@@ -221,6 +221,64 @@ def calendar(opps, plans, milestones, today, horizon_days=400):
     return ev
 
 
+def graph_export(plan, opps, include_calls=True):
+    """Ecosystem as a graphify-style graph.json (nodes + links) for the 3D viewer.
+
+    source_file's first segment is the colour group (the face, or "Hitos");
+    community_name carries the existence status; source_location the node kind.
+    """
+    faces = plan["faces"]
+    status_es = {"exists": "existe", "planned": "por crear", "proposed": "propuesta", "external": "socio externo"}
+    g = plan.get("graph", {})
+    linked = {x for e in g.get("edges", []) if e["status"] == "exists" for x in (e["from"], e["to"])}
+    nodes, links = [], []
+
+    def node(nid, label, face_or_group, kind, status):
+        group = faces[face_or_group]["name"] if face_or_group in faces else face_or_group
+        nodes.append({"id": nid, "label": label, "source_file": f"{group}/{kind}",
+                      "source_location": kind, "community_name": status})
+
+    kinds = {"entity": "figura legal", "face": "cara", "product": "producto", "partner": "socio"}
+    for n in g.get("nodes", []):
+        st = status_es.get(n["status"], n["status"])
+        if n["status"] == "external" and n["id"] not in linked:
+            st = "socio externo · relación por crear"
+        label = n["label"] + ("" if n["status"] in ("exists", "external") else f" ({st})")
+        node(n["id"], label, n["face"], kinds.get(n["type"], n["type"]), st)
+    for e in g.get("edges", []):
+        links.append({"source": e["from"], "target": e["to"], "relation": e["label"],
+                      "confidence": "EXTRACTED" if e["status"] == "exists" else "INFERRED"})
+
+    if include_calls:
+        # Map strategy entities / faces onto graph nodes so calls hang off the right places.
+        ent_node = {"fundacion_dl": "e_fund", "asoc_local": "e_asoc", "semf_asoc": "e_semf",
+                    "causality_ent": "e_cg", "branchout_sl": "e_bo", "partner_csic": "x_csic",
+                    "partner_uned": "x_uned", "partner_research": "x_idiphisa"}
+        face_node = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
+        names = {o["id"]: o["name"] for o in opps}
+        used_ms = set()
+        for oid in plan["ranking"]:
+            p = plan["plans"][oid]
+            if p["archived"] and not p["target_estimated"]:
+                continue
+            node("c_" + oid, f"[{p['grade']}] {names.get(oid, oid)}", p["lead"], "convocatoria",
+                 f"convocatoria · grado {p['grade']}" + (" · próxima edición" if p["target_estimated"] else ""))
+            if ent_node.get(p["applicant"]):
+                links.append({"source": "c_" + oid, "target": ent_node[p["applicant"]], "relation": "solicita"})
+            for f in p["faces"]:
+                if face_node.get(f) and face_node[f] != ent_node.get(p["applicant"]):
+                    links.append({"source": "c_" + oid, "target": face_node[f], "relation": "aporta valor"})
+            for m in p["pending"]:
+                used_ms.add(m)
+                links.append({"source": "m_" + m, "target": "c_" + oid, "relation": "bloquea"})
+        for m in plan["milestones"]:
+            if m["id"] in used_ms:
+                node("m_" + m["id"], m["name"], "Hitos", "hito", "hito " + {"pending": "pendiente", "doing": "en curso", "done": "hecho"}[m["status"]])
+    ids = {n["id"] for n in nodes}
+    return {"directed": True, "nodes": nodes,
+            "links": [l for l in links if l["source"] in ids and l["target"] in ids]}
+
+
 def check(strategy, opp_ids):
     """Consistency problems between strategy.json and the tracked opportunities."""
     problems = []

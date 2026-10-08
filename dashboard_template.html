@@ -238,6 +238,8 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .fl-edge { stroke: var(--ink-2); stroke-width: 1.5; fill: none; }
 .fl-lab { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
 .graph-wrap { overflow-x: auto; margin-top: 8px; }
+#graph-3d-wrap { margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+#graph3d-frame { display: block; width: 100%; height: min(78vh, 760px); border: 0; background: var(--page); }
 .graph-wrap svg { min-width: 760px; }
 .g-col { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .g-node rect.box { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
@@ -378,11 +380,18 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   <div class="view" id="view-graph" hidden>
     <section class="panel section-gap"><h2>Grafo del ecosistema</h2>
       <p class="small">Un solo proyecto: figuras legales → caras → productos y espacios, con los socios y el territorio. Línea continua = existe; discontinua = por crear. Pasa el ratón (o enfoca con el teclado) sobre un nodo para ver sus relaciones.</p>
+      <div class="cal-head"><div class="seg" id="gmode-seg" role="group" aria-label="Vista del grafo">
+        <button type="button" data-v="2d" aria-pressed="true">2D</button>
+        <button type="button" data-v="3d" aria-pressed="false">3D</button></div>
+        <span class="small" id="graph-3d"></span></div>
+      <div id="graph-2d">
       <div class="chipline" id="graph-legend"></div>
       <div class="graph-wrap" id="graph"></div>
+      </div>
+      <div id="graph-3d-wrap" hidden><iframe id="graph3d-frame" title="Grafo 3D del ecosistema" loading="lazy"></iframe></div>
       <div class="tooltip" id="gtip" role="tooltip" hidden></div>
     </section>
-    <section class="panel section-gap table-wrap"><h2>Relaciones</h2><div id="graph-table"></div></section>
+    <section class="panel section-gap table-wrap" id="graph-rel"><h2>Relaciones</h2><div id="graph-table"></div></section>
   </div>
 
   <div class="view" id="view-west" hidden>
@@ -446,6 +455,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     const next = dark ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     store.set("theme", next);
+    if (typeof syncFrameTheme === "function") syncFrameTheme();
   });
 
   // ---- status presentation: icon + label, never colour alone ----
@@ -1009,6 +1019,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       svg.append(grp);
     });
     document.getElementById("graph").replaceChildren(svg);
+    setGraphMode(store.get("gmode") || "2d");
     const legend = document.getElementById("graph-legend");
     legend.replaceChildren(...faceOrder.map(faceDot),
       el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"), el("span", { class: "mini", style: "background:repeating-linear-gradient(45deg,var(--surface-2) 0 4px,var(--grid) 4px 6px)" }, "sombreado = socio por crear"));
@@ -1017,6 +1028,34 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       el("tbody", {}, g.edges.map((e) => el("tr", {}, el("td", {}, name(e.from)), el("td", {}, e.label), el("td", {}, name(e.to)),
         el("td", {}, e.status === "exists" ? "existe" : "por crear"))))));
   }
+
+  // ---- 2D / 3D switcher for the graph tab ----
+  function syncFrameTheme() {
+    const f = document.getElementById("graph3d-frame");
+    try { const d = f.contentDocument; if (d && d.documentElement) {
+      const th = document.documentElement.dataset.theme; if (th) d.documentElement.dataset.theme = th; else delete d.documentElement.dataset.theme; } } catch (e) {}
+  }
+  function setGraphMode(m) {
+    if (m === "3d" && !PLAN.has_3d) m = "2d";
+    document.getElementById("graph-2d").hidden = m !== "2d";
+    document.getElementById("graph-rel").hidden = m !== "2d";
+    document.getElementById("graph-3d-wrap").hidden = m !== "3d";
+    document.querySelectorAll("#gmode-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === m)));
+    const note = document.getElementById("graph-3d");
+    if (!PLAN.has_3d) {
+      document.querySelector('#gmode-seg button[data-v="3d"]').disabled = true;
+      note.replaceChildren("Vista 3D no generada: ", el("code", {}, "python3 -I orchestrator.py grafo3d"));
+    } else if (m === "3d") {
+      const f = document.getElementById("graph3d-frame");
+      if (!f.getAttribute("src")) { f.addEventListener("load", syncFrameTheme); f.setAttribute("src", "graphify-out/graph3d.html"); }
+      note.replaceChildren("Incluye las convocatorias (por grado) y los hitos que las bloquean. Color = cara; el estado aparece al seleccionar un nodo. ",
+        el("a", { href: "graphify-out/graph3d.html", target: "_blank", rel: "noopener" }, "Pantalla completa ↗"));
+    } else {
+      note.textContent = "Arrastra en 3D para rotar; en 2D pasa el ratón por un nodo para ver sus relaciones.";
+    }
+    store.set("gmode", m);
+  }
+  document.getElementById("gmode-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && !b.disabled) setGraphMode(b.dataset.v); });
 
   function showTab(t) {
     ["radar", "strategy", "calendar", "graph", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });

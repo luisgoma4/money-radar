@@ -34,6 +34,21 @@ Muestra `python3 -I orchestrator.py plan <id>` y trabaja la etapa actual. No ava
 
 Los hitos (constituir la fundación, domicilio en Las Rozas, asociación local, certificados, PIC/OID…) están en `strategy.json`. Explica su detalle y qué desbloquean; cuando el usuario confirme un avance: `python3 -I orchestrator.py hito <M_ID> en-curso|hecho`. El plan y el dashboard se recalculan solos.
 
+## Especialización: grafos 3D
+
+Cuando el usuario quiera ver o explicar cómo se conecta el ecosistema (entidades, caras, productos, socios, convocatorias, hitos):
+
+1. Asegúrate de que `strategy.json` → `graph` refleja la realidad: un nodo por figura legal, cara, producto o socio, con `status` `exists | planned | proposed | external`. Las aristas usan `exists` si la relación ya es real y `planned` si está por crear. Al cambiar algo, valida con `python3 -I monitor.py`.
+2. Genera el 3D con `python3 -I orchestrator.py grafo3d [--sin-convocatorias] [--abrir]`:
+   - Escribe `graphify-out/graph.json` en formato graphify, con nodos y `links`. Además del grafo 2D incluye cada convocatoria activa (etiqueta `[grado] nombre`, enlazada a quien solicita y a las caras que aportan valor) y los hitos pendientes que la bloquean.
+   - Genera `graphify-out/graph3d.html` con el visor local `~/.claude/scripts/graphify_3d.py` (necesita networkx y scipy; se ejecuta sin `-I`).
+   - Fija el color de cada cara igual que en el dashboard.
+3. El dashboard (pestaña **Grafo**) tiene un selector **2D / 3D**. El 2D es el diagrama por columnas, que distingue lo que existe (continuo), lo que está por crear (discontinuo) y los socios sin relación (sombreados). El 3D incrusta `graph3d.html`.
+4. En el 3D, el estado de cada nodo (existe, por crear, socio externo, grado de la convocatoria, estado del hito) está en *community*. Se ve al seleccionar un nodo, y se puede buscar «por crear».
+5. Si el usuario construye un grafo con `/graphify` en otra carpeta, genera también su visor 3D. Es la preferencia global: `python3 ~/.claude/scripts/graphify_3d.py graphify-out/graph.json graphify-out/graph3d.html --title "<nombre>"`.
+
+El visor 3D se genera en local (el script no está en el repo). La rutina en la nube solo actualiza `graph.json`; el HTML 3D se regenera al ejecutar `grafo3d` en una máquina con el script.
+
 ## Reglas
 
 - Nunca inventes importes ni fechas; cita la fuente. Las puntuaciones de valor de `strategy.json` son juicios de planificación: dilo así.

@@ -686,6 +686,11 @@ def main():
 
     planner = load_planner()
     plan = planner.make_plan(opps, planner.load_strategy(), apps, TODAY)
+    out = HERE / "graphify-out"
+    out.mkdir(exist_ok=True)
+    (out / "graph.json").write_text(json.dumps(planner.graph_export(plan, opps), ensure_ascii=False, indent=1) + "\n",
+                                    encoding="utf-8")
+    plan["has_3d"] = (out / "graph3d.html").exists()
     DASHBOARD.write_text(render(opps, changes, read_lessons(), plan), encoding="utf-8")
     report = alerts(opps, changes)
     ALERTS.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
