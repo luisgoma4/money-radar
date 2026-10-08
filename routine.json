@@ -16,7 +16,7 @@
   "prompt": {
     "goal": "Find public and private funding opportunities (grants, loans, prizes, foundation calls), focused on Spain first and Europe second, for an independent researcher/developer based in Madrid.",
     "applicant_profile": {
-      "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, tech). Full profiles and eligibility notes are in CLAUDE.md.",
+      "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, branchout). Full profiles and eligibility notes are in CLAUDE.md.",
       "lines_of_work": [
         {
           "line": "solidarity / outreach science projects",
@@ -57,9 +57,11 @@
           "what_it_is": "Causal-inference consultancy (DAGs, dynamic causal models) for pharma/clinical/biostatistics teams"
         },
         {
-          "line": "other technology development",
+          "line": "BranchOut: tech startup hub (coworking + coliving)",
           "example": null,
           "search_angles": [
+            "startup hub / incubator / coworking space funding",
+            "coliving / housing for entrepreneurs",
             "CDTI",
             "ENISA",
             "Red.es",
@@ -67,8 +69,8 @@
             "open-source / NGI-type grants",
             "startup and research prizes"
           ],
-          "key": "tech",
-          "what_it_is": "Other technology development"
+          "key": "branchout",
+          "what_it_is": "Hub for technology startups that aims to create a coworking and coliving space"
         }
       ]
     },
