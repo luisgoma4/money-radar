@@ -132,11 +132,12 @@ def make_plan(opps, strategy, applications=(), today=None):
     ranking = sorted(plans.values(), key=lambda p: (p["archived"] and not p["target_estimated"],
                                                      order[p["grade"]], -p["score"]))
     now = what_now(plans, ms, [p["id"] for p in ranking], strategy["stages"], applications, today)
+    events = calendar(opps, plans, ms, today)
     return {
-        "today": today.isoformat(), "now": now,
+        "today": today.isoformat(), "now": now, "calendar": events,
         "project": strategy["project"], "faces": strategy["faces"], "entities": strategy["entities"],
         "levels": strategy["levels"], "stages": strategy["stages"],
-        "municipalities": strategy["municipalities"],
+        "municipalities": strategy["municipalities"], "graph": strategy.get("graph", {}),
         "milestones": ms, "plans": plans, "ranking": [p["id"] for p in ranking],
         "applications": list(applications),
     }
@@ -176,6 +177,50 @@ def what_now(plans, milestones, ranking, stages, applications, today, n_mileston
     return {"active": active, "milestones": [m["id"] for m in todo], "recommended": recommended}
 
 
+def calendar(opps, plans, milestones, today, horizon_days=400):
+    """Dated events for the agenda. 'late' events are past start dates still worth acting on."""
+    end = today + dt.timedelta(days=horizon_days)
+    ev = []
+
+    def add(date, kind, ref, name, lines, detail="", estimated=False):
+        d = _date(date)
+        if d and (d >= today or kind == "late") and d <= end:
+            ev.append({"date": d.isoformat(), "kind": kind, "ref": ref, "name": name, "lines": lines,
+                       "detail": detail, "estimated": estimated})
+
+    for o in opps:
+        p = plans[o["id"]]
+        lines = o["lines"].split(",")
+        live = not o.get("archived") or p["target_estimated"]
+        if not live:
+            if o.get("review_on"):
+                add(o["review_on"], "review", o["id"], o["name"], lines, o.get("archive_reason") or "")
+            continue
+        if p["target"]:
+            add(p["target"], "next_edition" if p["target_estimated"] else "deadline", o["id"], o["name"], lines,
+                o.get("amount_text") or "", p["target_estimated"])
+        if o.get("opens") and not o.get("archived"):
+            add(o["opens"], "opens", o["id"], o["name"], lines)
+        if p["start_by"]:
+            late = p["start_by"] < today.isoformat() and p["target"] and p["target"] >= today.isoformat()
+            add(p["start_by"], "late" if late else "start_by", o["id"], o["name"], lines,
+                f"Grado {p['grade']} · prepara ~{(_date(p['target']) - _date(p['start_by'])).days // 7} semanas",
+                p["target_estimated"])
+        if o.get("archived") and o.get("review_on"):
+            add(o["review_on"], "review", o["id"], o["name"], lines, o.get("archive_reason") or "")
+    for m in milestones:
+        if m["status"] == "done":
+            continue
+        need = [plans[i]["milestones_by"] for i in m["blocked"] if plans[i]["milestones_by"]]
+        future = [d for d in need if d >= today.isoformat()]
+        if future:
+            add(min(future), "milestone", m["id"], m["name"], [], f"Necesario para {len(m['blocked'])} convocatorias · ~{m['weeks']} semanas")
+        elif need:
+            add(min(need), "late", m["id"], m["name"], [], f"Hito atrasado · ~{m['weeks']} semanas")
+    ev.sort(key=lambda e: (e["date"], e["kind"]))
+    return ev
+
+
 def check(strategy, opp_ids):
     """Consistency problems between strategy.json and the tracked opportunities."""
     problems = []
@@ -198,6 +243,18 @@ def check(strategy, opp_ids):
         for m in e.get("requires", []):
             if m not in ms:
                 problems.append(f"strategy entity {eid}: unknown milestone {m}")
+    g = strategy.get("graph", {})
+    nodes = {n["id"] for n in g.get("nodes", [])}
+    for n in g.get("nodes", []):
+        if n.get("status") not in ("exists", "planned", "proposed", "external"):
+            problems.append(f"graph node {n['id']}: bad status {n.get('status')}")
+        if n.get("face") not in faces:
+            problems.append(f"graph node {n['id']}: unknown face {n.get('face')}")
+    for e in g.get("edges", []):
+        if e["from"] not in nodes or e["to"] not in nodes:
+            problems.append(f"graph edge {e['from']}->{e['to']}: unknown node")
+        if e.get("status") not in ("exists", "planned"):
+            problems.append(f"graph edge {e['from']}->{e['to']}: status must be exists|planned")
     for mid, m in ms.items():
         if m.get("status") not in ("pending", "doing", "done"):
             problems.append(f"strategy milestone {mid}: status must be pending|doing|done")

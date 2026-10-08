@@ -215,6 +215,43 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .now-list .small { margin: 2px 0 0; }
 .late { color: var(--critical); font-weight: 600; }
 @media (max-width: 860px) { .now-grid { grid-template-columns: 1fr; } }
+.cal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cal-head h2 { margin: 0; }
+.month h3 { font-size: 15px; margin: 0 0 8px; }
+.ev { display: grid; grid-template-columns: 96px 150px minmax(0, 1fr); gap: 4px 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--grid); }
+.ev:last-child { border-bottom: 0; }
+.ev .day { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ev .what a, .ev .what strong { font-weight: 600; }
+.kind { font-size: 12px; font-weight: 600; display: inline-flex; gap: 5px; align-items: center; color: var(--ink-2); }
+.kind.deadline { color: var(--critical); } .kind.late { color: var(--critical); }
+.kind.start_by { color: var(--accent); } .kind.milestone { color: var(--good-ink); }
+.est { font-size: 11px; border: 1px dashed var(--axis); border-radius: 999px; padding: 0 6px; margin-left: 6px; color: var(--muted); }
+.late-box { border-color: color-mix(in srgb, var(--critical) 45%, var(--border)); }
+@media (max-width: 600px) { .ev { grid-template-columns: 44px minmax(0, 1fr); } .ev .kind { grid-column: 2; } .ev .what { grid-column: 1 / -1; } }
+#flow svg, #graph svg { display: block; width: 100%; height: auto; }
+.fl-box { fill: var(--surface); stroke: var(--axis); stroke-width: 1.5; }
+.fl-box.human { stroke: var(--critical); stroke-width: 2; }
+.fl-dec { fill: var(--surface-2); stroke: var(--axis); stroke-width: 1.5; }
+.fl-side { fill: var(--surface-2); stroke: var(--axis); stroke-dasharray: 4 3; }
+.fl-t { fill: var(--ink); font-size: 14px; font-weight: 600; }
+.fl-s { fill: var(--ink-2); font-size: 11.5px; }
+.fl-edge { stroke: var(--ink-2); stroke-width: 1.5; fill: none; }
+.fl-lab { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
+.graph-wrap { overflow-x: auto; margin-top: 8px; }
+.graph-wrap svg { min-width: 760px; }
+.g-col { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.g-node rect.box { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
+.g-node.planned rect.box, .g-node.proposed rect.box { stroke-dasharray: 5 4; fill: var(--surface-2); }
+.g-node.external rect.box { stroke-dasharray: 1.5 3; stroke-width: 2; }
+.g-node text { fill: var(--ink); font-size: 12.5px; }
+.g-node .st { fill: var(--muted); font-size: 10.5px; }
+.g-node { cursor: default; }
+.g-node:focus { outline: none; }
+.g-node:focus rect.box, .g-node.hl rect.box { stroke: var(--accent); stroke-width: 2.5; }
+.g-edge { fill: none; stroke: var(--axis); stroke-width: 1.5; }
+.g-edge.planned { stroke-dasharray: 5 4; }
+.g-edge.hl { stroke: var(--accent); stroke-width: 2.5; }
+svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) { opacity: .35; }
 
 @media (max-width: 860px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -243,6 +280,8 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
   <nav class="tabs" aria-label="Views"><div class="seg" id="tab-seg" role="group">
     <button type="button" data-v="radar" aria-pressed="true">Radar</button>
     <button type="button" data-v="strategy" aria-pressed="false">Estrategia</button>
+    <button type="button" data-v="calendar" aria-pressed="false">Calendario</button>
+    <button type="button" data-v="graph" aria-pressed="false">Grafo</button>
     <button type="button" data-v="west" aria-pressed="false">Madrid Oeste</button>
   </div></nav>
 
@@ -319,6 +358,30 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
       <div id="plan-table"></div></section>
     <section class="panel section-gap"><h2>Solicitudes en curso</h2><p class="small">Gestionadas con <code>python3 -I orchestrator.py</code> o el comando <code>/becas</code> en Claude Code.</p><div id="pipeline"></div></section>
     <section class="section-gap"><h2>Proceso de solicitud</h2><div class="stage-list" id="stages"></div></section>
+  </div>
+
+  <div class="view" id="view-calendar" hidden>
+    <section class="panel section-gap">
+      <div class="cal-head"><h2>Calendario</h2><button class="btn" id="ics" type="button">⤓ Descargar .ics</button></div>
+      <p class="small">Plazos, fechas para empezar a preparar (según el plan), hitos que hay que tener listos, aperturas y revisiones del archivo. «Estimado» = próxima edición calculada a partir de la anterior (≈ +1 año).</p>
+      <div class="chipline" id="cal-legend"></div>
+    </section>
+    <section class="panel section-gap late-box" id="cal-late"></section>
+    <section class="section-gap" id="cal-months"></section>
+    <section class="panel section-gap"><h2>Hitos sin fecha límite todavía</h2><p class="small">No bloquean ninguna convocatoria con fecha, pero sí convocatorias abiertas todo el año o por anunciar.</p><ul class="log" id="cal-undated"></ul></section>
+    <section class="panel section-gap"><h2>Flujograma del proceso de solicitud</h2>
+      <p class="small">Las mismas etapas y controles que aplica el orquestador. Los rombos son decisiones; el paso «Presentar» lo hace siempre una persona.</p>
+      <div id="flow"></div></section>
+  </div>
+
+  <div class="view" id="view-graph" hidden>
+    <section class="panel section-gap"><h2>Grafo del ecosistema</h2>
+      <p class="small">Un solo proyecto: figuras legales → caras → productos y espacios, con los socios y el territorio. Línea continua = existe; discontinua = por crear. Pasa el ratón (o enfoca con el teclado) sobre un nodo para ver sus relaciones.</p>
+      <div class="chipline" id="graph-legend"></div>
+      <div class="graph-wrap" id="graph"></div>
+      <div class="tooltip" id="gtip" role="tooltip" hidden></div>
+    </section>
+    <section class="panel section-gap table-wrap"><h2>Relaciones</h2><div id="graph-table"></div></section>
   </div>
 
   <div class="view" id="view-west" hidden>
@@ -762,15 +825,198 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
         dims.map(([k, l]) => el("p", { class: "small" }, el("strong", {}, `${l}: `), m.notes[k])))));
   }
 
+  // ---- calendar ----
+  const KIND = {
+    late: ["▲", "Atrasado"], deadline: ["■", "Plazo"], next_edition: ["□", "Próx. edición"], start_by: ["▶", "Empezar a preparar"],
+    milestone: ["◆", "Hito listo"], opens: ["○", "Abre"], review: ["↺", "Revisión archivo"] };
+  const kindEl = (k) => el("span", { class: "kind " + k }, el("span", { "aria-hidden": "true" }, KIND[k][0]), KIND[k][1]);
+  function evRow(e, showYear) {
+    const isOpp = !!PLAN.plans[e.ref];
+    const d = new Date(e.date + "T00:00:00");
+    return el("div", { class: "ev" },
+      el("div", { class: "day" }, showYear ? fmtDate(e.date) : d.toLocaleDateString("es-ES", { day: "2-digit", month: "short" })),
+      kindEl(e.kind),
+      el("div", { class: "what" },
+        isOpp ? el("a", { href: "#", onclick: (ev) => { ev.preventDefault(); showTab("radar"); focusCard(e.ref); } }, e.name) : el("strong", {}, e.name),
+        e.estimated ? el("span", { class: "est" }, "estimado") : null,
+        el("div", { class: "small" }, e.lines.length ? el("span", { class: "tags", style: "display:inline-flex;margin-right:8px" }, e.lines.map(faceDot)) : null, e.detail)));
+  }
+  function renderCalendar() {
+    const ev = PLAN.calendar || [];
+    document.getElementById("cal-legend").replaceChildren(...Object.keys(KIND).map(kindEl));
+    const late = ev.filter((e) => e.kind === "late");
+    const box = document.getElementById("cal-late");
+    box.hidden = !late.length;
+    box.replaceChildren(el("h2", {}, "Atrasado"), el("p", { class: "small" }, "Fechas de inicio o hitos que ya deberían estar en marcha para llegar al plazo."), ...late.map((e) => evRow(e, true)));
+    const months = new Map();
+    ev.filter((e) => e.kind !== "late").forEach((e) => { const k = e.date.slice(0, 7); if (!months.has(k)) months.set(k, []); months.get(k).push(e); });
+    document.getElementById("cal-months").replaceChildren(...[...months].map(([k, list]) =>
+      el("div", { class: "panel month section-gap" },
+        el("h3", {}, (() => { const m = new Date(k + "-01T00:00:00").toLocaleDateString("es-ES", { month: "long", year: "numeric" }); return m[0].toUpperCase() + m.slice(1); })()),
+        list.map((e) => evRow(e, false)))));
+    const dated = new Set(ev.filter((e) => !PLAN.plans[e.ref]).map((e) => e.ref));
+    const undated = (PLAN.milestones || []).filter((m) => m.status !== "done" && !dated.has(m.id));
+    document.getElementById("cal-undated").replaceChildren(...(undated.length ? undated.map((m) =>
+      el("li", {}, el("b", {}, m.name), ` · ~${m.weeks} semanas · bloquea ${m.blocked.length} convocatorias`)) : [el("li", {}, "Ninguno.")]));
+  }
+  document.getElementById("ics").addEventListener("click", () => {
+    const esc = (s) => String(s).replace(/[\\;,]/g, (c) => "\\" + c).replace(/\n/g, " ");
+    const stamp = DATA.today.replace(/-/g, "") + "T000000Z";
+    const body = (PLAN.calendar || []).map((e, i) => {
+      const d = e.date.replace(/-/g, "");
+      const n = new Date(e.date + "T00:00:00"); n.setDate(n.getDate() + 1);
+      const d2 = n.toISOString().slice(0, 10).replace(/-/g, "");
+      return ["BEGIN:VEVENT", `UID:money-radar-${e.kind}-${e.ref}-${d}@luisgoma4.github.io`, `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${d2}`,
+        `SUMMARY:${esc(KIND[e.kind][1] + ": " + e.name + (e.estimated ? " (estimado)" : ""))}`,
+        `DESCRIPTION:${esc(e.detail || "")}`, "END:VEVENT"].join("\r\n");
+    }).join("\r\n");
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//money-radar//ES", "CALSCALE:GREGORIAN", body, "END:VCALENDAR"].join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    a.download = "money-radar.ics"; document.body.append(a); a.click(); a.remove();
+  });
+
+  // ---- flowchart (hand-laid SVG) ----
+  function renderFlow() {
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
+    const W = 760, cx = 300, bw = 260, bh = 52;
+    const svg = s("svg", { viewBox: `0 0 ${W} 1170`, role: "img", "aria-label": "Flujograma del proceso de solicitud en 8 etapas con decisiones" });
+    const defs = s("defs", {}); const mk = s("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+    mk.append(s("path", { d: "M0,0 L10,5 L0,10 z", fill: "currentColor", style: "color:var(--ink-2)" })); defs.append(mk); svg.append(defs);
+    const box = (y, title, sub, cls = "fl-box", x = cx) => {
+      svg.append(s("rect", { class: cls, x: x - bw / 2, y, width: bw, height: bh, rx: 10 }));
+      svg.append(s("text", { class: "fl-t", x, y: y + 22, "text-anchor": "middle" }, title));
+      if (sub) svg.append(s("text", { class: "fl-s", x, y: y + 40, "text-anchor": "middle" }, sub));
+    };
+    const dec = (y, q) => {
+      const h = 34, w = 150;
+      svg.append(s("polygon", { class: "fl-dec", points: `${cx},${y} ${cx + w},${y + h} ${cx},${y + 2 * h} ${cx - w},${y + h}` }));
+      svg.append(s("text", { class: "fl-t", x: cx, y: y + h + 5, "text-anchor": "middle" }, q));
+    };
+    const line = (d, label, lx, ly) => { svg.append(s("path", { class: "fl-edge", d, "marker-end": "url(#arr)" })); if (label) svg.append(s("text", { class: "fl-lab", x: lx, y: ly }, label)); };
+    const Y = { det: 10, cua: 92, d1: 174, est: 270, d2: 352, pre: 448, red: 530, pres: 612, d3: 694, seg: 790, d4: 872, cer: 1050 };
+    box(Y.det, "1 · Detectar", "fuente oficial + ganadores anteriores");
+    box(Y.cua, "2 · Cualificar", "bases, entidad elegible, sede/registro");
+    dec(Y.d1, "¿Elegible?");
+    box(Y.est, "3 · Estrategia", "nivel 1–3, caras, importe ≈ mediana");
+    dec(Y.d2, "¿Hitos completos?");
+    box(Y.pre, "4 · Preparar", "documentos, presupuesto, cartas");
+    box(Y.red, "5 · Redactar", "memoria por criterios + impacto causal");
+    box(Y.pres, "6 · Presentar", "solo una persona, en la sede oficial", "fl-box human");
+    dec(Y.d3, "¿Justificante?");
+    box(Y.seg, "7 · Seguimiento", "subsanación ~10 días, alegaciones");
+    dec(Y.d4, "¿Concedida?");
+    box(Y.cer, "8 · Cerrar", "ganadores, lección, archivar con revisión");
+    // main spine
+    [[Y.det + bh, Y.cua], [Y.cua + bh, Y.d1], [Y.d1 + 68, Y.est], [Y.est + bh, Y.d2], [Y.d2 + 68, Y.pre], [Y.pre + bh, Y.red],
+     [Y.red + bh, Y.pres], [Y.pres + bh, Y.d3], [Y.d3 + 68, Y.seg], [Y.seg + bh, Y.d4]].forEach(([a, b]) => line(`M${cx},${a} L${cx},${b - 2}`));
+    svg.append(s("text", { class: "fl-lab", x: cx + 8, y: Y.d1 + 86 }, "sí")); svg.append(s("text", { class: "fl-lab", x: cx + 8, y: Y.d2 + 86 }, "sí"));
+    svg.append(s("text", { class: "fl-lab", x: cx + 8, y: Y.d3 + 86 }, "sí"));
+    // side boxes
+    const sx = 600, sw = 240;
+    const side = (y, t1, t2) => { svg.append(s("rect", { class: "fl-side", x: sx - sw / 2, y, width: sw, height: bh, rx: 10 }));
+      svg.append(s("text", { class: "fl-t", x: sx, y: y + 22, "text-anchor": "middle" }, t1)); svg.append(s("text", { class: "fl-s", x: sx, y: y + 40, "text-anchor": "middle" }, t2)); };
+    side(Y.d1 + 8, "Archivar", "motivo + fecha de revisión");
+    line(`M${cx + 150},${Y.d1 + 34} L${sx - sw / 2 - 2},${Y.d1 + 34}`, "no", cx + 160, Y.d1 + 26);
+    side(Y.d2 + 8, "Mover hitos", "orchestrator.py hito … hecho");
+    line(`M${cx + 150},${Y.d2 + 34} L${sx - sw / 2 - 2},${Y.d2 + 34}`, "no", cx + 160, Y.d2 + 26);
+    line(`M${sx},${Y.d2 + 8} L${sx},${Y.d2 - 20} L${cx + 40},${Y.d2 - 20} L${cx + 40},${Y.d2 + 6}`, "reintentar", sx - 120, Y.d2 - 26);
+    line(`M${cx - 150},${Y.d3 + 34} L${cx - 220},${Y.d3 + 34} L${cx - 220},${Y.pres + 26} L${cx - bw / 2 - 2},${Y.pres + 26}`, "no", cx - 214, Y.d3 + 26);
+    side(Y.d4 + 8, "Pedir informe", "por qué no; registrar ganadores");
+    line(`M${cx + 150},${Y.d4 + 34} L${sx - sw / 2 - 2},${Y.d4 + 34}`, "no", cx + 160, Y.d4 + 26);
+    svg.append(s("rect", { class: "fl-side", x: 20, y: Y.d4 + 90, width: 200, height: bh, rx: 10 }));
+    svg.append(s("text", { class: "fl-t", x: 120, y: Y.d4 + 112, "text-anchor": "middle" }, "Ejecutar y justificar"));
+    svg.append(s("text", { class: "fl-s", x: 120, y: Y.d4 + 130, "text-anchor": "middle" }, "calendario de la ayuda"));
+    line(`M${cx - 150},${Y.d4 + 34} L${120},${Y.d4 + 34} L${120},${Y.d4 + 88}`, "sí", cx - 190, Y.d4 + 26);
+    line(`M${120},${Y.d4 + 90 + bh} L${120},${Y.cer + 26} L${cx - bw / 2 - 2},${Y.cer + 26}`);
+    line(`M${sx},${Y.d4 + 8 + bh} L${sx},${Y.cer + 26} L${cx + bw / 2 + 2},${Y.cer + 26}`);
+    // loop back: archive / close → next edition
+    line(`M${cx},${Y.cer + bh} L${cx},${Y.cer + bh + 30} L${W - 14},${Y.cer + bh + 30} L${W - 14},${Y.det + 26} L${cx + bw / 2 + 2},${Y.det + 26}`,
+      "próxima edición / revisión del archivo", W - 300, Y.cer + bh + 24);
+    line(`M${sx + sw / 2},${Y.d1 + 34} L${W - 16},${Y.d1 + 34}`);
+    document.getElementById("flow").replaceChildren(svg);
+  }
+
+  // ---- ecosystem graph ----
+  function renderGraph() {
+    const g = PLAN.graph; if (!g || !g.nodes) return;
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
+    const faceOrder = Object.keys(PLAN.faces);
+    const cols = g.columns.map((c) => c.id);
+    const nw = 250, nh = 46, gapY = 14, colW = 310, top = 40;
+    const byCol = cols.map((c) => g.nodes.filter((n) => n.type === c).sort((a, b) => faceOrder.indexOf(a.face) - faceOrder.indexOf(b.face)));
+    const H = top + Math.max(...byCol.map((l) => l.length)) * (nh + gapY) + 10;
+    const W = 20 + cols.length * colW - (colW - nw) + 20;
+    const pos = {};
+    byCol.forEach((list, ci) => {
+      const colH = list.length * (nh + gapY) - gapY, y0 = top + (H - top - colH) / 2;
+      list.forEach((n, i) => { pos[n.id] = { x: 20 + ci * colW, y: y0 + i * (nh + gapY), col: ci, n }; });
+    });
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Grafo de figuras legales, caras, productos y socios" });
+    g.columns.forEach((c, ci) => svg.append(s("text", { class: "g-col", x: 20 + ci * colW, y: 18 }, c.name)));
+    const edgesEl = [];
+    g.edges.forEach((e) => {
+      const a = pos[e.from], b = pos[e.to]; if (!a || !b) return;
+      let x1, y1 = a.y + nh / 2, x2, y2 = b.y + nh / 2;
+      if (a.col < b.col) { x1 = a.x + nw; x2 = b.x; } else if (a.col > b.col) { x1 = a.x; x2 = b.x + nw; } else { x1 = a.x + nw; x2 = b.x + nw; }
+      const dx = a.col === b.col ? 60 : Math.abs(x2 - x1) / 2;
+      const c1 = a.col <= b.col ? x1 + dx : x1 - dx, c2 = a.col < b.col ? x2 - dx : (a.col === b.col ? x2 + dx : x2 + dx);
+      const path = s("path", { class: "g-edge " + e.status, d: `M${x1},${y1} C${c1},${y1} ${c2},${y2} ${x2},${y2}` });
+      path.dataset.from = e.from; path.dataset.to = e.to;
+      svg.append(path); edgesEl.push(path);
+    });
+    const tip = document.getElementById("gtip");
+    const ST = { exists: "existe", planned: "por crear", proposed: "propuesta", external: "socio externo" };
+    const name = (id) => (g.nodes.find((n) => n.id === id) || {}).label || id;
+    Object.values(pos).forEach(({ x, y, n }) => {
+      const grp = s("g", { class: `g-node ${n.status}`, tabindex: 0, role: "button", "aria-label": `${n.label} (${ST[n.status]})` });
+      grp.append(s("rect", { class: "box", x, y, width: nw, height: nh, rx: 9 }));
+      grp.append(s("rect", { x: x + 1, y: y + 8, width: 5, height: nh - 16, rx: 2.5, fill: lineColor(n.face) }));
+      const label = n.label.length > 36 ? n.label.slice(0, 35) + "…" : n.label;
+      grp.append(s("text", { x: x + 14, y: y + 20 }, label));
+      grp.append(s("text", { class: "st", x: x + 14, y: y + 36 }, ST[n.status]));
+      const on = (evt) => {
+        svg.classList.add("dim"); grp.classList.add("hl");
+        const rel = [];
+        edgesEl.forEach((p) => { if (p.dataset.from === n.id || p.dataset.to === n.id) { p.classList.add("hl");
+          const other = p.dataset.from === n.id ? p.dataset.to : p.dataset.from;
+          const nd = svg.querySelector(`[data-id="${other}"]`); if (nd) nd.classList.add("hl");
+          const ed = g.edges.find((e) => e.from === p.dataset.from && e.to === p.dataset.to);
+          rel.push(`${p.dataset.from === n.id ? "→" : "←"} ${name(other)} · ${ed.label}${ed.status === "planned" ? " (por crear)" : ""}`); } });
+        tip.replaceChildren(el("div", { class: "t-name" }, n.label), el("div", { class: "t-meta" }, `${ST[n.status]} · ${n.detail}`), ...rel.map((r) => el("div", { class: "t-meta" }, r)));
+        tip.hidden = false;
+        const host = tip.parentElement.getBoundingClientRect(), r = grp.getBoundingClientRect();
+        tip.style.left = Math.max(4, Math.min(r.left - host.left, host.width - 270)) + "px";
+        tip.style.top = (r.bottom - host.top + 6) + "px";
+      };
+      const off = () => { svg.classList.remove("dim"); svg.querySelectorAll(".hl").forEach((x) => x.classList.remove("hl")); tip.hidden = true; };
+      grp.dataset.id = n.id;
+      grp.addEventListener("mouseenter", on); grp.addEventListener("focus", on);
+      grp.addEventListener("mouseleave", off); grp.addEventListener("blur", off);
+      svg.append(grp);
+    });
+    document.getElementById("graph").replaceChildren(svg);
+    const legend = document.getElementById("graph-legend");
+    legend.replaceChildren(...faceOrder.map(faceDot),
+      el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"));
+    document.getElementById("graph-table").replaceChildren(el("table", {},
+      el("thead", {}, el("tr", {}, ["Desde", "Relación", "Hacia", "Estado"].map((h) => el("th", { scope: "col" }, h)))),
+      el("tbody", {}, g.edges.map((e) => el("tr", {}, el("td", {}, name(e.from)), el("td", {}, e.label), el("td", {}, name(e.to)),
+        el("td", {}, e.status === "exists" ? "existe" : "por crear"))))));
+  }
+
   function showTab(t) {
-    ["radar", "strategy", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
+    ["radar", "strategy", "calendar", "graph", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
     document.querySelectorAll("#tab-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === t)));
     store.set("tab", t);
     if (t === "radar") renderTimeline(sorted(DATA.opportunities.filter(matches)));
   }
   document.getElementById("tab-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.v); });
 
-  renderKpis(); renderLog(); update(); renderStrategy(); renderWest();
+  renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderFlow(); renderGraph();
   const savedTab = store.get("tab"); if (savedTab && savedTab !== "radar") showTab(savedTab);
 })();
 </script>

@@ -52,6 +52,8 @@ Eligibility matters more than topic. Cloudy's legal form is unclear (check befor
 - `planner.py` — computes the plan, loaded by file path:
   - per call: grade A–D (fit 25 + value 25 + readiness 25 + timing 15 + strategic 10), the applicant (the first entity in the list that exists; that entity's `requires` milestones are added automatically), and a backward calendar from the deadline (closed calls are planned against the next edition, ≈ +1 year);
   - milestones ranked by the value they unlock.
+- `strategy.json` → `graph` — the ecosystem graph: legal entities → faces → products/spaces ← partners. Each node and edge has a status (`exists`, `planned`, `proposed`, `external`); the dashboard draws non-existing items dashed. Update it whenever an entity, product or relationship is created.
+- **People and partners (no names in the repo, since it is public):** Causality Graphs is confirmed as a company. Its external researcher is a CSIC PI in computational neuroscience; that person can lead calls as a research centre and provides the PhD profile for NEOTEC. The coordinator of the UNED physics degree gives academic backing to SEMF and Cloudy and brings in students.
 - `orchestrator.py` — Spanish CLI that guides applications through the stages. Commands: `estado`, `plan <id>`, `iniciar <id>`, `avanzar <id> [--nota]`, `hito <M_ID> pendiente|en-curso|hecho`, `etapas`.
   - Built-in guards: it won't enter "preparar" while milestones are pending, and it won't leave "presentar" without a filing-receipt note.
   - Applications live in the `applications` table, which is delete-protected.

@@ -140,20 +140,19 @@
     },
     "causality_ent": {
       "name": "Causality Graphs",
-      "form": "Por confirmar (consultora)",
-      "status": "unknown",
+      "form": "Empresa (confirmada)",
+      "status": "exists",
       "seat": "España",
       "faces": [
         "causality"
       ],
       "can": [
+        "contratos de evaluación de impacto",
         "socio metodológico en consorcios",
         "NLnet (software abierto)",
-        "contratos de evaluación"
+        "NEOTEC / ENISA si cumple requisitos"
       ],
-      "requires": [
-        "M_CG_FORM"
-      ]
+      "requires": []
     },
     "partner_research": {
       "name": "Socio de investigación (IDIPHISA / UFV / UCM)",
@@ -171,6 +170,38 @@
       "requires": [
         "M_PARTNER_IDIPHISA"
       ]
+    },
+    "partner_csic": {
+      "name": "Investigador externo — PI del CSIC (neurociencia computacional)",
+      "form": "Investigador principal en el CSIC (organismo público de investigación)",
+      "status": "external",
+      "seat": "CSIC",
+      "faces": [
+        "causality",
+        "semf"
+      ],
+      "can": [
+        "liderar proyectos como centro de investigación (CaixaResearch, AEI, Horizon Europe)",
+        "FECYT (el CSIC tuvo 27 ayudas en 2024)",
+        "dirección científica y doctorado en el equipo (bonus NEOTEC)"
+      ],
+      "requires": []
+    },
+    "partner_uned": {
+      "name": "Coordinador del grado en Física — UNED",
+      "form": "Profesorado universitario (universidad pública)",
+      "status": "external",
+      "seat": "UNED",
+      "faces": [
+        "semf",
+        "cloudy"
+      ],
+      "can": [
+        "universidad socia en FECYT y Erasmus+",
+        "prácticas, TFG/TFM y divulgación con estudiantes de Física",
+        "aval académico para SEMF y Cloudy"
+      ],
+      "requires": []
     }
   },
   "milestones": {
@@ -200,9 +231,9 @@
     },
     "M_CG_FORM": {
       "name": "Confirmar la forma jurídica de Causality Graphs",
-      "detail": "Autónomo, SL o integrada en otra entidad: determina a qué convocatorias puede ir como solicitante o socio.",
+      "detail": "Autónomo, SL o integrada en otra entidad: determina a qué convocatorias puede ir como solicitante o socio. Confirmado: Causality Graphs es una empresa.",
       "weeks": 1,
-      "status": "pending"
+      "status": "done"
     },
     "M_CERT": {
       "name": "Certificados y firma electrónica al día",
@@ -458,8 +489,9 @@
     },
     "horizon-hlth-2027-01-02": {
       "applicant": [
-        "partner_research",
-        "causality_ent"
+        "causality_ent",
+        "partner_csic",
+        "partner_research"
       ],
       "lead": "causality",
       "support": [
@@ -472,7 +504,7 @@
       "prep_weeks": 12,
       "value_basis": "Proyectos de consorcio de varios millones; la parte de una pyme socia suele ser una fracción.",
       "ask": "Entrar como socio metodológico (paquete de evaluación causal / evidencia del mundo real).",
-      "offer": "Causality aporta métodos causales para ensayos imperfectos y datos del mundo real; SEMF da acceso a matemáticos e investigadores internacionales.",
+      "offer": "Causality aporta métodos causales para ensayos imperfectos y datos del mundo real; SEMF da acceso a matemáticos e investigadores internacionales. El PI del CSIC refuerza el consorcio con neurociencia computacional.",
       "prereqs": [
         "M_CG_FORM",
         "M_EU_PIC",
@@ -522,6 +554,7 @@
     },
     "caixaresearch-health-next": {
       "applicant": [
+        "partner_csic",
         "partner_research"
       ],
       "lead": "causality",
@@ -529,16 +562,14 @@
         "cloudy"
       ],
       "level": 2,
-      "fit": 3,
+      "fit": 4,
       "value": 4,
       "strategic": 2,
       "prep_weeks": 10,
       "value_basis": "Proyectos de investigación con financiación alta; lidera un centro de investigación.",
       "ask": "Proyecto liderado por IDIPHISA con Causality como socio de métodos y Cloudy para la difusión a pacientes y familias.",
-      "offer": "Investigación traslacional con evaluación causal rigurosa y plan de divulgación a familias.",
-      "prereqs": [
-        "M_PARTNER_IDIPHISA"
-      ]
+      "offer": "El PI del CSIC (neurociencia computacional) lidera desde su centro; Causality Graphs aporta los métodos causales y Cloudy la difusión a pacientes y familias.",
+      "prereqs": []
     },
     "erasmus-ka210-2027": {
       "applicant": [
@@ -802,7 +833,7 @@
       "typical_award_eur": 20500,
       "value_basis": "Mediana de ganadores 2024: 20.500 €; asociaciones 12.000 €, fundaciones 20.000 €.",
       "ask": "15.000–25.000 € para un proyecto de comunicación o ciencia ciudadana con familias.",
-      "offer": "Cloudy produce el contenido, SEMF aporta científicos y Causality evalúa el impacto (pocos competidores miden impacto causal).",
+      "offer": "Cloudy produce el contenido, SEMF aporta científicos y Causality evalúa el impacto (pocos competidores miden impacto causal). Con aval académico del coordinador del grado en Física de la UNED.",
       "prereqs": []
     },
     "cdti-neotec-2026": {
@@ -821,7 +852,7 @@
       "typical_award_eur": 325000,
       "value_basis": "Mediana de ganadores 2025: 325.000 € (tope con contratación de doctor).",
       "ask": "Proyecto de base tecnológica con un doctor en el equipo.",
-      "offer": "Empresa de base tecnológica nacida de la investigación (método causal).",
+      "offer": "Empresa de base tecnológica nacida de la investigación (método causal). El PI del CSIC puede aportar el perfil doctor que activa el tope de 325.000 €.",
       "prereqs": [
         "M_PRODUCTO",
         "M_CERT"
@@ -885,5 +916,414 @@
         "M_ASOC_LOCAL"
       ]
     }
+  },
+  "graph": {
+    "_doc": "Grafo del ecosistema: figuras legales, caras, productos y socios. status: exists | planned | proposed | external. Aristas: status exists (relación real) o planned (por crear).",
+    "columns": [
+      {
+        "id": "entity",
+        "name": "Figuras legales"
+      },
+      {
+        "id": "face",
+        "name": "Caras (proyectos)"
+      },
+      {
+        "id": "product",
+        "name": "Productos y espacios"
+      },
+      {
+        "id": "partner",
+        "name": "Socios y territorio"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "e_fund",
+        "label": "Fundación Delfina León",
+        "type": "entity",
+        "status": "planned",
+        "face": "delfina",
+        "detail": "Paraguas sin ánimo de lucro; por constituir (M_FUND)."
+      },
+      {
+        "id": "e_asoc",
+        "label": "Asociación local (Las Rozas)",
+        "type": "entity",
+        "status": "proposed",
+        "face": "delfina",
+        "detail": "Para espacios y ayudas culturales municipales (M_ASOC_LOCAL)."
+      },
+      {
+        "id": "e_semf",
+        "label": "SEMF (asociación)",
+        "type": "entity",
+        "status": "exists",
+        "face": "semf",
+        "detail": "Asociación multinacional; registro por confirmar (probablemente Valencia)."
+      },
+      {
+        "id": "e_cg",
+        "label": "Causality Graphs (empresa)",
+        "type": "entity",
+        "status": "exists",
+        "face": "causality",
+        "detail": "Empresa confirmada."
+      },
+      {
+        "id": "e_bo",
+        "label": "BranchOut SL",
+        "type": "entity",
+        "status": "exists",
+        "face": "branchout",
+        "detail": "Sociedad limitada."
+      },
+      {
+        "id": "f_cloudy",
+        "label": "Cloudy",
+        "type": "face",
+        "status": "exists",
+        "face": "cloudy",
+        "detail": "Proyecto sin ánimo de lucro de divulgación científica para familias; sin figura legal propia."
+      },
+      {
+        "id": "f_semf",
+        "label": "SEMF",
+        "type": "face",
+        "status": "exists",
+        "face": "semf",
+        "detail": "Red interdisciplinar internacional."
+      },
+      {
+        "id": "f_cg",
+        "label": "Causality Graphs",
+        "type": "face",
+        "status": "exists",
+        "face": "causality",
+        "detail": "Inferencia causal y datos de salud."
+      },
+      {
+        "id": "f_bo",
+        "label": "BranchOut",
+        "type": "face",
+        "status": "exists",
+        "face": "branchout",
+        "detail": "Hub de startups tecnológicas."
+      },
+      {
+        "id": "p_books",
+        "label": "Libros, cartas y serie 3D",
+        "type": "product",
+        "status": "exists",
+        "face": "cloudy",
+        "detail": "Contenido bilingüe de ciencia y salud (cloudybooks.org)."
+      },
+      {
+        "id": "p_sessions",
+        "label": "Sesiones familiares en colegios",
+        "type": "product",
+        "status": "planned",
+        "face": "cloudy",
+        "detail": "Vía Decreto 11/2018 (uso de colegios fuera de horario)."
+      },
+      {
+        "id": "p_events",
+        "label": "Congresos, escuela de verano y talleres",
+        "type": "product",
+        "status": "exists",
+        "face": "semf",
+        "detail": "Escuela de verano en Valencia; congresos internacionales."
+      },
+      {
+        "id": "p_ciclo",
+        "label": "Ciclo SEMF Madrid Oeste",
+        "type": "product",
+        "status": "planned",
+        "face": "semf",
+        "detail": "Talleres y conferencias en centros culturales de Las Rozas."
+      },
+      {
+        "id": "p_consult",
+        "label": "Consultoría de inferencia causal",
+        "type": "product",
+        "status": "exists",
+        "face": "causality",
+        "detail": "DAGs, modelos causales dinámicos; clientes farma y clínicos."
+      },
+      {
+        "id": "p_lib",
+        "label": "Librería abierta de DAGs",
+        "type": "product",
+        "status": "planned",
+        "face": "causality",
+        "detail": "Candidata a NLnet (M_PRODUCTO)."
+      },
+      {
+        "id": "p_eval",
+        "label": "Evaluación de impacto del ecosistema",
+        "type": "product",
+        "status": "planned",
+        "face": "causality",
+        "detail": "Mide el impacto de Cloudy, SEMF y BranchOut; diferencial en FECYT y convenios."
+      },
+      {
+        "id": "p_hub",
+        "label": "Hub de startups",
+        "type": "product",
+        "status": "exists",
+        "face": "branchout",
+        "detail": "Comunidad de startups tecnológicas de BranchOut."
+      },
+      {
+        "id": "p_cowork",
+        "label": "Coworking",
+        "type": "product",
+        "status": "planned",
+        "face": "branchout",
+        "detail": "Espacio de trabajo en Madrid Oeste."
+      },
+      {
+        "id": "p_coliving",
+        "label": "Coliving",
+        "type": "product",
+        "status": "planned",
+        "face": "branchout",
+        "detail": "Vivienda compartida para emprendedores e investigadores."
+      },
+      {
+        "id": "p_space",
+        "label": "Espacio compartido Madrid Oeste",
+        "type": "product",
+        "status": "planned",
+        "face": "delfina",
+        "detail": "Sede física común de todas las caras (Las Rozas recomendado)."
+      },
+      {
+        "id": "x_csic",
+        "label": "PI del CSIC (neurociencia computacional)",
+        "type": "partner",
+        "status": "external",
+        "face": "causality",
+        "detail": "Investigador externo de Causality Graphs."
+      },
+      {
+        "id": "x_uned",
+        "label": "Coordinador grado en Física (UNED)",
+        "type": "partner",
+        "status": "external",
+        "face": "semf",
+        "detail": "Aval académico, estudiantes, divulgación."
+      },
+      {
+        "id": "x_idiphisa",
+        "label": "IDIPHISA · Puerta de Hierro",
+        "type": "partner",
+        "status": "external",
+        "face": "causality",
+        "detail": "Instituto de investigación sanitaria (Majadahonda)."
+      },
+      {
+        "id": "x_lr",
+        "label": "Ayto. Las Rozas · Las Rozas Innova",
+        "type": "partner",
+        "status": "external",
+        "face": "delfina",
+        "detail": "Convenios, espacios y ecosistema tech."
+      }
+    ],
+    "edges": [
+      {
+        "from": "e_fund",
+        "to": "f_cloudy",
+        "label": "vehículo legal",
+        "status": "planned"
+      },
+      {
+        "from": "e_fund",
+        "to": "f_semf",
+        "label": "acoge en Madrid",
+        "status": "planned"
+      },
+      {
+        "from": "e_fund",
+        "to": "f_cg",
+        "label": "agrupa",
+        "status": "planned"
+      },
+      {
+        "from": "e_fund",
+        "to": "f_bo",
+        "label": "agrupa",
+        "status": "planned"
+      },
+      {
+        "from": "e_asoc",
+        "to": "f_cloudy",
+        "label": "actividades locales",
+        "status": "planned"
+      },
+      {
+        "from": "e_asoc",
+        "to": "f_semf",
+        "label": "actividades locales",
+        "status": "planned"
+      },
+      {
+        "from": "e_semf",
+        "to": "f_semf",
+        "label": "titular",
+        "status": "exists"
+      },
+      {
+        "from": "e_cg",
+        "to": "f_cg",
+        "label": "titular",
+        "status": "exists"
+      },
+      {
+        "from": "e_bo",
+        "to": "f_bo",
+        "label": "titular",
+        "status": "exists"
+      },
+      {
+        "from": "f_cloudy",
+        "to": "p_books",
+        "label": "produce",
+        "status": "exists"
+      },
+      {
+        "from": "f_cloudy",
+        "to": "p_sessions",
+        "label": "produce",
+        "status": "planned"
+      },
+      {
+        "from": "f_semf",
+        "to": "p_events",
+        "label": "organiza",
+        "status": "exists"
+      },
+      {
+        "from": "f_semf",
+        "to": "p_ciclo",
+        "label": "organiza",
+        "status": "planned"
+      },
+      {
+        "from": "f_cg",
+        "to": "p_consult",
+        "label": "vende",
+        "status": "exists"
+      },
+      {
+        "from": "f_cg",
+        "to": "p_lib",
+        "label": "desarrolla",
+        "status": "planned"
+      },
+      {
+        "from": "f_cg",
+        "to": "p_eval",
+        "label": "aporta",
+        "status": "planned"
+      },
+      {
+        "from": "f_bo",
+        "to": "p_hub",
+        "label": "opera",
+        "status": "exists"
+      },
+      {
+        "from": "f_bo",
+        "to": "p_cowork",
+        "label": "opera",
+        "status": "planned"
+      },
+      {
+        "from": "f_bo",
+        "to": "p_coliving",
+        "label": "opera",
+        "status": "planned"
+      },
+      {
+        "from": "f_bo",
+        "to": "p_lib",
+        "label": "desarrollo",
+        "status": "planned"
+      },
+      {
+        "from": "e_fund",
+        "to": "p_space",
+        "label": "titular",
+        "status": "planned"
+      },
+      {
+        "from": "p_space",
+        "to": "p_cowork",
+        "label": "aloja",
+        "status": "planned"
+      },
+      {
+        "from": "p_space",
+        "to": "p_ciclo",
+        "label": "aloja",
+        "status": "planned"
+      },
+      {
+        "from": "p_eval",
+        "to": "p_books",
+        "label": "mide impacto",
+        "status": "planned"
+      },
+      {
+        "from": "p_eval",
+        "to": "p_ciclo",
+        "label": "mide impacto",
+        "status": "planned"
+      },
+      {
+        "from": "x_csic",
+        "to": "f_cg",
+        "label": "investigador externo",
+        "status": "exists"
+      },
+      {
+        "from": "x_csic",
+        "to": "p_lib",
+        "label": "dirección científica",
+        "status": "planned"
+      },
+      {
+        "from": "x_uned",
+        "to": "f_semf",
+        "label": "aval académico",
+        "status": "planned"
+      },
+      {
+        "from": "x_uned",
+        "to": "p_sessions",
+        "label": "estudiantes de Física",
+        "status": "planned"
+      },
+      {
+        "from": "x_idiphisa",
+        "to": "f_cg",
+        "label": "socio clínico",
+        "status": "planned"
+      },
+      {
+        "from": "x_lr",
+        "to": "p_space",
+        "label": "convenio / cesión",
+        "status": "planned"
+      },
+      {
+        "from": "x_lr",
+        "to": "p_hub",
+        "label": "ecosistema tech",
+        "status": "planned"
+      }
+    ]
   }
 }
