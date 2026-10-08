@@ -16,7 +16,7 @@
   "prompt": {
     "goal": "Find public and private funding opportunities (grants, loans, prizes, foundation calls), focused on Spain first and Europe second, for an independent researcher/developer based in Madrid.",
     "applicant_profile": {
-      "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, branchout). Full profiles and eligibility notes are in CLAUDE.md.",
+      "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, branchout, delfina). Full profiles and eligibility notes are in CLAUDE.md.",
       "lines_of_work": [
         {
           "line": "solidarity / outreach science projects",
@@ -57,7 +57,7 @@
           "what_it_is": "Causal-inference consultancy (DAGs, dynamic causal models) for pharma/clinical/biostatistics teams"
         },
         {
-          "line": "BranchOut: tech startup hub (coworking + coliving)",
+          "line": "BranchOut (technology line): tech startup hub, an SL, building a coworking + coliving space",
           "example": null,
           "search_angles": [
             "startup hub / incubator / coworking space funding",
@@ -70,13 +70,26 @@
             "startup and research prizes"
           ],
           "key": "branchout",
-          "what_it_is": "Hub for technology startups that aims to create a coworking and coliving space"
+          "what_it_is": "SL; hub for tech startups planning a coworking and coliving space in Madrid West"
+        },
+        {
+          "line": "Fundacion Delfina Leon (planned umbrella foundation)",
+          "key": "delfina",
+          "example": null,
+          "what_it_is": "Foundation to be constituted, holding all projects and a shared space for SEMF, Causality Graphs, Cloudy and BranchOut",
+          "search_angles": [
+            "municipal space cession for non-profits in Las Rozas/Majadahonda/Pozuelo",
+            "municipal cultural subsidies (Pozuelo, Las Rozas, Majadahonda)",
+            "foundation/non-profit calls (FECYT, la Caixa social, Carasso, Erasmus+)",
+            "Comunidad de Madrid grants for non-profit entities"
+          ]
         }
-      ]
+      ],
+      "geography": "Phase 1: Madrid West (Las Rozas, Majadahonda, Pozuelo de Alarcon; scope 'Madrid West'), then wider Comunidad de Madrid, then Spain/EU."
     },
     "steps": [
       "Read CLAUDE.md and LESSONS.md, then money.db (table opportunities) and the ROWS list in build.py to see what is already tracked and which sources/queries worked before.",
-      "WebSearch in Spanish and English for new or changed calls across every line of work in applicant_profile: CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BDNS/infosubvenciones, BOE, Comunidad de Madrid / madri+d, EIC/Horizon Europe/EU4Health/COST/Erasmus+/Funding & Tenders portal, NLnet, Spanish and EU private foundations (la Caixa, BBVA, Telefonica, Carasso), startup/research prizes. Prioritise the gaps named in the latest LESSONS.md entry.",
+      "WebSearch in Spanish and English, starting with Madrid West municipalities (Las Rozas / Las Rozas Innova, Majadahonda, Pozuelo: BOCM extracts, BDNS, municipal sedes), for new or changed calls across every line of work in applicant_profile: CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BDNS/infosubvenciones, BOE, Comunidad de Madrid / madri+d, EIC/Horizon Europe/EU4Health/COST/Erasmus+/Funding & Tenders portal, NLnet, Spanish and EU private foundations (la Caixa, BBVA, Telefonica, Carasso), startup/research prizes. Prioritise the gaps named in the latest LESSONS.md entry.",
       "Verify each candidate on an official page with WebFetch (binary PDFs: save and run pdftotext -layout). Set verification 'verified' only from an official page, else 'unverified', and cite it in `source`. Never invent amounts or dates. Record the matching line(s) of work in `lines`.",
       "Add new rows (or a new id for a new edition) to ROWS in build.py; update changed facts in place (changes are logged automatically). Then run: python3 -I monitor.py && python3 -I build.py. If monitor.py exits non-zero, fix the reported rows and rerun.",
       "Commit money.db, dashboard.html, build.py and LESSONS.md and push to the repository's default branch with: git push -u origin <branch>.",

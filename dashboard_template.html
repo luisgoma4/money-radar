@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Money Radar</title>
-<meta name="description" content="Spain/EU funding radar for Cloudy, SEMF, Causality Graphs and BranchOut. Generated __GENERATED__.">
+<meta name="description" content="Spain/EU funding radar for Cloudy, SEMF, Causality Graphs, BranchOut and Fundación Delfina León. Generated __GENERATED__.">
 <style>
 :root {
   color-scheme: light;
@@ -22,6 +22,7 @@
   --line-semf: #eb6834;
   --line-causality: #1baf7a;
   --line-branchout: #eda100;
+  --line-delfina: #e87ba4;
   --good: #0ca30c;
   --good-ink: #006300;
   --warning: #fab219;
@@ -35,7 +36,7 @@
     --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
     --accent: #3987e5;
-    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500;
+    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-delfina: #d55181;
     --good-ink: #0ca30c; --shadow: none;
   }
 }
@@ -192,7 +193,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
   <header class="top">
     <div>
       <h1>Money Radar</h1>
-      <p class="sub">Funding calls for Cloudy, SEMF, Causality Graphs and BranchOut · Spain first, Europe second · updated __GENERATED__</p>
+      <p class="sub">Funding calls for Cloudy, SEMF, Causality Graphs, BranchOut and Fundación Delfina León · Spain first, Europe second · updated __GENERATED__</p>
     </div>
     <button class="btn" id="theme" type="button" aria-label="Toggle colour theme">◐ Theme</button>
   </header>
@@ -211,7 +212,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
       </div>
       <select id="scope" aria-label="Scope">
         <option value="">All scopes</option>
-        <option>Madrid</option><option>Spain</option><option>EU</option><option>International</option>
+        <option>Madrid West</option><option>Madrid</option><option>Spain</option><option>EU</option><option>International</option>
       </select>
       <label class="check"><input type="checkbox" id="verified"> Verified only</label>
     </div>
@@ -286,9 +287,11 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
   };
   const state = Object.assign(
     { lines: LINE_KEYS.slice(), status: "actionable", scope: "", verified: false, q: "", sort: "deadline", view: "cards" },
-    store.get("state") || {}, { q: "" }
+    store.get("view") || {}, { q: "" }
   );
-  state.lines = state.lines.filter((k) => LINE_KEYS.includes(k));
+  // Remember which lines the viewer hid (not which were shown), so a newly added
+  // line of work always starts visible.
+  state.lines = LINE_KEYS.filter((k) => !(state.hiddenLines || []).includes(k));
   if (state.status === "closed") state.status = "archive";
 
   // ---- theme ----
@@ -565,7 +568,8 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
   }
 
   function update() {
-    store.set("state", Object.assign({}, state, { q: "" }));
+    store.set("view", Object.assign({}, state, { q: "", lines: undefined,
+      hiddenLines: LINE_KEYS.filter((k) => !state.lines.includes(k)) }));
     renderChips(); syncStatus(); syncView();
     scopeSel.value = state.scope; verifiedBox.checked = state.verified; sortSel.value = state.sort;
     const list = sorted(DATA.opportunities.filter(matches));
