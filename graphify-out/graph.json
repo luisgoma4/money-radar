@@ -3,21 +3,21 @@
  "nodes": [
   {
    "id": "e_fund",
-   "label": "Fundación Delfina León (por crear)",
-   "source_file": "Fundación Delfina León/figura legal",
+   "label": "Fundacion Delfina Leon (por crear)",
+   "source_file": "Fundacion Delfina Leon/figura legal",
    "source_location": "figura legal",
    "community_name": "por crear"
   },
   {
    "id": "e_asoc",
-   "label": "Asociación local (Las Rozas) (propuesta)",
-   "source_file": "Fundación Delfina León/figura legal",
+   "label": "Asociacion local (Las Rozas) (propuesta)",
+   "source_file": "Fundacion Delfina Leon/figura legal",
    "source_location": "figura legal",
    "community_name": "propuesta"
   },
   {
    "id": "e_semf",
-   "label": "SEMF (asociación)",
+   "label": "SEMF (asociacion)",
    "source_file": "SEMF/figura legal",
    "source_location": "figura legal",
    "community_name": "existe"
@@ -94,21 +94,21 @@
   },
   {
    "id": "p_consult",
-   "label": "Consultoría de inferencia causal",
+   "label": "Consultoria de inferencia causal",
    "source_file": "Causality Graphs/producto",
    "source_location": "producto",
    "community_name": "existe"
   },
   {
    "id": "p_lib",
-   "label": "Librería abierta de DAGs (por crear)",
+   "label": "Libreria abierta de DAGs (por crear)",
    "source_file": "Causality Graphs/producto",
    "source_location": "producto",
    "community_name": "por crear"
   },
   {
    "id": "p_eval",
-   "label": "Evaluación de impacto del ecosistema (por crear)",
+   "label": "Evaluacion de impacto del ecosistema (por crear)",
    "source_file": "Causality Graphs/producto",
    "source_location": "producto",
    "community_name": "por crear"
@@ -137,7 +137,7 @@
   {
    "id": "p_space",
    "label": "Espacio compartido Madrid Oeste (por crear)",
-   "source_file": "Fundación Delfina León/producto",
+   "source_file": "Fundacion Delfina Leon/producto",
    "source_location": "producto",
    "community_name": "por crear"
   },
@@ -150,203 +150,203 @@
   },
   {
    "id": "x_uned",
-   "label": "Coordinador grado en Física (UNED)",
+   "label": "Coordinador grado en Fisica (UNED)",
    "source_file": "SEMF/socio",
    "source_location": "socio",
-   "community_name": "socio externo · relación por crear"
+   "community_name": "socio externo - relacion por crear"
   },
   {
    "id": "x_idiphisa",
-   "label": "IDIPHISA · Puerta de Hierro",
+   "label": "IDIPHISA - Puerta de Hierro",
    "source_file": "Causality Graphs/socio",
    "source_location": "socio",
-   "community_name": "socio externo · relación por crear"
+   "community_name": "socio externo - relacion por crear"
   },
   {
    "id": "x_lr",
-   "label": "Ayto. Las Rozas · Las Rozas Innova",
-   "source_file": "Fundación Delfina León/socio",
+   "label": "Ayto. Las Rozas - Las Rozas Innova",
+   "source_file": "Fundacion Delfina Leon/socio",
    "source_location": "socio",
-   "community_name": "socio externo · relación por crear"
+   "community_name": "socio externo - relacion por crear"
   },
   {
    "id": "c_caixaresearch-health-next",
    "label": "[A] CaixaResearch Health Research Call (next edition)",
    "source_file": "Causality Graphs/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado A"
+   "community_name": "convocatoria - grado A"
   },
   {
    "id": "c_lasrozas-convenios-entidades",
-   "label": "[B] Las Rozas — direct collaboration agreements (convenios / subvenciones nominativas) with associations and foundations",
-   "source_file": "Fundación Delfina León/convocatoria",
+   "label": "[B] Las Rozas - direct collaboration agreements (convenios / subvenciones nominativas) with associations and foundations",
+   "source_file": "Fundacion Delfina Leon/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B"
+   "community_name": "convocatoria - grado B"
   },
   {
    "id": "c_fecyt-fcc-2026",
-   "label": "[B] FECYT Ayudas para el Fomento de la Cultura Científica 2026",
+   "label": "[B] FECYT Ayudas para el Fomento de la Cultura Cientifica 2026",
    "source_file": "Cloudy/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B · próxima edición"
+   "community_name": "convocatoria - grado B - proxima edicion"
   },
   {
    "id": "c_startup-europe-2027",
    "label": "[B] Horizon Europe Startup Europe (HORIZON-EIE-2027-01-CONNECT-01)",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B"
+   "community_name": "convocatoria - grado B"
   },
   {
    "id": "c_horizon-hlth-2027-01-02",
    "label": "[B] Horizon Europe Cluster Health 2027 (HLTH-2027-01 / -02)",
    "source_file": "Causality Graphs/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B"
+   "community_name": "convocatoria - grado B"
   },
   {
    "id": "c_cost-oc-2026-1",
    "label": "[B] COST Open Call OC-2026-1 (new COST Action)",
    "source_file": "SEMF/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B"
+   "community_name": "convocatoria - grado B"
   },
   {
    "id": "c_lasrozas-cesion-espacios-cultura",
-   "label": "[B] Las Rozas — free use of rooms in municipal cultural centres for cultural associations",
+   "label": "[B] Las Rozas - free use of rooms in municipal cultural centres for cultural associations",
    "source_file": "SEMF/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B"
+   "community_name": "convocatoria - grado B"
   },
   {
    "id": "c_madrid-cesion-centros-educativos",
    "label": "[B] Use of public school premises outside school hours (Comunidad de Madrid Decreto 11/2018)",
    "source_file": "Cloudy/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B"
+   "community_name": "convocatoria - grado B"
   },
   {
    "id": "c_cdti-neotec-2026",
    "label": "[B] CDTI NEOTEC 2026",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado B · próxima edición"
+   "community_name": "convocatoria - grado B - proxima edicion"
   },
   {
    "id": "c_pozuelo-subv-cultura-2026",
-   "label": "[C] Pozuelo de Alarcón — subsidies for non-profit cultural entities 2026",
+   "label": "[C] Pozuelo de Alarcon - subsidies for non-profit cultural entities 2026",
    "source_file": "Cloudy/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C · próxima edición"
+   "community_name": "convocatoria - grado C - proxima edicion"
   },
   {
    "id": "c_healthstart-madrimasd",
    "label": "[C] healthstart madri+d (health tech startup programme)",
    "source_file": "Causality Graphs/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_erasmus-ka210-2027",
-   "label": "[C] Erasmus+ Small-scale Partnerships (KA210) — 2027 round",
+   "label": "[C] Erasmus+ Small-scale Partnerships (KA210) - 2027 round",
    "source_file": "Cloudy/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_carasso-componer-saberes",
-   "label": "[C] Fundación Daniel y Nina Carasso — Componer saberes (art + science + community)",
+   "label": "[C] Fundacion Daniel y Nina Carasso - Componer saberes (art + science + community)",
    "source_file": "SEMF/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_lasrozas-innova-foro",
-   "label": "[C] Las Rozas Innova — Foro de Inversión + Hub access (municipal innovation company)",
+   "label": "[C] Las Rozas Innova - Foro de Inversion + Hub access (municipal innovation company)",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_enisa-prestamo-participativo",
    "label": "[C] ENISA participatory loans for startups and SMEs",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_nlnet-2026-11",
    "label": "[C] NLnet open calls (Restack, CodeSupply, open call)",
    "source_file": "Causality Graphs/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_eic-accelerator-2026-11",
-   "label": "[C] EIC Accelerator — full application cut-off 4 Nov 2026",
+   "label": "[C] EIC Accelerator - full application cut-off 4 Nov 2026",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_horizon-neb-2026",
    "label": "[C] Horizon Europe New European Bauhaus 2026 (HORIZON-NEB-2026-01)",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_plan-vivienda-2026-coliving",
-   "label": "[C] Plan Estatal de Vivienda 2026–2030 — cohousing / coliving / alojamientos temporales line",
-   "source_file": "Fundación Delfina León/convocatoria",
+   "label": "[C] Plan Estatal de Vivienda 2026-2030 - cohousing / coliving / alojamientos temporales line",
+   "source_file": "Fundacion Delfina Leon/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_madrid-sello-excelencia",
-   "label": "[C] Comunidad de Madrid — Sello de Excelencia (EIC Accelerator)",
+   "label": "[C] Comunidad de Madrid - Sello de Excelencia (EIC Accelerator)",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado C"
+   "community_name": "convocatoria - grado C"
   },
   {
    "id": "c_lasrozas-cultura-asociaciones-2026",
-   "label": "[D] Las Rozas — subsidies for cultural programmes by local associations 2026",
+   "label": "[D] Las Rozas - subsidies for cultural programmes by local associations 2026",
    "source_file": "SEMF/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado D · próxima edición"
+   "community_name": "convocatoria - grado D - proxima edicion"
   },
   {
    "id": "c_madrid-cheque-innovacion",
-   "label": "[D] Comunidad de Madrid — Cheque Innovación",
+   "label": "[D] Comunidad de Madrid - Cheque Innovacion",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado D"
+   "community_name": "convocatoria - grado D"
   },
   {
    "id": "c_pozuelo-innpar-vivero",
-   "label": "[D] Pozuelo de Alarcón — INNPAR Vivero (municipal incubator) and business-development sponsorships",
+   "label": "[D] Pozuelo de Alarcon - INNPAR Vivero (municipal incubator) and business-development sponsorships",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado D"
+   "community_name": "convocatoria - grado D"
   },
   {
    "id": "c_neb-connect-cocreate-2027",
    "label": "[D] Connect NEB / Co-create NEB open call 2027",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado D · próxima edición"
+   "community_name": "convocatoria - grado D - proxima edicion"
   },
   {
    "id": "c_majadahonda-emprende-2026",
    "label": "[D] Premios Majadahonda Emprende 2026",
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
-   "community_name": "convocatoria · grado D · próxima edición"
+   "community_name": "convocatoria - grado D - proxima edicion"
   },
   {
    "id": "m_M_CERT",
-   "label": "Certificados y firma electrónica al día",
+   "label": "Certificados y firma electronica al dia",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
@@ -360,7 +360,7 @@
   },
   {
    "id": "m_M_PRODUCTO",
-   "label": "Definir un producto tecnológico",
+   "label": "Definir un producto tecnologico",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
@@ -374,7 +374,7 @@
   },
   {
    "id": "m_M_FUND",
-   "label": "Constituir la Fundación Delfina León",
+   "label": "Constituir la Fundacion Delfina Leon",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
@@ -388,35 +388,35 @@
   },
   {
    "id": "m_M_ASOC_LOCAL",
-   "label": "Crear e inscribir una asociación local en Las Rozas",
+   "label": "Crear e inscribir una asociacion local en Las Rozas",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
   },
   {
    "id": "m_M_LR_REUNION",
-   "label": "Reunión con Cultura y Las Rozas Innova",
+   "label": "Reunion con Cultura y Las Rozas Innova",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
   },
   {
    "id": "m_M_RED_COST",
-   "label": "Red de 7+ países para una Acción COST",
+   "label": "Red de 7+ paises para una Accion COST",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
   },
   {
    "id": "m_M_PARTNER_IDIPHISA",
-   "label": "Alianza con un instituto de investigación sanitaria",
+   "label": "Alianza con un instituto de investigacion sanitaria",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
   },
   {
    "id": "m_M_SEGURO",
-   "label": "Póliza de responsabilidad civil para actividades",
+   "label": "Poliza de responsabilidad civil para actividades",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
@@ -426,7 +426,7 @@
   {
    "source": "e_fund",
    "target": "f_cloudy",
-   "relation": "vehículo legal",
+   "relation": "vehiculo legal",
    "confidence": "INFERRED"
   },
   {
@@ -582,31 +582,31 @@
   {
    "source": "x_csic",
    "target": "p_lib",
-   "relation": "dirección científica",
+   "relation": "direccion cientifica",
    "confidence": "INFERRED"
   },
   {
    "source": "x_uned",
    "target": "f_semf",
-   "relation": "aval académico",
+   "relation": "aval academico",
    "confidence": "INFERRED"
   },
   {
    "source": "x_uned",
    "target": "p_sessions",
-   "relation": "estudiantes de Física",
+   "relation": "estudiantes de Fisica",
    "confidence": "INFERRED"
   },
   {
    "source": "x_idiphisa",
    "target": "f_cg",
-   "relation": "socio clínico",
+   "relation": "socio clinico",
    "confidence": "INFERRED"
   },
   {
    "source": "x_lr",
    "target": "p_space",
-   "relation": "convenio / cesión",
+   "relation": "convenio / cesion",
    "confidence": "INFERRED"
   },
   {

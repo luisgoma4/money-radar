@@ -19,6 +19,7 @@ Value scores are planning judgements documented in strategy.json, not amounts.
 
 import datetime as dt
 import json
+import unicodedata
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -221,6 +222,18 @@ def calendar(opps, plans, milestones, today, horizon_days=400):
     return ev
 
 
+ASCII_MAP = {"·": "-", "→": "->", "←": "<-", "≈": "~", "«": '"', "»": '"', "“": '"', "”": '"',
+             "‘": "'", "’": "'", "–": "-", "—": "-", "…": "...", "€": "EUR", "º": "o", "ª": "a", "+": "+"}
+
+
+def ascii_text(text):
+    """Plain ASCII for the 3D viewer: no accents, no typographic symbols (they break there)."""
+    for k, v in ASCII_MAP.items():
+        text = text.replace(k, v)
+    text = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in text if ord(c) < 128 and not unicodedata.combining(c))
+
+
 def graph_export(plan, opps, include_calls=True):
     """Ecosystem as a graphify-style graph.json (nodes + links) for the 3D viewer.
 
@@ -274,6 +287,12 @@ def graph_export(plan, opps, include_calls=True):
         for m in plan["milestones"]:
             if m["id"] in used_ms:
                 node("m_" + m["id"], m["name"], "Hitos", "hito", "hito " + {"pending": "pendiente", "doing": "en curso", "done": "hecho"}[m["status"]])
+    for n in nodes:
+        for k in ("label", "source_file", "source_location", "community_name"):
+            n[k] = ascii_text(n[k])
+    for l in links:
+        if "relation" in l:
+            l["relation"] = ascii_text(l["relation"])
     ids = {n["id"] for n in nodes}
     return {"directed": True, "nodes": nodes,
             "links": [l for l in links if l["source"] in ids and l["target"] in ids]}

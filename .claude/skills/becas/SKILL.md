@@ -47,6 +47,8 @@ Cuando el usuario quiera ver o explicar cómo se conecta el ecosistema (entidade
 4. En el 3D, el estado de cada nodo (existe, por crear, socio externo, grado de la convocatoria, estado del hito) está en *community*. Se ve al seleccionar un nodo, y se puede buscar «por crear».
 5. Si el usuario construye un grafo con `/graphify` en otra carpeta, genera también su visor 3D. Es la preferencia global: `python3 ~/.claude/scripts/graphify_3d.py graphify-out/graph.json graphify-out/graph3d.html --title "<nombre>"`.
 
+**Texto del grafo 3D sin tildes ni caracteres especiales** (ni ñ, ·, →, «», €): se rompen en el visor. `planner.ascii_text()` los convierte al exportar; si escribes etiquetas a mano para un grafo 3D, hazlo ya en ASCII.
+
 El visor 3D se genera en local (el script no está en el repo). La rutina en la nube solo actualiza `graph.json`; el HTML 3D se regenera al ejecutar `grafo3d` en una máquina con el script.
 
 ## Reglas

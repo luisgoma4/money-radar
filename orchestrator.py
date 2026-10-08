@@ -288,6 +288,10 @@ VIEWER = Path.home() / ".claude" / "scripts" / "graphify_3d.py"
 FACE_SLOTS = {"cloudy": "--c1", "semf": "--c2", "causality": "--c3", "branchout": "--c4", "delfina": "--c5"}
 
 
+def planner_ascii(text):
+    return load_planner().ascii_text(text)
+
+
 def pin_colours(html_path, plan):
     """The viewer colours groups by size rank; pin each face to its dashboard colour instead."""
     html = html_path.read_text(encoding="utf-8")
@@ -295,11 +299,14 @@ def pin_colours(html_path, plan):
     if old not in html:
         print("Aviso: el visor 3D cambió; no se han fijado los colores por cara.")
         return
-    mapping = {plan["faces"][k]["name"]: v for k, v in FACE_SLOTS.items()}
+    mapping = {planner_ascii(plan["faces"][k]["name"]): v for k, v in FACE_SLOTS.items()}
     mapping["Hitos"] = "--c8"
     new = ("var pinned = " + json.dumps(mapping, ensure_ascii=False) + "; "
            "projList.forEach(function (p, i) { projColor[p] = cssVar(pinned[p] || colorSlots[i % 8]); projVisible[p] = true; });")
-    html_path.write_text(html.replace(old, new, 1), encoding="utf-8")
+    html = html.replace(old, new, 1)
+    if "<meta charset" not in html[:500].lower():  # the viewer omits it; Pages then mangles any non-ASCII
+        html = '<!doctype html>\n<meta charset="utf-8">\n' + html
+    html_path.write_text(html, encoding="utf-8")
 
 
 def cmd_grafo3d(args):
@@ -315,7 +322,7 @@ def cmd_grafo3d(args):
     # The viewer needs networkx/scipy, so run it without -I (normal site-packages).
     exe = "/usr/bin/env"
     subprocess.run([exe, "python3", str(VIEWER), str(out / "graph.json"), str(out / "graph3d.html"),
-                    "--title", "Ecosistema Delfina León"], check=True)
+                    "--title", "Ecosistema Delfina Leon"], check=True)
     pin_colours(out / "graph3d.html", plan)
     rebuild()  # the dashboard links the 3D view once graph3d.html exists
     print("Visor 3D: graphify-out/graph3d.html (enlazado desde la pestaña Grafo del dashboard)")
