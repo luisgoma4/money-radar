@@ -27,6 +27,11 @@ A call only needs to fit **one** line of work. Every row records its lines in `l
   - Non-profit, cultural and space calls go to the foundation once it is registered, or meanwhile to an existing association (e.g. SEMF).
   - Causality Graphs joins health research calls as a partner.
 - **Municipal space and grants require local registration:** the entity must be on that town's Registro Municipal de Asociaciones and have its registered office there. Las Rozas lends cultural-centre rooms only to *associations*, so a foundation may not qualify. Choosing the registered-office town is therefore a funding decision.
+- **SEMF's registration:** the team believes SEMF is registered in Spain, probably in the Valencian registry, and it is a multinational association; not yet confirmed (semf.org.es shows no legal details). A regionally registered association does not automatically have a registered office in Madrid West. Use the foundation, or a local association, as the Madrid applicant.
+- **Municipality assessment (Oct 2026):**
+  - **Las Rozas** is the recommended registered office: a tech-startup policy (Las Rozas Innova), free cultural rooms for associations, and large direct agreements with foundations (up to EUR 60k).
+  - **Majadahonda** is the health anchor (Hospital Puerta de Hierro / IDIPHISA) for Causality Graphs; no registered office is needed there.
+  - **Pozuelo** has the biggest competitive culture fund (EUR 72.5k, publications included) and universities (UFV, UCM Somosaguas), but publishes no awards in BDNS and gives 15-day windows.
 - **Constituting the foundation** (Comunidad de Madrid): a foundational endowment of at least EUR 30,000 (if in cash, 25% at signing and the rest within 5 years); name certificate from the Registro de Fundaciones; deed; favourable report from the Protectorado; registration. This is not tracked as a funding row.
 
 Eligibility matters more than topic. Cloudy's legal form is unclear (check before applying anywhere). SEMF is a non-profit. Causality Graphs is a company and cannot lead calls reserved for research centres; it joins them as a partner.
