@@ -1,0 +1,101 @@
+"""money-radar: maintenance pass over money.db, run before build.py.
+
+- Marks opportunities whose fixed deadline has passed as 'closed' (logged in `changes`).
+- Checks build.py's ROWS for data-quality problems and exits non-zero if any are found,
+  so a bad edit stops the run before the dashboard is rebuilt.
+
+Run with:  python3 -I monitor.py && python3 -I build.py
+"""
+
+import ast
+import datetime as dt
+import re
+import sqlite3
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+DB = HERE / "money.db"
+TODAY = dt.date.today()
+ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+LINES = {"cloudy", "semf", "causality", "tech"}
+KINDS = {"grant", "loan", "equity", "prize", "network"}
+SCOPES = {"Madrid", "Spain", "EU", "International"}
+DEADLINE_KINDS = {"fixed", "rolling", "expected"}
+VERIFICATION = {"verified", "unverified"}
+REQUIRED = ["id", "name", "funder", "kind", "scope", "lines", "deadline_kind", "verification", "url", "source"]
+
+
+def close_passed(conn):
+    today = TODAY.isoformat()
+    rows = conn.execute(
+        "SELECT id, status FROM opportunities "
+        "WHERE deadline_kind = 'fixed' AND deadline < ? AND status != 'closed'",
+        (today,),
+    ).fetchall()
+    for oid, status in rows:
+        conn.execute("UPDATE opportunities SET status = 'closed' WHERE id = ?", (oid,))
+        conn.execute("INSERT INTO changes VALUES (?, 'status', ?, 'closed', ?)", (oid, status, today))
+        print(f"closed: {oid} (deadline passed)")
+    conn.commit()
+    return len(rows)
+
+
+def read_rows():
+    """Parse ROWS out of build.py without importing it (-I drops the script dir from sys.path)."""
+    tree = ast.parse((HERE / "build.py").read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "ROWS" for t in node.targets):
+            return [{kw.arg: ast.literal_eval(kw.value) for kw in call.keywords} for call in node.value.elts]
+    raise SystemExit("monitor: ROWS not found in build.py")
+
+
+def check(rows):
+    problems, seen = [], set()
+    for r in rows:
+        rid = r.get("id", "?")
+        for f in REQUIRED:
+            if not r.get(f):
+                problems.append(f"{rid}: missing {f}")
+        if rid in seen:
+            problems.append(f"{rid}: duplicate id")
+        seen.add(rid)
+        if not set(str(r.get("lines", "")).split(",")) <= LINES:
+            problems.append(f"{rid}: unknown line in {r.get('lines')!r}")
+        for field, allowed in (("kind", KINDS), ("scope", SCOPES),
+                               ("deadline_kind", DEADLINE_KINDS), ("verification", VERIFICATION)):
+            if r.get(field) not in allowed:
+                problems.append(f"{rid}: {field}={r.get(field)!r} not in {sorted(allowed)}")
+        for f in ("opens", "deadline"):
+            if r.get(f) is not None and not ISO.match(str(r[f])):
+                problems.append(f"{rid}: {f} must be YYYY-MM-DD")
+        if r.get("deadline_kind") == "fixed" and not r.get("deadline"):
+            problems.append(f"{rid}: fixed deadline_kind needs a deadline")
+        if r.get("deadline_kind") in ("rolling", "expected") and r.get("deadline"):
+            problems.append(f"{rid}: {r['deadline_kind']} rows must not carry a deadline")
+        lo, hi = r.get("amount_min"), r.get("amount_max")
+        if lo is not None and hi is not None and lo > hi:
+            problems.append(f"{rid}: amount_min > amount_max")
+        if not str(r.get("url", "")).startswith("https://"):
+            problems.append(f"{rid}: url must be https")
+    return problems
+
+
+def main():
+    problems = check(read_rows())
+    if DB.exists():
+        conn = sqlite3.connect(DB)
+        closed = close_passed(conn)
+        conn.close()
+    else:
+        closed = 0
+        print("monitor: money.db not found yet — build.py will create it")
+    if problems:
+        print("monitor: data problems in build.py ROWS:", *problems, sep="\n  ")
+        sys.exit(1)
+    print(f"monitor: rows OK; {closed} closed today")
+
+
+if __name__ == "__main__":
+    main()

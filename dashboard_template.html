@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money Radar</title>
+<meta name="description" content="Spain/EU funding radar for Cloudy, SEMF, Causality Graphs and tech projects. Generated __GENERATED__.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f3f2ee;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11,11,11,0.10);
+  --accent: #2a78d6;
+  --line-cloudy: #2a78d6;
+  --line-semf: #eb6834;
+  --line-causality: #1baf7a;
+  --line-tech: #eda100;
+  --good: #0ca30c;
+  --good-ink: #006300;
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --shadow: 0 1px 2px rgba(11,11,11,0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422;
+    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --accent: #3987e5;
+    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-tech: #c98500;
+    --good-ink: #0ca30c; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422;
+  --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --accent: #3987e5;
+  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-tech: #c98500;
+  --good-ink: #0ca30c; --shadow: none;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--accent); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+
+header.top { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.01em; }
+.sub { color: var(--ink-2); margin: 0; }
+h2 { font-size: 17px; margin: 0 0 12px; }
+button, select, input { font: inherit; color: inherit; }
+.btn {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 12px; cursor: pointer; box-shadow: var(--shadow);
+}
+.btn:hover { background: var(--surface-2); }
+.btn:focus-visible, .chip:focus-visible, .seg button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+.panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; box-shadow: var(--shadow);
+}
+
+/* KPI tiles */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+.kpi .label { color: var(--ink-2); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+.kpi .value { font-size: 30px; font-weight: 650; line-height: 1.15; margin-top: 4px; }
+.kpi .note { color: var(--muted); font-size: 13px; margin-top: 2px; overflow-wrap: anywhere; }
+
+/* Filters */
+.filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); padding: 4px 12px; cursor: pointer;
+}
+.chip[aria-pressed="false"] { color: var(--muted); background: transparent; }
+.chip[aria-pressed="false"] .dot { opacity: 0.35; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
+.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 5px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.search {
+  flex: 1 1 200px; min-width: 0; padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+label.check { display: inline-flex; gap: 6px; align-items: center; color: var(--ink-2); }
+.count { color: var(--muted); font-size: 13px; margin-left: auto; }
+
+/* Timeline */
+.timeline { margin-bottom: 16px; position: relative; }
+.timeline svg { display: block; width: 100%; height: auto; overflow: visible; }
+.timeline .hint { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+.tl-grid { stroke: var(--grid); stroke-width: 1; }
+.tl-axis { stroke: var(--axis); stroke-width: 1; }
+.tl-tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.tl-lane { fill: var(--ink-2); font-size: 12px; }
+.tl-today { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.tl-today-label { fill: var(--ink); font-size: 11px; font-weight: 600; }
+.tl-mark { cursor: pointer; stroke: var(--surface); stroke-width: 2; }
+.tl-mark.closed { opacity: 0.4; }
+.tl-mark:hover, .tl-mark.active { stroke: var(--ink); }
+.tl-label { fill: var(--ink-2); font-size: 11px; pointer-events: none; }
+.tooltip {
+  position: absolute; pointer-events: none; z-index: 5; max-width: 260px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 13px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.tooltip[hidden] { display: none; }
+.tooltip .t-name { font-weight: 600; margin-bottom: 2px; }
+.tooltip .t-meta { color: var(--ink-2); }
+
+/* Cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.card { display: flex; flex-direction: column; gap: 8px; scroll-margin-top: 16px; }
+.card.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card h3 { font-size: 16px; line-height: 1.3; margin: 0; }
+.meta { color: var(--ink-2); font-size: 13px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+  border-radius: 999px; padding: 2px 9px; border: 1px solid var(--border); color: var(--ink-2);
+}
+.pill .ico { font-size: 11px; line-height: 1; }
+.pill.critical { color: var(--critical); border-color: currentColor; }
+.pill.warning { color: var(--ink); border-color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+.pill.good { color: var(--good-ink); border-color: currentColor; }
+.pill.unverified { border-style: dashed; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-2); }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 14px; margin: 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.card .action { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+.card .action b { display: block; font-size: 12px; color: var(--ink-2); font-weight: 600; }
+details summary { cursor: pointer; color: var(--ink-2); font-size: 13px; }
+details p { margin: 6px 0; font-size: 14px; }
+details .src { color: var(--muted); font-size: 12px; }
+.card .links { margin-top: auto; font-size: 14px; }
+.empty { color: var(--muted); padding: 24px; text-align: center; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.lower { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.log { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.log li { padding: 6px 0; border-bottom: 1px solid var(--grid); color: var(--ink-2); }
+.log li b { color: var(--ink); font-weight: 600; }
+.log .old { text-decoration: line-through; color: var(--muted); }
+footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+
+@media (max-width: 860px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lower { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .cards { grid-template-columns: 1fr; }
+  .kpi .value { font-size: 24px; }
+  .seg button { padding: 5px 8px; font-size: 14px; }
+}
+@media (forced-colors: active) {
+  .dot, .tl-mark { forced-color-adjust: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Money Radar</h1>
+      <p class="sub">Funding calls for Cloudy, SEMF, Causality Graphs and tech projects · Spain first, Europe second · updated __GENERATED__</p>
+    </div>
+    <button class="btn" id="theme" type="button" aria-label="Toggle colour theme">◐ Theme</button>
+  </header>
+
+  <section class="kpis" id="kpis" aria-label="Summary"></section>
+
+  <section class="panel filters" aria-label="Filters">
+    <div class="filter-row" id="line-chips" role="group" aria-label="Line of work"></div>
+    <div class="filter-row">
+      <div class="seg" id="status-seg" role="group" aria-label="Status">
+        <button type="button" data-v="actionable" aria-pressed="true">Actionable</button>
+        <button type="button" data-v="open" aria-pressed="false">Open</button>
+        <button type="button" data-v="upcoming" aria-pressed="false">Upcoming</button>
+        <button type="button" data-v="closed" aria-pressed="false">Closed</button>
+        <button type="button" data-v="all" aria-pressed="false">All</button>
+      </div>
+      <select id="scope" aria-label="Scope">
+        <option value="">All scopes</option>
+        <option>Madrid</option><option>Spain</option><option>EU</option><option>International</option>
+      </select>
+      <label class="check"><input type="checkbox" id="verified"> Verified only</label>
+    </div>
+    <div class="filter-row">
+      <input class="search" id="q" type="search" placeholder="Search name, funder, fit…" aria-label="Search">
+      <select id="sort" aria-label="Sort by">
+        <option value="deadline">Sort: deadline</option>
+        <option value="amount">Sort: max amount</option>
+        <option value="recent">Sort: recently added</option>
+      </select>
+      <div class="seg" id="view-seg" role="group" aria-label="View">
+        <button type="button" data-v="cards" aria-pressed="true">Cards</button>
+        <button type="button" data-v="table" aria-pressed="false">Table</button>
+      </div>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="panel timeline" aria-labelledby="tl-h">
+    <h2 id="tl-h">Deadlines</h2>
+    <div id="tl"></div>
+    <p class="hint" id="tl-hint"></p>
+    <div class="tooltip" id="tip" role="tooltip" hidden></div>
+  </section>
+
+  <section id="list" aria-label="Opportunities"></section>
+
+  <section class="lower">
+    <div class="panel">
+      <h2>Recent changes</h2>
+      <ul class="log" id="changes"></ul>
+    </div>
+    <div class="panel">
+      <h2>Lessons from past runs</h2>
+      <ul class="log" id="lessons"></ul>
+    </div>
+  </section>
+
+  <footer>Amounts and dates come only from the source cited on each card; “Unverified” means no official page has confirmed them yet. Always check the official page before applying.</footer>
+</div>
+
+<script id="data" type="application/json">/*__DATA__*/null</script>
+<script>
+(function () {
+  "use strict";
+  const DATA = JSON.parse(document.getElementById("data").textContent);
+  const TODAY = new Date(DATA.today + "T00:00:00");
+  const LINE_KEYS = Object.keys(DATA.lines);
+  const DAY = 86400000;
+  const fmtDate = (s) => new Date(s + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const daysLeft = (o) => o.deadline ? Math.round((new Date(o.deadline + "T00:00:00") - TODAY) / DAY) : null;
+  const lineColor = (k) => `var(--line-${k})`;
+  const linesOf = (o) => o.lines.split(",");
+
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") n.className = v;
+      else if (k === "style") n.style.cssText = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? "" : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid);
+    return n;
+  }
+
+  // ---- state (view prefs remembered per viewer; page works without storage) ----
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem("money-radar:" + k)); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem("money-radar:" + k, JSON.stringify(v)); } catch (e) {} },
+  };
+  const state = Object.assign(
+    { lines: LINE_KEYS.slice(), status: "actionable", scope: "", verified: false, q: "", sort: "deadline", view: "cards" },
+    store.get("state") || {}, { q: "" }
+  );
+  state.lines = state.lines.filter((k) => LINE_KEYS.includes(k));
+
+  // ---- theme ----
+  const themeBtn = document.getElementById("theme");
+  const savedTheme = store.get("theme");
+  if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+  themeBtn.addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    store.set("theme", next);
+  });
+
+  // ---- status presentation: icon + label, never colour alone ----
+  function statusInfo(o) {
+    const d = daysLeft(o);
+    if (o.status === "closed") return { cls: "", ico: "■", text: o.deadline ? `Closed ${fmtDate(o.deadline)}` : "Closed" };
+    if (o.status === "rolling") return { cls: "good", ico: "↻", text: "Rolling — apply any time" };
+    if (o.status === "upcoming") {
+      if (o.opens && o.deadline) return { cls: "", ico: "◷", text: `Opens ${fmtDate(o.opens)} · closes ${fmtDate(o.deadline)}` };
+      return { cls: "", ico: "◷", text: "Expected — dates not announced" };
+    }
+    if (d <= 14) return { cls: "critical", ico: "▲", text: d === 0 ? "Closes today" : `Closes in ${d} d` };
+    if (d <= 30) return { cls: "warning", ico: "●", text: `Closes in ${d} d` };
+    return { cls: "good", ico: "✓", text: `Open · ${d} d left` };
+  }
+
+  // ---- filtering ----
+  function matches(o) {
+    if (!linesOf(o).some((k) => state.lines.includes(k))) return false;
+    if (state.scope && o.scope !== state.scope) return false;
+    if (state.verified && o.verification !== "verified") return false;
+    const s = state.status;
+    if (s === "actionable" && o.status === "closed") return false;
+    if (s !== "actionable" && s !== "all" && o.status !== s && !(s === "open" && o.status === "rolling")) return false;
+    if (state.q) {
+      const hay = [o.name, o.funder, o.fit, o.requirements, o.action, o.amount_text].join(" ").toLowerCase();
+      if (!state.q.toLowerCase().split(/\s+/).every((w) => hay.includes(w))) return false;
+    }
+    return true;
+  }
+  function sorted(list) {
+    const rank = { open: 0, rolling: 1, upcoming: 2, closed: 3 };
+    const by = {
+      deadline: (a, b) => (rank[a.status] - rank[b.status]) || ((a.deadline || "9999") < (b.deadline || "9999") ? -1 : 1),
+      amount: (a, b) => (b.amount_max || 0) - (a.amount_max || 0),
+      recent: (a, b) => (b.first_seen > a.first_seen ? 1 : b.first_seen < a.first_seen ? -1 : 0),
+    };
+    return list.slice().sort(by[state.sort]);
+  }
+
+  // ---- KPIs (always over all actionable data, not the filtered view) ----
+  function renderKpis() {
+    const all = DATA.opportunities;
+    const open = all.filter((o) => o.status === "open" || o.status === "rolling");
+    const soon = all.filter((o) => o.status === "open" && daysLeft(o) <= 14);
+    const next = all.filter((o) => o.status === "open").sort((a, b) => a.deadline < b.deadline ? -1 : 1)[0];
+    const upcoming = all.filter((o) => o.status === "upcoming");
+    const tile = (label, value, note, ico) => el("div", { class: "panel kpi" },
+      el("div", { class: "label" }, ico || null, label),
+      el("div", { class: "value" }, String(value)),
+      el("div", { class: "note" }, note));
+    const k = document.getElementById("kpis");
+    k.replaceChildren(
+      tile("Open now", open.length, `${open.filter((o) => o.verification === "verified").length} verified on an official page`),
+      tile("Closing in ≤ 14 days", soon.length, soon.length ? soon.map((o) => o.name).join(", ") : "Nothing urgent",
+        soon.length ? el("span", { style: "color:var(--critical)", "aria-hidden": "true" }, "▲") : null),
+      tile("Next deadline", next ? `${daysLeft(next)} d` : "—", next ? `${next.name} · ${fmtDate(next.deadline)}` : "No fixed deadlines open"),
+      tile("Upcoming / watch", upcoming.length, "Announced or expected calls to prepare for"),
+    );
+  }
+
+  // ---- filter controls ----
+  function renderChips() {
+    const box = document.getElementById("line-chips");
+    box.replaceChildren(...LINE_KEYS.map((k) => el("button", {
+      type: "button", class: "chip", "aria-pressed": String(state.lines.includes(k)),
+      onclick: () => {
+        state.lines = state.lines.includes(k) ? state.lines.filter((x) => x !== k) : state.lines.concat(k);
+        if (!state.lines.length) state.lines = LINE_KEYS.slice();
+        update();
+      },
+    }, el("span", { class: "dot", style: `background:${lineColor(k)}` }), DATA.lines[k])));
+  }
+  function bindSeg(id, key) {
+    const seg = document.getElementById(id);
+    seg.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      state[key] = b.dataset.v; update();
+    });
+    return () => seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === state[key])));
+  }
+  const syncStatus = bindSeg("status-seg", "status");
+  const syncView = bindSeg("view-seg", "view");
+  const scopeSel = document.getElementById("scope");
+  const verifiedBox = document.getElementById("verified");
+  const qBox = document.getElementById("q");
+  const sortSel = document.getElementById("sort");
+  scopeSel.addEventListener("change", () => { state.scope = scopeSel.value; update(); });
+  verifiedBox.addEventListener("change", () => { state.verified = verifiedBox.checked; update(); });
+  qBox.addEventListener("input", () => { state.q = qBox.value.trim(); update(); });
+  sortSel.addEventListener("change", () => { state.sort = sortSel.value; update(); });
+
+  // ---- timeline ----
+  const tip = document.getElementById("tip");
+  function showTip(evt, o) {
+    const s = statusInfo(o);
+    tip.replaceChildren(
+      el("div", { class: "t-name" }, o.name),
+      el("div", { class: "t-meta" }, `${s.ico} ${s.text}`),
+      el("div", { class: "t-meta" }, o.amount_text || "Amount not confirmed"),
+      el("div", { class: "t-meta" }, o.verification === "verified" ? "Verified" : "Unverified"));
+    tip.hidden = false;
+    const box = tip.parentElement.getBoundingClientRect();
+    const x = Math.min(evt.clientX - box.left + 12, box.width - tip.offsetWidth - 4);
+    tip.style.left = Math.max(4, x) + "px";
+    tip.style.top = (evt.clientY - box.top + 14) + "px";
+  }
+  function renderTimeline(list) {
+    const host = document.getElementById("tl");
+    const W = Math.max(300, host.clientWidth || 800);
+    const narrow = W < 560;
+    const left = narrow ? 8 : 190, right = 16, top = 26, laneH = narrow ? 52 : 54;
+    const lanes = LINE_KEYS.filter((k) => state.lines.includes(k));
+    const H = top + lanes.length * laneH + 22;
+    const start = new Date(TODAY.getTime() - 45 * DAY);
+    const end = new Date(TODAY.getTime() + 165 * DAY);
+    const x = (d) => left + (W - left - right) * ((d - start) / (end - start));
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Deadlines over the next months by line of work" });
+
+    // month gridlines + ticks
+    const m = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+    for (; m <= end; m.setMonth(m.getMonth() + 1)) {
+      const xx = x(m);
+      svg.append(s("line", { class: "tl-grid", x1: xx, x2: xx, y1: top - 6, y2: H - 22 }));
+      svg.append(s("text", { class: "tl-tick", x: xx + 3, y: H - 6 },
+        m.toLocaleDateString("en-GB", { month: "short", ...(m.getMonth() === 0 ? { year: "2-digit" } : {}) })));
+    }
+    lanes.forEach((k, i) => {
+      const y = top + i * laneH + laneH / 2;
+      svg.append(s("line", { class: "tl-axis", x1: left, x2: W - right, y1: y, y2: y }));
+      if (narrow) svg.append(s("text", { class: "tl-lane", x: left, y: y - 12 }, DATA.lines[k]));
+      else svg.append(s("text", { class: "tl-lane", x: left - 10, y: y + 4, "text-anchor": "end" }, DATA.lines[k]));
+    });
+    const tx = x(TODAY);
+    svg.append(s("line", { class: "tl-today", x1: tx, x2: tx, y1: top - 10, y2: H - 22 }));
+    svg.append(s("text", { class: "tl-today-label", x: tx + 4, y: top - 12 }, "Today"));
+
+    let plotted = 0;
+    const offTimeline = [];
+    const taken = {};
+    list.forEach((o) => {
+      if (!o.deadline) { offTimeline.push(o); return; }
+      const d = new Date(o.deadline + "T00:00:00");
+      if (d < start || d > end) { offTimeline.push(o); return; }
+      linesOf(o).filter((k) => lanes.includes(k)).forEach((k) => {
+        const y = top + lanes.indexOf(k) * laneH + laneH / 2;
+        if (o.opens) {
+          const x0 = Math.max(left, x(new Date(o.opens + "T00:00:00")));
+          svg.append(s("line", { x1: x0, x2: x(d), y1: y, y2: y, stroke: lineColor(k), "stroke-width": 4, "stroke-linecap": "round", opacity: o.status === "closed" ? 0.25 : 0.45 }));
+        }
+        const c = s("circle", { class: "tl-mark" + (o.status === "closed" ? " closed" : ""), cx: x(d), cy: y, r: 7, fill: lineColor(k), tabindex: 0, "aria-label": `${o.name}: ${statusInfo(o).text}` });
+        c.addEventListener("mousemove", (e) => showTip(e, o));
+        c.addEventListener("mouseleave", () => { tip.hidden = true; });
+        c.addEventListener("focus", () => { const r = c.getBoundingClientRect(); showTip({ clientX: r.left, clientY: r.bottom }, o); });
+        c.addEventListener("blur", () => { tip.hidden = true; });
+        c.addEventListener("click", () => focusCard(o.id));
+        c.addEventListener("keydown", (e) => { if (e.key === "Enter") focusCard(o.id); });
+        svg.append(c);
+        if (!narrow && o.status !== "closed") {
+          // Selective direct labels: above the lane, else below, else skip (tooltip still works).
+          const short = o.name.length > 30 ? o.name.slice(0, 28) + "…" : o.name;
+          const wLabel = short.length * 6;
+          let lx = x(d) + 11;
+          if (lx + wLabel > W - right) lx = x(d) - 11 - wLabel;
+          const slots = taken[k] || (taken[k] = { above: [], below: [] });
+          const free = (row) => row.every(([a, b]) => lx + wLabel + 6 < a || lx > b + 6);
+          const row = free(slots.above) ? "above" : free(slots.below) ? "below" : null;
+          if (row) {
+            slots[row].push([lx, lx + wLabel]);
+            svg.append(s("text", { class: "tl-label", x: lx, y: row === "above" ? y - 10 : y + 18 }, short));
+          }
+        }
+        plotted++;
+      });
+    });
+    host.replaceChildren(svg);
+    document.getElementById("tl-hint").textContent = plotted
+      ? `Dot = deadline, bar = application window. ${offTimeline.length} rolling, unannounced or out-of-range calls are listed below only.`
+      : "No fixed deadlines in this window for the current filters.";
+  }
+
+  // ---- list ----
+  function focusCard(id) {
+    if (state.view !== "cards") { state.view = "cards"; update(); }
+    const card = document.getElementById("opp-" + id);
+    if (!card) return;
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+    card.classList.add("flash");
+    const det = card.querySelector("details"); if (det) det.open = true;
+    setTimeout(() => card.classList.remove("flash"), 1600);
+  }
+  const lineTags = (o) => el("div", { class: "tags" }, linesOf(o).map((k) =>
+    el("span", { class: "tag" }, el("span", { class: "dot", style: `background:${lineColor(k)}` }), DATA.lines[k] || k)));
+  const verPill = (o) => o.verification === "verified"
+    ? el("span", { class: "pill", title: "Confirmed on an official page" }, el("span", { class: "ico", "aria-hidden": "true" }, "✓"), "Verified")
+    : el("span", { class: "pill unverified", title: "Not yet confirmed on an official page" }, el("span", { class: "ico", "aria-hidden": "true" }, "?"), "Unverified");
+
+  function card(o) {
+    const s = statusInfo(o);
+    return el("article", { class: "panel card", id: "opp-" + o.id },
+      el("div", { class: "pills" },
+        el("span", { class: "pill " + s.cls }, el("span", { class: "ico", "aria-hidden": "true" }, s.ico), s.text),
+        verPill(o)),
+      el("h3", {}, o.name),
+      el("div", { class: "meta" }, `${o.funder} · ${o.scope} · ${o.kind}`),
+      lineTags(o),
+      el("dl", { class: "facts" },
+        el("dt", {}, "Amount"), el("dd", {}, o.amount_text || "Not confirmed"),
+        el("dt", {}, "Deadline"), el("dd", {}, o.deadline ? fmtDate(o.deadline) : (o.status === "rolling" ? "Rolling" : "Not announced"))),
+      o.action ? el("div", { class: "action" }, el("b", {}, "Next step"), o.action) : null,
+      el("details", {},
+        el("summary", {}, "Fit and requirements"),
+        o.fit ? el("p", {}, el("strong", {}, "Why it fits: "), o.fit) : null,
+        o.requirements ? el("p", {}, el("strong", {}, "Requirements: "), o.requirements) : null,
+        el("p", { class: "src" }, `Source: ${o.source || "—"} · first seen ${fmtDate(o.first_seen)} · checked ${fmtDate(o.last_checked)}`)),
+      el("div", { class: "links" }, el("a", { href: o.url, target: "_blank", rel: "noopener" }, "Official page ↗")));
+  }
+  function table(list) {
+    const head = ["Name", "Lines", "Kind", "Scope", "Amount", "Deadline", "Days", "Status", "Verified"];
+    return el("div", { class: "panel table-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, head.map((h) => el("th", { scope: "col" }, h)))),
+      el("tbody", {}, list.map((o) => {
+        const d = daysLeft(o);
+        return el("tr", {},
+          el("td", {}, el("a", { href: o.url, target: "_blank", rel: "noopener" }, o.name)),
+          el("td", {}, linesOf(o).map((k) => DATA.lines[k] || k).join(", ")),
+          el("td", {}, o.kind), el("td", {}, o.scope),
+          el("td", {}, o.amount_text || "—"),
+          el("td", { class: "num" }, o.deadline ? fmtDate(o.deadline) : "—"),
+          el("td", { class: "num" }, d == null ? "—" : String(d)),
+          el("td", {}, statusInfo(o).text),
+          el("td", {}, o.verification));
+      }))));
+  }
+
+  // ---- changes & lessons ----
+  function renderLog() {
+    const names = Object.fromEntries(DATA.opportunities.map((o) => [o.id, o.name]));
+    const ch = document.getElementById("changes");
+    ch.replaceChildren(...(DATA.changes.length ? DATA.changes.slice(0, 12).map((c) => el("li", {},
+      `${fmtDate(c.changed_on)} · `, el("b", {}, names[c.opportunity_id] || c.opportunity_id), ` — ${c.field}: `,
+      c.old_value != null ? el("span", { class: "old" }, c.old_value.slice(0, 60)) : null,
+      c.old_value != null ? " → " : "", (c.new_value || "—").slice(0, 80)))
+      : [el("li", {}, "No changes logged yet — this is the first run.")]));
+    const ls = document.getElementById("lessons");
+    ls.replaceChildren(...(DATA.lessons.length ? DATA.lessons.slice().reverse().map((t) => el("li", {}, t))
+      : [el("li", {}, "No lessons recorded yet.")]));
+  }
+
+  function update() {
+    store.set("state", Object.assign({}, state, { q: "" }));
+    renderChips(); syncStatus(); syncView();
+    scopeSel.value = state.scope; verifiedBox.checked = state.verified; sortSel.value = state.sort;
+    const list = sorted(DATA.opportunities.filter(matches));
+    document.getElementById("count").textContent = `${list.length} of ${DATA.opportunities.length} calls`;
+    renderTimeline(list);
+    const host = document.getElementById("list");
+    if (!list.length) host.replaceChildren(el("div", { class: "panel empty" }, "No calls match these filters."));
+    else if (state.view === "table") host.replaceChildren(table(list));
+    else host.replaceChildren(el("div", { class: "cards" }, list.map(card)));
+  }
+
+  let resizeTimer;
+  addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderTimeline(sorted(DATA.opportunities.filter(matches))), 120); });
+  renderKpis(); renderLog(); update();
+})();
+</script>
+</body>
+</html>
