@@ -131,14 +131,49 @@ def make_plan(opps, strategy, applications=(), today=None):
     order = {"A": 0, "B": 1, "C": 2, "D": 3}
     ranking = sorted(plans.values(), key=lambda p: (p["archived"] and not p["target_estimated"],
                                                      order[p["grade"]], -p["score"]))
+    now = what_now(plans, ms, [p["id"] for p in ranking], strategy["stages"], applications, today)
     return {
-        "today": today.isoformat(),
+        "today": today.isoformat(), "now": now,
         "project": strategy["project"], "faces": strategy["faces"], "entities": strategy["entities"],
         "levels": strategy["levels"], "stages": strategy["stages"],
         "municipalities": strategy["municipalities"],
         "milestones": ms, "plans": plans, "ranking": [p["id"] for p in ranking],
         "applications": list(applications),
     }
+
+
+def what_now(plans, milestones, ranking, stages, applications, today, n_milestones=5, n_recommended=8):
+    """The orchestrator's 'estado' view: active applications, milestones to move, calls to start."""
+    ids = {a["opportunity_id"] for a in applications}
+    stage_ix = {st["id"]: i for i, st in enumerate(stages)}
+    active = []
+    for a in applications:
+        if a["stage"] == "cerrar":
+            continue
+        p = plans.get(a["opportunity_id"], {})
+        i = stage_ix.get(a["stage"], 0)
+        active.append({"id": a["opportunity_id"], "name": p.get("name", a["opportunity_id"]), "stage": a["stage"],
+                       "stage_n": i + 1, "stages": len(stages), "stage_name": stages[i]["name"],
+                       "checklist": stages[i]["checklist"], "target": p.get("target"), "start_by": p.get("start_by"),
+                       "late": bool(p.get("start_by") and p["start_by"] < today.isoformat() and a["stage"] in
+                                    ("detectar", "cualificar", "estrategia", "preparar")),
+                       "updated_on": a["updated_on"]})
+    active.sort(key=lambda x: x["start_by"] or "9999")
+    recommended = []
+    for oid in ranking:
+        p = plans[oid]
+        if oid in ids or (p["archived"] and not p["target_estimated"]) or p["grade"] == "D":
+            continue
+        if p["start_by"]:
+            when = "late" if p["start_by"] < today.isoformat() else "start_by"
+        else:
+            when = "rolling" if p["status"] == "rolling" else "tbd"
+        recommended.append({"id": oid, "name": p["name"], "grade": p["grade"], "score": p["score"], "when": when,
+                            "start_by": p["start_by"], "target": p["target"], "pending": p["pending"]})
+        if len(recommended) == n_recommended:
+            break
+    todo = [m for m in milestones if m["status"] != "done"][:n_milestones]
+    return {"active": active, "milestones": [m["id"] for m in todo], "recommended": recommended}
 
 
 def check(strategy, opp_ids):

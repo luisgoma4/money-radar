@@ -77,43 +77,34 @@ def stage_index(plan, stage):
 
 # ---------------------------------------------------------------- commands
 def cmd_estado(_args):
-    _, strategy, _, opps, apps, plan = context()
+    _, strategy, _, _, _, plan = context()
+    now = plan["now"]
     print(f"ORQUESTADOR · {strategy['project']['name']} · {fmt(TODAY.isoformat())}\n")
 
-    active = [a for a in apps.values() if a["stage"] != "cerrar"]
     print("1) Solicitudes en curso")
-    if not active:
+    if not now["active"]:
         print("   Ninguna. Empieza por una de grado A/B de la lista 3.")
-    for a in sorted(active, key=lambda a: plan["plans"].get(a["opportunity_id"], {}).get("start_by") or "9999"):
-        p = plan["plans"].get(a["opportunity_id"], {})
-        i = stage_index(plan, a["stage"])
-        st = plan["stages"][i]
-        print(f"   · {p.get('name', a['opportunity_id'])} — etapa {i + 1}/{len(plan['stages'])} «{st['name']}»"
-              f"{' · plazo ' + fmt(p['target']) if p.get('target') else ''}")
-        for c in st["checklist"]:
+    for a in now["active"]:
+        print(f"   · {a['name']} — etapa {a['stage_n']}/{a['stages']} «{a['stage_name']}»"
+              f"{' · plazo ' + fmt(a['target']) if a['target'] else ''}{' · ¡TARDE!' if a['late'] else ''}")
+        for c in a["checklist"]:
             print(f"       □ {c}")
 
     print("\n2) Hitos a mover ahora (más valor desbloqueado primero)")
-    for m in [m for m in plan["milestones"] if m["status"] != "done"][:5]:
+    by_id = {m["id"]: m for m in plan["milestones"]}
+    for mid in now["milestones"]:
+        m = by_id[mid]
         mark = "◐" if m["status"] == "doing" else "○"
         print(f"   {mark} {m['id']}: {m['name']} (~{m['weeks']} sem) → desbloquea {m['unlocks']} puntos en "
               f"{len(m['blocked'])} convocatorias")
 
     print("\n3) Convocatorias recomendadas (no iniciadas)")
-    shown = 0
-    for oid in plan["ranking"]:
-        p = plan["plans"][oid]
-        if oid in apps or (p["archived"] and not p["target_estimated"]) or p["grade"] in ("D",):
-            continue
-        late = p["start_by"] and p["start_by"] < TODAY.isoformat()
-        when = (f"¡TARDE! plazo {fmt(p['target'])}, había que empezar el {fmt(p['start_by'])}" if late else
-                f"empezar antes del {fmt(p['start_by'])}") if p["start_by"] else (
-            "abierta todo el año" if p["status"] == "rolling" else "fechas por anunciar")
-        block = f" · bloqueada por: {', '.join(p['pending'])}" if p["pending"] else " · lista"
-        print(f"   [{p['grade']} {p['score']}] {oid} — {when}{block}")
-        shown += 1
-        if shown == 8:
-            break
+    for r in now["recommended"]:
+        when = {"late": f"¡TARDE! plazo {fmt(r['target'])}, había que empezar el {fmt(r['start_by'])}",
+                "start_by": f"empezar antes del {fmt(r['start_by'])}",
+                "rolling": "abierta todo el año", "tbd": "fechas por anunciar"}[r["when"]]
+        block = f" · bloqueada por: {', '.join(r['pending'])}" if r["pending"] else " · lista"
+        print(f"   [{r['grade']} {r['score']}] {r['id']} — {when}{block}")
     print("\nSiguiente paso: python3 -I orchestrator.py plan <id>   ·   iniciar <id>")
 
 

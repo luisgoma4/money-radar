@@ -206,6 +206,15 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 table.plan td { font-size: 13px; }
 table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .section-gap { margin-top: 16px; }
+.now-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.now h3 { font-size: 14px; margin: 0 0 8px; color: var(--ink-2); }
+.now .ms { grid-template-columns: 1fr; }
+.now .ms ul { padding-left: 18px; margin: 6px 0; }
+.now-list { margin: 0; padding-left: 20px; font-size: 14px; }
+.now-list li { margin-bottom: 10px; }
+.now-list .small { margin: 2px 0 0; }
+.late { color: var(--critical); font-weight: 600; }
+@media (max-width: 860px) { .now-grid { grid-template-columns: 1fr; } }
 
 @media (max-width: 860px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -294,6 +303,13 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
   </div>
 
   <div class="view" id="view-strategy" hidden>
+    <section class="panel section-gap now"><h2>Qué hacer ahora</h2>
+      <p class="small">Lo mismo que muestra <code>/becas</code> o <code>python3 -I orchestrator.py</code>, a fecha de la última actualización.</p>
+      <div class="now-grid">
+        <div><h3>1 · Solicitudes en curso</h3><div id="now-active"></div></div>
+        <div><h3>2 · Hitos a mover</h3><ol class="now-list" id="now-ms"></ol></div>
+        <div><h3>3 · Convocatorias para empezar</h3><ol class="now-list" id="now-rec"></ol></div>
+      </div></section>
     <section class="panel section-gap"><h2 id="proj-name"></h2><p class="pitch" id="proj-pitch"></p></section>
     <section class="section-gap"><h2>Un proyecto, varias caras</h2><div class="grid-3" id="faces"></div></section>
     <section class="section-gap"><h2>Figuras legales (quién solicita)</h2><div class="grid-3" id="entities"></div></section>
@@ -656,8 +672,35 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
   const msName = (id) => ((PLAN.milestones || []).find((m) => m.id === id) || {}).name || id;
   const dots = (n, max) => el("span", { class: "dots", "aria-label": `${n} de ${max}` }, Array.from({ length: max }, (_, i) => el("i", { class: i < n ? "on" : "" })));
 
+  function renderNow() {
+    const now = PLAN.now; if (!now) return;
+    const byId = Object.fromEntries((PLAN.milestones || []).map((m) => [m.id, m]));
+    const go = (id) => el("a", { href: "#", onclick: (e) => { e.preventDefault(); showTab("radar"); focusCard(id); } }, (PLAN.plans[id] || {}).name || id);
+    document.getElementById("now-active").replaceChildren(...(now.active.length ? now.active.map((a) =>
+      el("div", { class: "ms" }, el("div", {},
+        el("div", { class: "name" }, go(a.id)),
+        el("div", { class: "small" }, `Etapa ${a.stage_n}/${a.stages} · ${a.stage_name}` + (a.target ? ` · plazo ${fmtDate(a.target)}` : ""),
+          a.late ? el("span", { class: "late" }, " · ¡tarde!") : null),
+        el("ul", { class: "small" }, a.checklist.map((c) => el("li", {}, c)))),
+        el("div", {}, el("div", { class: "bar" }, el("span", { style: `width:${100 * a.stage_n / a.stages}%` })))))
+      : [el("p", { class: "small" }, "Ninguna todavía. Empieza por una de la lista 3 con ", el("code", {}, "orchestrator.py iniciar <id>"), " o con /becas.")]));
+    document.getElementById("now-ms").replaceChildren(...now.milestones.map((id) => {
+      const m = byId[id];
+      return el("li", {}, el("strong", {}, m.name), el("div", { class: "small" },
+        `~${m.weeks} sem · desbloquea ${m.blocked.length} convocatorias (${m.unlocks} puntos)` + (m.status === "doing" ? " · en curso" : "")));
+    }));
+    document.getElementById("now-rec").replaceChildren(...now.recommended.map((r) => {
+      const when = { late: `plazo ${r.target ? fmtDate(r.target) : "—"}; había que empezar el ${fmtDate(r.start_by)}`,
+        start_by: `empezar antes del ${r.start_by ? fmtDate(r.start_by) : "—"}`, rolling: "abierta todo el año", tbd: "fechas por anunciar" }[r.when];
+      return el("li", {}, gradeEl(r), " ", go(r.id),
+        el("div", { class: "small" }, r.when === "late" ? el("span", { class: "late" }, "¡Tarde! ") : null, when,
+          r.pending.length ? ` · bloqueada por: ${r.pending.map(msName).join(", ")}` : " · lista"));
+    }));
+  }
+
   function renderStrategy() {
     if (!PLAN.project) return;
+    renderNow();
     document.getElementById("proj-name").textContent = PLAN.project.name;
     document.getElementById("proj-pitch").textContent = PLAN.project.pitch;
     document.getElementById("faces").replaceChildren(...Object.entries(PLAN.faces).map(([k, f]) =>
