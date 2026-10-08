@@ -16,6 +16,7 @@ archived instead, each with a reason and a ``review_on`` date:
 
 import datetime as dt
 import html
+import importlib.util
 import json
 import sqlite3
 from pathlib import Path
@@ -93,7 +94,27 @@ CREATE TRIGGER IF NOT EXISTS opportunities_no_delete BEFORE DELETE ON opportunit
 BEGIN SELECT RAISE(ABORT, 'money-radar: entries are archived, never deleted'); END;
 CREATE TRIGGER IF NOT EXISTS changes_no_delete BEFORE DELETE ON changes
 BEGIN SELECT RAISE(ABORT, 'money-radar: the change history is append-only'); END;
+-- Applications in progress, managed by orchestrator.py (stages in strategy.json).
+CREATE TABLE IF NOT EXISTS applications (
+    opportunity_id TEXT PRIMARY KEY,
+    stage          TEXT NOT NULL,
+    applicant      TEXT,
+    level          INTEGER,
+    started_on     TEXT NOT NULL,
+    updated_on     TEXT NOT NULL,
+    notes          TEXT
+);
+CREATE TRIGGER IF NOT EXISTS applications_no_delete BEFORE DELETE ON applications
+BEGIN SELECT RAISE(ABORT, 'money-radar: applications are closed, never deleted'); END;
 """
+
+
+def load_planner():
+    """planner.py by file path (``python3 -I`` drops the script dir from sys.path)."""
+    spec = importlib.util.spec_from_file_location("planner", HERE / "planner.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 # Columns added after the first release; ALTER TABLE them into older databases.
 MIGRATIONS = {
     "bdns": "TEXT",
@@ -633,10 +654,10 @@ def _brief(o):
     return {k: o[k] for k in ("id", "name", "lines", "amount_text", "deadline", "url", "action")}
 
 
-def render(opps, changes, lessons):
+def render(opps, changes, lessons, plan):
     data = json.dumps(
         {"today": TODAY.isoformat(), "lines": LINES, "opportunities": opps,
-         "changes": changes, "lessons": lessons},
+         "changes": changes, "lessons": lessons, "plan": plan},
         ensure_ascii=False,
     ).replace("</", "<\\/")
     template = (HERE / "dashboard_template.html").read_text(encoding="utf-8")
@@ -660,9 +681,12 @@ def main():
     migrate(conn)
     sync(conn)
     opps, changes = load(conn)
+    apps = [dict(r) for r in conn.execute("SELECT * FROM applications ORDER BY updated_on DESC")]
     conn.close()
 
-    DASHBOARD.write_text(render(opps, changes, read_lessons()), encoding="utf-8")
+    planner = load_planner()
+    plan = planner.make_plan(opps, planner.load_strategy(), apps, TODAY)
+    DASHBOARD.write_text(render(opps, changes, read_lessons(), plan), encoding="utf-8")
     report = alerts(opps, changes)
     ALERTS.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 

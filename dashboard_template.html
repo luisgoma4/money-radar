@@ -174,6 +174,39 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .log .old { text-decoration: line-through; color: var(--muted); }
 footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 
+/* Tabs + strategy views */
+.tabs { margin: 16px 0 0; }
+.tabs .seg button { padding: 7px 16px; font-weight: 600; }
+.view[hidden] { display: none; }
+.pitch { font-size: 15px; color: var(--ink-2); margin: 0; max-width: 80ch; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.ent h3, .face h3 { font-size: 15px; margin: 0 0 4px; }
+.ent .meta { margin-bottom: 6px; }
+.small { font-size: 13px; color: var(--ink-2); margin: 4px 0; }
+.chipline { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.mini { font-size: 12px; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--ink-2); }
+.grade { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; padding: 0 6px;
+  border-radius: 6px; font-weight: 700; font-size: 13px; border: 1px solid currentColor; }
+.grade.A { color: var(--good-ink); } .grade.B { color: var(--accent); }
+.grade.C { color: var(--ink); border-color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+.grade.D { color: var(--muted); }
+.ms { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 4px 16px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--grid); }
+.ms:last-child { border-bottom: 0; }
+.ms .name { font-weight: 600; }
+.ms .bar { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+.ms .bar span { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.ms .num { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ms.done .name { text-decoration: line-through; color: var(--muted); }
+.stage-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.stage h4 { margin: 0 0 6px; font-size: 14px; }
+.stage ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); }
+.dots { display: inline-flex; gap: 3px; vertical-align: middle; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid var(--axis); }
+.dots i.on { background: var(--accent); border-color: var(--accent); }
+table.plan td { font-size: 13px; }
+table.plan td.offer { min-width: 260px; color: var(--ink-2); }
+.section-gap { margin-top: 16px; }
+
 @media (max-width: 860px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lower { grid-template-columns: 1fr; }
@@ -198,6 +231,13 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
     <button class="btn" id="theme" type="button" aria-label="Toggle colour theme">◐ Theme</button>
   </header>
 
+  <nav class="tabs" aria-label="Views"><div class="seg" id="tab-seg" role="group">
+    <button type="button" data-v="radar" aria-pressed="true">Radar</button>
+    <button type="button" data-v="strategy" aria-pressed="false">Estrategia</button>
+    <button type="button" data-v="west" aria-pressed="false">Madrid Oeste</button>
+  </div></nav>
+
+  <div class="view" id="view-radar">
   <section class="kpis" id="kpis" aria-label="Summary"></section>
 
   <section class="panel filters" aria-label="Filters">
@@ -250,6 +290,27 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
       <ul class="log" id="lessons"></ul>
     </div>
   </section>
+
+  </div>
+
+  <div class="view" id="view-strategy" hidden>
+    <section class="panel section-gap"><h2 id="proj-name"></h2><p class="pitch" id="proj-pitch"></p></section>
+    <section class="section-gap"><h2>Un proyecto, varias caras</h2><div class="grid-3" id="faces"></div></section>
+    <section class="section-gap"><h2>Figuras legales (quién solicita)</h2><div class="grid-3" id="entities"></div></section>
+    <section class="panel section-gap"><h2>Hitos que más valor desbloquean</h2><p class="small">Valor = suma de los puntos de valor de las convocatorias que bloquea cada hito. Hazlos en este orden.</p><div id="milestones"></div></section>
+    <section class="panel section-gap table-wrap"><h2>Plan por convocatoria</h2>
+      <p class="small">Grado A–D = encaje 25 + valor 25 + preparación 25 + calendario 15 + estratégico 10. Nivel de oferta: <span id="levels"></span></p>
+      <div id="plan-table"></div></section>
+    <section class="panel section-gap"><h2>Solicitudes en curso</h2><p class="small">Gestionadas con <code>python3 -I orchestrator.py</code> o el comando <code>/becas</code> en Claude Code.</p><div id="pipeline"></div></section>
+    <section class="section-gap"><h2>Proceso de solicitud</h2><div class="stage-list" id="stages"></div></section>
+  </div>
+
+  <div class="view" id="view-west" hidden>
+    <section class="panel section-gap table-wrap"><h2>Valoración de municipios · Madrid Oeste</h2>
+      <p class="small">Puntuación 1–3 por dimensión, con datos de la BDNS 2024–2026 y bases oficiales (octubre 2026). No incluye el coste de locales y vivienda.</p>
+      <div id="west-table"></div></section>
+    <section class="section-gap"><div class="grid-3" id="west-cards"></div></section>
+  </div>
 
   <footer>Entries are never deleted: closed or dropped calls move to the Archive with a reason and a review date, to recover them or guide future applications. Amounts and dates come only from the source cited on each card; “Unverified” means no official page has confirmed them yet. Always check the official page before applying.</footer>
 </div>
@@ -510,12 +571,16 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
     ? el("span", { class: "pill", title: "Confirmed on an official page" }, el("span", { class: "ico", "aria-hidden": "true" }, "✓"), "Verified")
     : el("span", { class: "pill unverified", title: "Not yet confirmed on an official page" }, el("span", { class: "ico", "aria-hidden": "true" }, "?"), "Unverified");
 
+  const PLAN = DATA.plan || { plans: {} };
+  const gradeEl = (p) => p ? el("span", { class: "grade " + p.grade, title: `Plan score ${p.score}/100` }, p.grade) : null;
   function card(o) {
     const s = statusInfo(o);
+    const p = PLAN.plans[o.id];
     return el("article", { class: "panel card", id: "opp-" + o.id },
       el("div", { class: "pills" },
         el("span", { class: "pill " + s.cls }, el("span", { class: "ico", "aria-hidden": "true" }, s.ico), s.text),
         verPill(o),
+        p ? el("span", { class: "pill", title: "Strategy grade (see Estrategia)" }, gradeEl(p), ` Plan · ${(PLAN.entities[p.applicant] || {}).name || p.applicant}`) : null,
         o.archived ? el("span", { class: "pill" + (o.review_on && o.review_on <= DATA.today ? " warning" : "") },
           el("span", { class: "ico", "aria-hidden": "true" }, "▣"), "Archived") : null),
       el("h3", {}, o.name),
@@ -584,7 +649,86 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 
   let resizeTimer;
   addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderTimeline(sorted(DATA.opportunities.filter(matches))), 120); });
-  renderKpis(); renderLog(); update();
+  // ---- strategy + Madrid West views ----
+  const ENT_STATUS = { exists: ["good", "✓", "Existe"], planned: ["warning", "◷", "Planificada"], proposed: ["", "○", "Propuesta"],
+    unknown: ["", "?", "Por confirmar"], external: ["", "↔", "Socio externo"] };
+  const faceDot = (k) => el("span", { class: "tag" }, el("span", { class: "dot", style: `background:${lineColor(k)}` }), (PLAN.faces[k] || {}).name || k);
+  const msName = (id) => ((PLAN.milestones || []).find((m) => m.id === id) || {}).name || id;
+  const dots = (n, max) => el("span", { class: "dots", "aria-label": `${n} de ${max}` }, Array.from({ length: max }, (_, i) => el("i", { class: i < n ? "on" : "" })));
+
+  function renderStrategy() {
+    if (!PLAN.project) return;
+    document.getElementById("proj-name").textContent = PLAN.project.name;
+    document.getElementById("proj-pitch").textContent = PLAN.project.pitch;
+    document.getElementById("faces").replaceChildren(...Object.entries(PLAN.faces).map(([k, f]) =>
+      el("div", { class: "panel face" }, el("h3", {}, faceDot(k)), el("p", { class: "small" }, f.offers),
+        el("div", { class: "chipline" }, f.tags.map((t) => el("span", { class: "mini" }, t))))));
+    document.getElementById("entities").replaceChildren(...Object.entries(PLAN.entities).map(([k, e]) => {
+      const [cls, ico, label] = ENT_STATUS[e.status] || ["", "?", e.status];
+      return el("div", { class: "panel ent" },
+        el("div", { class: "pills" }, el("span", { class: "pill " + cls }, el("span", { class: "ico", "aria-hidden": "true" }, ico), label)),
+        el("h3", {}, e.name), el("div", { class: "meta" }, `${e.form} · ${e.seat}`),
+        el("div", { class: "tags" }, e.faces.map(faceDot)),
+        el("p", { class: "small" }, el("strong", {}, "Puede pedir: "), e.can.join(", ")),
+        e.requires.length ? el("p", { class: "small" }, el("strong", {}, "Requiere: "), e.requires.map(msName).join(" · ")) : null);
+    }));
+    const max = Math.max(1, ...PLAN.milestones.map((m) => m.unlocks));
+    document.getElementById("milestones").replaceChildren(...PLAN.milestones.map((m) =>
+      el("div", { class: "ms" + (m.status === "done" ? " done" : "") },
+        el("div", {}, el("div", { class: "name" }, (m.status === "done" ? "✓ " : m.status === "doing" ? "◐ " : "") + m.name),
+          el("div", { class: "small" }, `${m.detail} · ~${m.weeks} semanas · bloquea ${m.blocked.length} convocatorias (${m.grades.join(" ") || "—"})`)),
+        el("div", {}, el("div", { class: "bar", title: `${m.unlocks} puntos de valor` }, el("span", { style: `width:${100 * m.unlocks / max}%` })),
+          el("div", { class: "num" }, `${m.unlocks} puntos`)))));
+    document.getElementById("levels").textContent = Object.entries(PLAN.levels).map(([k, l]) => `${k} = ${l.name}`).join(" · ");
+    const head = ["Grado", "Convocatoria", "Solicita", "Nivel", "Caras", "Empezar antes de", "Pendiente", "Oferta de valor"];
+    const rows = PLAN.ranking.map((id) => PLAN.plans[id]).filter((p) => !(p.archived && !p.target_estimated));
+    document.getElementById("plan-table").replaceChildren(el("table", { class: "plan" },
+      el("thead", {}, el("tr", {}, head.map((h) => el("th", { scope: "col" }, h)))),
+      el("tbody", {}, rows.map((p) => el("tr", {},
+        el("td", {}, gradeEl(p), el("div", { class: "num small" }, String(p.score))),
+        el("td", {}, el("a", { href: "#", onclick: (e) => { e.preventDefault(); showTab("radar"); focusCard(p.id); } }, p.name),
+          p.target ? el("div", { class: "small" }, (p.target_estimated ? "próxima edición ≈ " : "plazo ") + fmtDate(p.target)) : null),
+        el("td", {}, (PLAN.entities[p.applicant] || {}).name || p.applicant, el("div", { class: "small" }, (ENT_STATUS[p.applicant_status] || [])[2] || "")),
+        el("td", { class: "num" }, `${p.level} · ${(PLAN.levels[p.level] || {}).name || ""}`),
+        el("td", {}, el("div", { class: "tags" }, p.faces.map(faceDot))),
+        el("td", { class: "num" }, p.start_by ? fmtDate(p.start_by) : "—"),
+        el("td", {}, p.pending.length ? p.pending.map(msName).join(" · ") : "Listo"),
+        el("td", { class: "offer" }, p.offer || p.ask || "—"))))));
+    const apps = PLAN.applications || [];
+    document.getElementById("pipeline").replaceChildren(...(apps.length ? apps.map((a) => {
+      const st = PLAN.stages.findIndex((x) => x.id === a.stage);
+      const p = PLAN.plans[a.opportunity_id] || {};
+      return el("div", { class: "ms" }, el("div", {}, el("div", { class: "name" }, p.name || a.opportunity_id),
+        el("div", { class: "small" }, `Etapa ${st + 1}/${PLAN.stages.length}: ${(PLAN.stages[st] || {}).name || a.stage} · actualizada ${fmtDate(a.updated_on)}` + (a.notes ? ` · ${a.notes}` : ""))),
+        el("div", {}, el("div", { class: "bar" }, el("span", { style: `width:${100 * (st + 1) / PLAN.stages.length}%` }))));
+    }) : [el("p", { class: "small" }, "Ninguna solicitud iniciada todavía. Empieza con: python3 -I orchestrator.py iniciar <id>")]));
+    document.getElementById("stages").replaceChildren(...PLAN.stages.map((st, i) =>
+      el("div", { class: "panel stage" }, el("h4", {}, `${i + 1}. ${st.name}`), el("ul", {}, st.checklist.map((c) => el("li", {}, c))))));
+  }
+
+  function renderWest() {
+    const munis = PLAN.municipalities || [];
+    const dims = [["tech", "Tech / BranchOut"], ["espacio", "Espacio"], ["dinero", "Dinero municipal"], ["anclas", "Instituciones ancla"]];
+    document.getElementById("west-table").replaceChildren(el("table", {},
+      el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "Municipio"), dims.map(([, l]) => el("th", { scope: "col" }, l)), el("th", { scope: "col" }, "Papel"))),
+      el("tbody", {}, munis.map((m) => el("tr", {}, el("td", {}, el("strong", {}, m.name)),
+        dims.map(([k]) => el("td", {}, dots(m.scores[k], 3), el("span", { class: "num small" }, ` ${m.scores[k]}/3`))),
+        el("td", {}, m.role))))));
+    document.getElementById("west-cards").replaceChildren(...munis.map((m) =>
+      el("div", { class: "panel" }, el("h3", {}, m.name), el("div", { class: "meta" }, m.role),
+        dims.map(([k, l]) => el("p", { class: "small" }, el("strong", {}, `${l}: `), m.notes[k])))));
+  }
+
+  function showTab(t) {
+    ["radar", "strategy", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
+    document.querySelectorAll("#tab-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === t)));
+    store.set("tab", t);
+    if (t === "radar") renderTimeline(sorted(DATA.opportunities.filter(matches)));
+  }
+  document.getElementById("tab-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.v); });
+
+  renderKpis(); renderLog(); update(); renderStrategy(); renderWest();
+  const savedTab = store.get("tab"); if (savedTab && savedTab !== "radar") showTab(savedTab);
 })();
 </script>
 </body>

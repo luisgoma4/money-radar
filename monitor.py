@@ -12,6 +12,8 @@ Run with:  python3 -I monitor.py && python3 -I build.py
 
 import ast
 import datetime as dt
+import importlib.util
+import json
 import re
 import sqlite3
 import sys
@@ -108,9 +110,20 @@ def archive_report(conn, rows):
         print(f"review due: {oid} (since {review_on}; {reason})")
 
 
+def check_strategy(rows):
+    spec = importlib.util.spec_from_file_location("planner", HERE / "planner.py")
+    planner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(planner)
+    try:
+        strategy = planner.load_strategy()
+    except (OSError, json.JSONDecodeError) as e:
+        return [f"strategy.json unreadable: {e}"]
+    return planner.check(strategy, {r["id"] for r in rows})
+
+
 def main():
     rows = read_rows()
-    problems = check(rows)
+    problems = check(rows) + check_strategy(rows)
     if DB.exists():
         conn = sqlite3.connect(DB)
         closed = close_passed(conn)

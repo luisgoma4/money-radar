@@ -1,0 +1,889 @@
+{
+  "_doc": "Planificador de estrategia. Un solo proyecto con varias caras al mundo: cada convocatoria se ataca con una entidad solicitante (figura legal) y una combinación de caras que forman la oferta de valor. Estimaciones de valor = juicio de planificación basado en ganadores reales (campo winners) o rangos oficiales; no son importes confirmados. planner.py calcula grado, preparación, calendario y qué hitos desbloquean más valor. Los prerrequisitos de cada convocatoria son solo los propios de la estrategia; los de la figura legal (p. ej. que la fundación exista) se añaden automáticamente según la entidad solicitante elegida: la primera de la lista que ya existe.",
+  "project": {
+    "name": "Ecosistema Delfina León",
+    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (Fundación Delfina León) que comparte espacio y gobierno."
+  },
+  "faces": {
+    "cloudy": {
+      "name": "Cloudy",
+      "offers": "Contenido de ciencia y salud para familias: libros bilingües, cartas, serie 3D, retos familiares; acceso a público infantil y familiar.",
+      "tags": [
+        "divulgación",
+        "educación",
+        "salud",
+        "publicaciones",
+        "familias"
+      ]
+    },
+    "semf": {
+      "name": "SEMF",
+      "offers": "Red internacional interdisciplinar (IAS, Wolfram, ICMAT, LSE CPNSS…), congresos, escuela de verano y talleres; credibilidad científica y dimensión europea.",
+      "tags": [
+        "red",
+        "eventos",
+        "investigación",
+        "arte-ciencia",
+        "internacional"
+      ]
+    },
+    "causality": {
+      "name": "Causality Graphs",
+      "offers": "Evaluación de impacto con métodos causales y analítica de datos de salud; puede medir el impacto de cualquier otra cara y es socio metodológico en proyectos clínicos.",
+      "tags": [
+        "evaluación",
+        "datos de salud",
+        "métodos",
+        "I+D"
+      ]
+    },
+    "branchout": {
+      "name": "BranchOut",
+      "offers": "Hub de startups tecnológicas con coworking y coliving; desarrollo digital, emprendimiento y espacio físico.",
+      "tags": [
+        "tecnología",
+        "emprendimiento",
+        "espacio",
+        "digital"
+      ]
+    },
+    "delfina": {
+      "name": "Fundación Delfina León",
+      "offers": "Vehículo sin ánimo de lucro que agrupa todas las caras, espacio compartido y gobierno; interlocutor con ayuntamientos y fundaciones.",
+      "tags": [
+        "sin ánimo de lucro",
+        "paraguas",
+        "espacio",
+        "gobernanza"
+      ]
+    }
+  },
+  "entities": {
+    "fundacion_dl": {
+      "name": "Fundación Delfina León",
+      "form": "Fundación",
+      "status": "planned",
+      "seat": "Las Rozas (recomendado)",
+      "faces": [
+        "delfina",
+        "cloudy",
+        "semf",
+        "causality",
+        "branchout"
+      ],
+      "can": [
+        "subvenciones sin ánimo de lucro",
+        "convenios municipales",
+        "fundaciones privadas",
+        "Erasmus+",
+        "FECYT"
+      ],
+      "requires": [
+        "M_FUND",
+        "M_SEDE_LR"
+      ]
+    },
+    "asoc_local": {
+      "name": "Asociación local (p. ej. Amigos de la Fundación Delfina León)",
+      "form": "Asociación",
+      "status": "proposed",
+      "seat": "Las Rozas",
+      "faces": [
+        "cloudy",
+        "semf",
+        "delfina"
+      ],
+      "can": [
+        "cesión municipal de espacios",
+        "subvenciones culturales municipales"
+      ],
+      "requires": [
+        "M_ASOC_LOCAL"
+      ]
+    },
+    "semf_asoc": {
+      "name": "SEMF (Society for Explorative Multidisciplinary Frontiers)",
+      "form": "Asociación multinacional",
+      "status": "exists",
+      "seat": "Inscrita en España, probablemente Valencia (sin confirmar)",
+      "faces": [
+        "semf"
+      ],
+      "can": [
+        "COST",
+        "FECYT",
+        "redes europeas",
+        "fundaciones privadas"
+      ],
+      "requires": [
+        "M_SEMF_REG"
+      ]
+    },
+    "branchout_sl": {
+      "name": "BranchOut SL",
+      "form": "Sociedad Limitada",
+      "status": "exists",
+      "seat": "Madrid Oeste (por fijar)",
+      "faces": [
+        "branchout"
+      ],
+      "can": [
+        "préstamos ENISA",
+        "CDTI / NEOTEC",
+        "EIC",
+        "premios de emprendimiento",
+        "ayudas Comunidad de Madrid a pymes"
+      ],
+      "requires": [
+        "M_CERT"
+      ]
+    },
+    "causality_ent": {
+      "name": "Causality Graphs",
+      "form": "Por confirmar (consultora)",
+      "status": "unknown",
+      "seat": "España",
+      "faces": [
+        "causality"
+      ],
+      "can": [
+        "socio metodológico en consorcios",
+        "NLnet (software abierto)",
+        "contratos de evaluación"
+      ],
+      "requires": [
+        "M_CG_FORM"
+      ]
+    },
+    "partner_research": {
+      "name": "Socio de investigación (IDIPHISA / UFV / UCM)",
+      "form": "Instituto de investigación / universidad",
+      "status": "external",
+      "seat": "Majadahonda / Pozuelo",
+      "faces": [
+        "causality"
+      ],
+      "can": [
+        "CaixaResearch",
+        "ISCIII",
+        "Horizon Europe salud"
+      ],
+      "requires": [
+        "M_PARTNER_IDIPHISA"
+      ]
+    }
+  },
+  "milestones": {
+    "M_FUND": {
+      "name": "Constituir la Fundación Delfina León",
+      "detail": "Certificado negativo de denominación, estatutos, dotación ≥30.000 € (25 % al firmar si es dineraria, resto en 5 años), escritura, informe del Protectorado e inscripción en el Registro de Fundaciones de la Comunidad de Madrid.",
+      "weeks": 20,
+      "status": "pending"
+    },
+    "M_SEDE_LR": {
+      "name": "Domicilio social en Las Rozas",
+      "detail": "Fijar la sede de la fundación (y de la asociación local) en Las Rozas para acceder a espacios, ayudas y convenios municipales.",
+      "weeks": 4,
+      "status": "pending"
+    },
+    "M_ASOC_LOCAL": {
+      "name": "Crear e inscribir una asociación local en Las Rozas",
+      "detail": "Acta y estatutos, inscripción en el Registro de Asociaciones de la Comunidad de Madrid y en el Registro Municipal de Asociaciones de Las Rozas.",
+      "weeks": 10,
+      "status": "pending"
+    },
+    "M_SEMF_REG": {
+      "name": "Confirmar el registro de SEMF",
+      "detail": "Comprobar si SEMF está en el Registro Nacional o en el de la Comunitat Valenciana y si puede abrir delegación en Madrid; reunir CIF, estatutos y certificado de inscripción.",
+      "weeks": 2,
+      "status": "pending"
+    },
+    "M_CG_FORM": {
+      "name": "Confirmar la forma jurídica de Causality Graphs",
+      "detail": "Autónomo, SL o integrada en otra entidad: determina a qué convocatorias puede ir como solicitante o socio.",
+      "weeks": 1,
+      "status": "pending"
+    },
+    "M_CERT": {
+      "name": "Certificados y firma electrónica al día",
+      "detail": "Certificado digital de representante de cada entidad; estar al corriente con AEAT, Seguridad Social y ayuntamiento.",
+      "weeks": 2,
+      "status": "pending"
+    },
+    "M_EU_PIC": {
+      "name": "Registrar PIC/OID en el portal de la UE",
+      "detail": "Alta de la entidad solicitante en el Funding & Tenders Portal (PIC) y OID para Erasmus+.",
+      "weeks": 2,
+      "status": "pending"
+    },
+    "M_SEGURO": {
+      "name": "Póliza de responsabilidad civil para actividades",
+      "detail": "Necesaria para usar colegios y centros municipales con público (sesiones Cloudy, talleres SEMF).",
+      "weeks": 2,
+      "status": "pending"
+    },
+    "M_PARTNER_IDIPHISA": {
+      "name": "Alianza con un instituto de investigación sanitaria",
+      "detail": "Contacto y carta de interés con IDIPHISA (Puerta de Hierro, Majadahonda) u otro centro elegible para que lidere y Causality aporte la metodología.",
+      "weeks": 8,
+      "status": "pending"
+    },
+    "M_RED_COST": {
+      "name": "Red de 7+ países para una Acción COST",
+      "detail": "Proponentes de 7+ países COST, ≥50 % de países de inclusión, ≥40 % investigadores jóvenes, a partir de la red SEMF.",
+      "weeks": 6,
+      "status": "pending"
+    },
+    "M_LR_REUNION": {
+      "name": "Reunión con Cultura y Las Rozas Innova",
+      "detail": "Presentar el proyecto y proponer un convenio piloto para 2027 antes de que se redacte el presupuesto municipal.",
+      "weeks": 3,
+      "status": "pending"
+    },
+    "M_PRODUCTO": {
+      "name": "Definir un producto tecnológico",
+      "detail": "Producto propio (p. ej. plataforma de evidencia causal o software abierto) para EIC, NEOTEC o NLnet.",
+      "weeks": 12,
+      "status": "pending"
+    }
+  },
+  "levels": {
+    "1": {
+      "name": "Cara única",
+      "detail": "Una sola cara y su entidad; propuesta simple y rápida."
+    },
+    "2": {
+      "name": "Cara + apoyo",
+      "detail": "Una cara lidera y otras aportan valor diferencial (p. ej. Causality evalúa el impacto, SEMF aporta la red)."
+    },
+    "3": {
+      "name": "Proyecto completo",
+      "detail": "La fundación presenta el ecosistema entero: todas las caras, espacio compartido y alianzas."
+    }
+  },
+  "stages": [
+    {
+      "id": "detectar",
+      "name": "Detectar",
+      "checklist": [
+        "Convocatoria en el radar",
+        "Verificada en fuente oficial",
+        "Ganadores de ediciones anteriores revisados"
+      ]
+    },
+    {
+      "id": "cualificar",
+      "name": "Cualificar",
+      "checklist": [
+        "Entidad solicitante elegible (forma jurídica, sede, registro)",
+        "Requisitos y gastos subvencionables leídos en las bases",
+        "Decisión de ir / no ir anotada"
+      ]
+    },
+    {
+      "id": "estrategia",
+      "name": "Estrategia",
+      "checklist": [
+        "Grado de oferta elegido (1–3)",
+        "Cara líder y caras de apoyo definidas",
+        "Socios y cartas de apoyo identificados",
+        "Importe a pedir según la mediana de ganadores"
+      ]
+    },
+    {
+      "id": "preparar",
+      "name": "Preparar",
+      "checklist": [
+        "Hitos previos completados",
+        "Documentación administrativa (CIF, estatutos, poderes, certificados AEAT/SS, seguro)",
+        "Presupuesto detallado",
+        "Cartas de apoyo firmadas"
+      ]
+    },
+    {
+      "id": "redactar",
+      "name": "Redactar",
+      "checklist": [
+        "Memoria técnica según los criterios de evaluación",
+        "Indicadores e impacto (evaluación causal)",
+        "Revisión cruzada por otra cara",
+        "Versión final en PDF"
+      ]
+    },
+    {
+      "id": "presentar",
+      "name": "Presentar",
+      "checklist": [
+        "La persona responsable presenta en la sede oficial con su certificado (Claude nunca presenta ni introduce datos personales)",
+        "Justificante de registro guardado"
+      ]
+    },
+    {
+      "id": "seguimiento",
+      "name": "Seguimiento",
+      "checklist": [
+        "Atender subsanaciones (normalmente 10 días)",
+        "Resolución provisional revisada",
+        "Alegaciones si procede",
+        "Resolución definitiva"
+      ]
+    },
+    {
+      "id": "cerrar",
+      "name": "Cerrar",
+      "checklist": [
+        "Concedida: calendario de ejecución y justificación",
+        "Denegada: pedir informe de evaluación",
+        "Ganadores registrados en el radar",
+        "Lección añadida a LESSONS.md y entrada archivada con fecha de revisión"
+      ]
+    }
+  ],
+  "municipalities": [
+    {
+      "name": "Las Rozas",
+      "role": "Sede recomendada (fundación + BranchOut)",
+      "scores": {
+        "tech": 3,
+        "espacio": 3,
+        "dinero": 2,
+        "anclas": 2
+      },
+      "notes": {
+        "tech": "Las Rozas Innova (empresa municipal), hub, foro de inversión; cheques coworking en 2021 con línea para operadores de coworking.",
+        "espacio": "Aulas gratis en 3 centros culturales para asociaciones culturales inscritas (bases oficiales).",
+        "dinero": "Convocatoria cultural pequeña (20.000 €, ~1.700 € por asociación) pero convenios directos grandes: una fundación cultural recibió 60.000 € en 2026.",
+        "anclas": "Ecosistema tecnológico local."
+      }
+    },
+    {
+      "name": "Majadahonda",
+      "role": "Ancla sanitaria para Causality Graphs (sin sede)",
+      "scores": {
+        "tech": 1,
+        "espacio": 2,
+        "dinero": 1,
+        "anclas": 3
+      },
+      "notes": {
+        "tech": "Premios Majadahonda Emprende (12.000 € en total), ganados sobre todo por negocios locales no tecnológicos.",
+        "espacio": "Salas para asociaciones inscritas; colegios fuera de horario también para otras entidades.",
+        "dinero": "Casi todo va a convenios con colegios, peñas y comerciantes.",
+        "anclas": "Hospital Puerta de Hierro e IDIPHISA (45 grupos, más de 400 investigadores)."
+      }
+    },
+    {
+      "name": "Pozuelo de Alarcón",
+      "role": "Cultura/publicaciones (Cloudy) y universidades",
+      "scores": {
+        "tech": 2,
+        "espacio": 1,
+        "dinero": 3,
+        "anclas": 2
+      },
+      "notes": {
+        "tech": "Vivero INNPAR, parque empresarial La Finca, incubadora La Finca Ventures Camp.",
+        "espacio": "Exige inscripción en el registro de asociaciones vecinales y actividad principal en Pozuelo.",
+        "dinero": "Mayor fondo cultural competitivo (72.500 €, incluye publicaciones); no publica ganadores; plazos de 15 días.",
+        "anclas": "Universidad Francisco de Vitoria y campus UCM de Somosaguas."
+      }
+    }
+  ],
+  "opportunities": {
+    "cost-oc-2026-1": {
+      "applicant": [
+        "semf_asoc"
+      ],
+      "lead": "semf",
+      "support": [
+        "causality",
+        "cloudy"
+      ],
+      "level": 2,
+      "fit": 5,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 6,
+      "value_basis": "Financia la actividad de red durante años (reuniones, escuelas, estancias); importe fijado por COST.",
+      "ask": "Acción COST sobre exploración interdisciplinar con red SEMF; Causality aporta un grupo de trabajo de métodos causales y Cloudy la divulgación.",
+      "offer": "SEMF lidera una red europea que ya funciona (congresos, escuela de verano); Causality aporta un grupo de trabajo de métodos y Cloudy convierte resultados en contenido para familias.",
+      "prereqs": [
+        "M_RED_COST"
+      ]
+    },
+    "nlnet-2026-11": {
+      "applicant": [
+        "causality_ent",
+        "branchout_sl"
+      ],
+      "lead": "causality",
+      "support": [
+        "branchout"
+      ],
+      "level": 2,
+      "fit": 4,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 3,
+      "typical_award_eur": 50000,
+      "value_basis": "5.000–50.000 € por primera ayuda (rango oficial).",
+      "ask": "Librería abierta de descubrimiento causal / DAGs con BranchOut como equipo de desarrollo.",
+      "offer": "Software abierto útil para Europa: Causality aporta el método, BranchOut el desarrollo y mantenimiento.",
+      "prereqs": [
+        "M_PRODUCTO"
+      ]
+    },
+    "eic-accelerator-2026-11": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [
+        "causality"
+      ],
+      "level": 2,
+      "fit": 2,
+      "value": 5,
+      "strategic": 1,
+      "prep_weeks": 16,
+      "typical_award_eur": 2500000,
+      "value_basis": "Subvención de hasta 2,5 M€; competencia muy alta.",
+      "ask": "Solo con un producto propio maduro; primero la solicitud corta.",
+      "offer": "Producto deep-tech (plataforma de evidencia causal) con mercado farmacéutico/clínico.",
+      "prereqs": [
+        "M_PRODUCTO",
+        "M_CERT",
+        "M_EU_PIC"
+      ]
+    },
+    "horizon-hlth-2027-01-02": {
+      "applicant": [
+        "partner_research",
+        "causality_ent"
+      ],
+      "lead": "causality",
+      "support": [
+        "semf"
+      ],
+      "level": 2,
+      "fit": 4,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 12,
+      "value_basis": "Proyectos de consorcio de varios millones; la parte de una pyme socia suele ser una fracción.",
+      "ask": "Entrar como socio metodológico (paquete de evaluación causal / evidencia del mundo real).",
+      "offer": "Causality aporta métodos causales para ensayos imperfectos y datos del mundo real; SEMF da acceso a matemáticos e investigadores internacionales.",
+      "prereqs": [
+        "M_CG_FORM",
+        "M_EU_PIC",
+        "M_PARTNER_IDIPHISA"
+      ]
+    },
+    "enisa-prestamo-participativo": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 4,
+      "typical_award_eur": 75000,
+      "value_basis": "Préstamo 25.000–1,5 M€; fondos propios deben igualar el préstamo.",
+      "ask": "Préstamo participativo para equipar el coworking, limitado por los fondos propios de BranchOut SL.",
+      "offer": "Plan de negocio del hub con ingresos por puestos y servicios a startups.",
+      "prereqs": [
+        "M_CERT"
+      ]
+    },
+    "healthstart-madrimasd": {
+      "applicant": [
+        "causality_ent",
+        "branchout_sl"
+      ],
+      "lead": "causality",
+      "support": [
+        "branchout"
+      ],
+      "level": 2,
+      "fit": 3,
+      "value": 2,
+      "strategic": 1,
+      "prep_weeks": 4,
+      "value_basis": "Programa de aceleración; valor en mentoría y visibilidad.",
+      "ask": "Entrar con un producto de salud basado en evidencia causal.",
+      "offer": "Startup de salud con método diferencial (Causality) incubada en el hub (BranchOut).",
+      "prereqs": [
+        "M_CG_FORM",
+        "M_PRODUCTO"
+      ]
+    },
+    "caixaresearch-health-next": {
+      "applicant": [
+        "partner_research"
+      ],
+      "lead": "causality",
+      "support": [
+        "cloudy"
+      ],
+      "level": 2,
+      "fit": 3,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 10,
+      "value_basis": "Proyectos de investigación con financiación alta; lidera un centro de investigación.",
+      "ask": "Proyecto liderado por IDIPHISA con Causality como socio de métodos y Cloudy para la difusión a pacientes y familias.",
+      "offer": "Investigación traslacional con evaluación causal rigurosa y plan de divulgación a familias.",
+      "prereqs": [
+        "M_PARTNER_IDIPHISA"
+      ]
+    },
+    "erasmus-ka210-2027": {
+      "applicant": [
+        "fundacion_dl",
+        "asoc_local"
+      ],
+      "lead": "cloudy",
+      "support": [
+        "semf",
+        "delfina"
+      ],
+      "level": 2,
+      "fit": 4,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 8,
+      "value_basis": "Asociaciones a pequeña escala con suma global; pensada para organizaciones nuevas.",
+      "ask": "Materiales bilingües de ciencia y salud para familias con un socio de otro país de la UE.",
+      "offer": "Cloudy aporta el contenido bilingüe, SEMF el socio europeo y la fundación el vehículo.",
+      "prereqs": [
+        "M_EU_PIC"
+      ]
+    },
+    "carasso-componer-saberes": {
+      "applicant": [
+        "fundacion_dl",
+        "semf_asoc"
+      ],
+      "lead": "semf",
+      "support": [
+        "cloudy",
+        "delfina"
+      ],
+      "level": 3,
+      "fit": 4,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 8,
+      "value_basis": "Convocatoria bienal arte + ciencia + comunidad; importe por confirmar.",
+      "ask": "Programa arte-ciencia-comunidad en Madrid Oeste con públicos familiares.",
+      "offer": "SEMF (confluencia arte-ciencia) + Cloudy (comunidad familiar) en el espacio compartido de la fundación.",
+      "prereqs": []
+    },
+    "plan-vivienda-2026-coliving": {
+      "applicant": [
+        "fundacion_dl"
+      ],
+      "lead": "delfina",
+      "support": [
+        "branchout"
+      ],
+      "level": 3,
+      "fit": 2,
+      "value": 4,
+      "strategic": 1,
+      "prep_weeks": 24,
+      "value_basis": "Línea de coliving con alquiler protegido 20 años; Madrid no se adhiere según prensa.",
+      "ask": "Coliving de alquiler limitado gestionado por la fundación (entidad sin ánimo de lucro) — solo si la región convoca.",
+      "offer": "Alojamiento asequible para emprendedores e investigadores ligado al hub.",
+      "prereqs": []
+    },
+    "horizon-neb-2026": {
+      "applicant": [
+        "fundacion_dl",
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [
+        "delfina",
+        "causality"
+      ],
+      "level": 3,
+      "fit": 3,
+      "value": 3,
+      "strategic": 2,
+      "prep_weeks": 10,
+      "value_basis": "Consorcios ~5 M€; como sitio piloto la parte propia es pequeña pero estratégica.",
+      "ask": "Ofrecer el edificio coworking+coliving como sitio piloto a un consorcio.",
+      "offer": "Sitio piloto de vida y trabajo compartido; Causality mide el impacto en bienestar.",
+      "prereqs": [
+        "M_EU_PIC"
+      ]
+    },
+    "startup-europe-2027": {
+      "applicant": [
+        "fundacion_dl",
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [
+        "semf",
+        "delfina"
+      ],
+      "level": 3,
+      "fit": 4,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 16,
+      "typical_award_eur": 2000000,
+      "value_basis": "~2 M€ por proyecto de consorcio (fuente secundaria).",
+      "ask": "Red de hubs con BranchOut como nodo de Madrid Oeste.",
+      "offer": "Hub con coliving, red científica internacional (SEMF) y evaluación de impacto (Causality).",
+      "prereqs": [
+        "M_EU_PIC"
+      ]
+    },
+    "madrid-cheque-innovacion": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 2,
+      "value": 2,
+      "strategic": 0,
+      "prep_weeks": 3,
+      "value_basis": "12.000–60.000 € según prensa; orientado a pymes tradicionales.",
+      "ask": "Herramienta para las startups del hub más que para BranchOut.",
+      "offer": "Servicio de acompañamiento del hub a sus miembros.",
+      "prereqs": [
+        "M_CERT"
+      ]
+    },
+    "madrid-sello-excelencia": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [
+        "causality"
+      ],
+      "level": 1,
+      "fit": 2,
+      "value": 4,
+      "strategic": 0,
+      "prep_weeks": 4,
+      "value_basis": "Hasta el 70 % del proyecto; requiere Sello de Excelencia del EIC.",
+      "ask": "Solo tras obtener un Sello de Excelencia en EIC.",
+      "offer": "Proyecto EIC evaluado positivamente.",
+      "prereqs": [
+        "M_PRODUCTO"
+      ]
+    },
+    "lasrozas-cesion-espacios-cultura": {
+      "applicant": [
+        "asoc_local"
+      ],
+      "lead": "semf",
+      "support": [
+        "cloudy"
+      ],
+      "level": 2,
+      "fit": 5,
+      "value": 3,
+      "strategic": 2,
+      "prep_weeks": 2,
+      "value_basis": "Espacio gratuito (en especie) hasta 4 años.",
+      "ask": "Aula en un centro cultural para talleres SEMF y sesiones Cloudy.",
+      "offer": "Programa cultural estable: talleres interdisciplinares y lectura científica en familia.",
+      "prereqs": [
+        "M_ASOC_LOCAL"
+      ]
+    },
+    "lasrozas-innova-foro": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 4,
+      "value": 2,
+      "strategic": 2,
+      "prep_weeks": 3,
+      "value_basis": "Inversión privada + 6 meses en el Hub Las Rozas Innova para finalistas.",
+      "ask": "Presentar BranchOut o una startup del hub en el próximo foro.",
+      "offer": "Startup tecnológica local con tracción.",
+      "prereqs": [
+        "M_CERT"
+      ]
+    },
+    "pozuelo-innpar-vivero": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 2,
+      "value": 1,
+      "strategic": 1,
+      "prep_weeks": 2,
+      "value_basis": "Espacio de vivero municipal; condiciones por confirmar.",
+      "ask": "Espacio temporal para startups mientras se construye el hub.",
+      "offer": "Empresa tecnológica en fase temprana.",
+      "prereqs": [
+        "M_CERT"
+      ]
+    },
+    "lasrozas-convenios-entidades": {
+      "applicant": [
+        "fundacion_dl"
+      ],
+      "lead": "delfina",
+      "support": [
+        "cloudy",
+        "semf",
+        "causality",
+        "branchout"
+      ],
+      "level": 3,
+      "fit": 5,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 8,
+      "typical_award_eur": 30000,
+      "value_basis": "Convenios 2026 de 8.000 a 60.000 € (60.000 € a una fundación cultural).",
+      "ask": "Convenio piloto 2027 de ciencia, cultura e innovación para familias y emprendedores de Las Rozas.",
+      "offer": "El ecosistema completo para el municipio: programa familiar (Cloudy), ciclo internacional de conferencias (SEMF), evaluación de impacto medible (Causality) y conexión con startups (BranchOut).",
+      "prereqs": [
+        "M_LR_REUNION"
+      ]
+    },
+    "madrid-cesion-centros-educativos": {
+      "applicant": [
+        "fundacion_dl",
+        "asoc_local"
+      ],
+      "lead": "cloudy",
+      "support": [
+        "semf"
+      ],
+      "level": 2,
+      "fit": 5,
+      "value": 2,
+      "strategic": 2,
+      "prep_weeks": 2,
+      "value_basis": "Espacio en especie en colegios fuera de horario.",
+      "ask": "Sesiones piloto de Cloudy en colegios públicos de fin de semana.",
+      "offer": "Actividad familiar de ciencia y salud gratuita, cerca de las familias.",
+      "prereqs": [
+        "M_SEGURO"
+      ]
+    },
+    "fecyt-fcc-2026": {
+      "applicant": [
+        "fundacion_dl",
+        "semf_asoc"
+      ],
+      "lead": "cloudy",
+      "support": [
+        "semf",
+        "causality"
+      ],
+      "level": 2,
+      "fit": 5,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 10,
+      "typical_award_eur": 20500,
+      "value_basis": "Mediana de ganadores 2024: 20.500 €; asociaciones 12.000 €, fundaciones 20.000 €.",
+      "ask": "15.000–25.000 € para un proyecto de comunicación o ciencia ciudadana con familias.",
+      "offer": "Cloudy produce el contenido, SEMF aporta científicos y Causality evalúa el impacto (pocos competidores miden impacto causal).",
+      "prereqs": []
+    },
+    "cdti-neotec-2026": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [
+        "causality"
+      ],
+      "level": 2,
+      "fit": 3,
+      "value": 5,
+      "strategic": 1,
+      "prep_weeks": 12,
+      "typical_award_eur": 325000,
+      "value_basis": "Mediana de ganadores 2025: 325.000 € (tope con contratación de doctor).",
+      "ask": "Proyecto de base tecnológica con un doctor en el equipo.",
+      "offer": "Empresa de base tecnológica nacida de la investigación (método causal).",
+      "prereqs": [
+        "M_PRODUCTO",
+        "M_CERT"
+      ]
+    },
+    "pozuelo-subv-cultura-2026": {
+      "applicant": [
+        "asoc_local"
+      ],
+      "lead": "cloudy",
+      "support": [
+        "semf"
+      ],
+      "level": 2,
+      "fit": 4,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 3,
+      "value_basis": "Fondo de 72.500 €; incluye publicaciones; solo entidades con sede en Pozuelo.",
+      "ask": "Edición de un libro Cloudy y presentaciones en Pozuelo — solo si hay entidad con sede allí.",
+      "offer": "Publicación científica familiar y actos culturales.",
+      "prereqs": [
+        "M_ASOC_LOCAL"
+      ]
+    },
+    "majadahonda-emprende-2026": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 2,
+      "value": 1,
+      "strategic": 0,
+      "prep_weeks": 2,
+      "typical_award_eur": 1500,
+      "value_basis": "Mediana 2025: 1.500 €.",
+      "ask": "Solo si la sede de BranchOut está en Majadahonda.",
+      "offer": "Startup local.",
+      "prereqs": []
+    },
+    "lasrozas-cultura-asociaciones-2026": {
+      "applicant": [
+        "asoc_local"
+      ],
+      "lead": "semf",
+      "support": [
+        "cloudy"
+      ],
+      "level": 1,
+      "fit": 3,
+      "value": 1,
+      "strategic": 1,
+      "prep_weeks": 2,
+      "typical_award_eur": 1700,
+      "value_basis": "~1.700 € por asociación (reparto lineal).",
+      "ask": "Programa cultural de la asociación local.",
+      "offer": "Actividades culturales locales.",
+      "prereqs": [
+        "M_ASOC_LOCAL"
+      ]
+    }
+  }
+}
