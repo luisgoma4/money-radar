@@ -151,7 +151,8 @@ label.check { display: inline-flex; gap: 6px; align-items: center; color: var(--
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; overflow-wrap: anywhere; }
 .card .action { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
-.card .action b { display: block; font-size: 12px; color: var(--ink-2); font-weight: 600; }
+.card .action b, .card .archive-note b { display: block; font-size: 12px; color: var(--ink-2); font-weight: 600; }
+.card .archive-note { border: 1px dashed var(--axis); border-radius: 8px; padding: 8px 10px; font-size: 14px; color: var(--ink-2); }
 details summary { cursor: pointer; color: var(--ink-2); font-size: 13px; }
 details p { margin: 6px 0; font-size: 14px; }
 details .src { color: var(--muted); font-size: 12px; }
@@ -205,7 +206,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
         <button type="button" data-v="actionable" aria-pressed="true">Actionable</button>
         <button type="button" data-v="open" aria-pressed="false">Open</button>
         <button type="button" data-v="upcoming" aria-pressed="false">Upcoming</button>
-        <button type="button" data-v="closed" aria-pressed="false">Closed</button>
+        <button type="button" data-v="archive" aria-pressed="false">Archive</button>
         <button type="button" data-v="all" aria-pressed="false">All</button>
       </div>
       <select id="scope" aria-label="Scope">
@@ -249,7 +250,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
     </div>
   </section>
 
-  <footer>Amounts and dates come only from the source cited on each card; “Unverified” means no official page has confirmed them yet. Always check the official page before applying.</footer>
+  <footer>Entries are never deleted: closed or dropped calls move to the Archive with a reason and a review date, to recover them or guide future applications. Amounts and dates come only from the source cited on each card; “Unverified” means no official page has confirmed them yet. Always check the official page before applying.</footer>
 </div>
 
 <script id="data" type="application/json">/*__DATA__*/null</script>
@@ -288,6 +289,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
     store.get("state") || {}, { q: "" }
   );
   state.lines = state.lines.filter((k) => LINE_KEYS.includes(k));
+  if (state.status === "closed") state.status = "archive";
 
   // ---- theme ----
   const themeBtn = document.getElementById("theme");
@@ -322,8 +324,11 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
     if (state.scope && o.scope !== state.scope) return false;
     if (state.verified && o.verification !== "verified") return false;
     const s = state.status;
-    if (s === "actionable" && o.status === "closed") return false;
-    if (s !== "actionable" && s !== "all" && o.status !== s && !(s === "open" && o.status === "rolling")) return false;
+    if (s === "archive") { if (!o.archived) return false; }
+    else if (s !== "all") {
+      if (o.archived) return false;
+      if (s !== "actionable" && o.status !== s && !(s === "open" && o.status === "rolling")) return false;
+    }
     if (state.q) {
       const hay = [o.name, o.funder, o.fit, o.requirements, o.action, o.amount_text].join(" ").toLowerCase();
       if (!state.q.toLowerCase().split(/\s+/).every((w) => hay.includes(w))) return false;
@@ -333,7 +338,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
   function sorted(list) {
     const rank = { open: 0, rolling: 1, upcoming: 2, closed: 3 };
     const by = {
-      deadline: (a, b) => (rank[a.status] - rank[b.status]) || ((a.deadline || "9999") < (b.deadline || "9999") ? -1 : 1),
+      deadline: (a, b) => (a.archived - b.archived) || (rank[a.status] - rank[b.status]) || ((a.deadline || "9999") < (b.deadline || "9999") ? -1 : 1),
       amount: (a, b) => (b.amount_max || 0) - (a.amount_max || 0),
       recent: (a, b) => (b.first_seen > a.first_seen ? 1 : b.first_seen < a.first_seen ? -1 : 0),
     };
@@ -342,7 +347,9 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 
   // ---- KPIs (always over all actionable data, not the filtered view) ----
   function renderKpis() {
-    const all = DATA.opportunities;
+    const all = DATA.opportunities.filter((o) => !o.archived);
+    const archived = DATA.opportunities.filter((o) => o.archived);
+    const due = archived.filter((o) => o.review_on && o.review_on <= DATA.today);
     const open = all.filter((o) => o.status === "open" || o.status === "rolling");
     const soon = all.filter((o) => o.status === "open" && daysLeft(o) <= 14);
     const next = all.filter((o) => o.status === "open").sort((a, b) => a.deadline < b.deadline ? -1 : 1)[0];
@@ -357,7 +364,8 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
       tile("Closing in ≤ 14 days", soon.length, soon.length ? soon.map((o) => o.name).join(", ") : "Nothing urgent",
         soon.length ? el("span", { style: "color:var(--critical)", "aria-hidden": "true" }, "▲") : null),
       tile("Next deadline", next ? `${daysLeft(next)} d` : "—", next ? `${next.name} · ${fmtDate(next.deadline)}` : "No fixed deadlines open"),
-      tile("Upcoming / watch", upcoming.length, "Announced or expected calls to prepare for"),
+      tile("Upcoming / watch", upcoming.length, `Calls to prepare for · ${archived.length} archived` +
+        (due.length ? `, ${due.length} due for review` : "")),
     );
   }
 
@@ -504,13 +512,18 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
     return el("article", { class: "panel card", id: "opp-" + o.id },
       el("div", { class: "pills" },
         el("span", { class: "pill " + s.cls }, el("span", { class: "ico", "aria-hidden": "true" }, s.ico), s.text),
-        verPill(o)),
+        verPill(o),
+        o.archived ? el("span", { class: "pill" + (o.review_on && o.review_on <= DATA.today ? " warning" : "") },
+          el("span", { class: "ico", "aria-hidden": "true" }, "▣"), "Archived") : null),
       el("h3", {}, o.name),
       el("div", { class: "meta" }, `${o.funder} · ${o.scope} · ${o.kind}`),
       lineTags(o),
       el("dl", { class: "facts" },
         el("dt", {}, "Amount"), el("dd", {}, o.amount_text || "Not confirmed"),
         el("dt", {}, "Deadline"), el("dd", {}, o.deadline ? fmtDate(o.deadline) : (o.status === "rolling" ? "Rolling" : "Not announced"))),
+      o.archived ? el("div", { class: "archive-note" },
+        el("b", {}, o.review_on && o.review_on <= DATA.today ? "Archived · review due" : `Archived · review ${fmtDate(o.review_on)}`),
+        o.archive_reason || "") : null,
       o.action ? el("div", { class: "action" }, el("b", {}, "Next step"), o.action) : null,
       el("details", {},
         el("summary", {}, "Fit and requirements"),
@@ -532,7 +545,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
           el("td", {}, o.amount_text || "—"),
           el("td", { class: "num" }, o.deadline ? fmtDate(o.deadline) : "—"),
           el("td", { class: "num" }, d == null ? "—" : String(d)),
-          el("td", {}, statusInfo(o).text),
+          el("td", {}, (o.archived ? "Archived · " : "") + statusInfo(o).text),
           el("td", {}, o.verification));
       }))));
   }

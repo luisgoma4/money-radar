@@ -1,6 +1,9 @@
 """money-radar: maintenance pass over money.db, run before build.py.
 
-- Marks opportunities whose fixed deadline has passed as 'closed' (logged in `changes`).
+- Marks opportunities whose fixed deadline has passed as 'closed' (logged in `changes`);
+  build.py then archives them. Entries are never deleted, only archived.
+- Lists archived entries whose review date has come (recover them or re-date the review),
+  and warns about DB entries missing from ROWS (build.py archives them, never deletes).
 - Checks build.py's ROWS for data-quality problems and exits non-zero if any are found,
   so a bad edit stops the run before the dashboard is rebuilt.
 
@@ -79,14 +82,35 @@ def check(rows):
             problems.append(f"{rid}: amount_min > amount_max")
         if not str(r.get("url", "")).startswith("https://"):
             problems.append(f"{rid}: url must be https")
+        if r.get("archived") and not (r.get("archive_reason") and r.get("review_on")):
+            problems.append(f"{rid}: archived rows need archive_reason and review_on")
+        if r.get("review_on") is not None and not ISO.match(str(r["review_on"])):
+            problems.append(f"{rid}: review_on must be YYYY-MM-DD")
     return problems
 
 
+def archive_report(conn, rows):
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(opportunities)")}
+    if "archived" not in cols:
+        return  # pre-archive database; build.py migrates it
+    ids = {r["id"] for r in rows}
+    for (oid,) in conn.execute("SELECT id FROM opportunities WHERE archived = 0"):
+        if oid not in ids:
+            print(f"monitor: {oid} is in money.db but not in ROWS; build.py will archive it (never delete)")
+    due = conn.execute(
+        "SELECT id, review_on, archive_reason FROM opportunities "
+        "WHERE archived = 1 AND review_on <= ? ORDER BY review_on", (TODAY.isoformat(),)).fetchall()
+    for oid, review_on, reason in due:
+        print(f"review due: {oid} (since {review_on}; {reason})")
+
+
 def main():
-    problems = check(read_rows())
+    rows = read_rows()
+    problems = check(rows)
     if DB.exists():
         conn = sqlite3.connect(DB)
         closed = close_passed(conn)
+        archive_report(conn, rows)
         conn.close()
     else:
         closed = 0

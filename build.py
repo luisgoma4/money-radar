@@ -6,6 +6,12 @@ Standard library only (``-I`` ignores user site-packages and the script dir).
 To track a new call, append a dict to ROWS. Rows are inserted with INSERT OR
 IGNORE, so ``first_seen`` is never overwritten; when an existing row's fields
 change, the old value is logged to the ``changes`` table before the update.
+
+Entries are never deleted (a trigger in money.db blocks DELETE). They are
+archived instead, each with a reason and a ``review_on`` date:
+- closed calls are archived automatically (review before the next edition);
+- rows removed from ROWS are archived automatically (restore by re-adding them);
+- a row can be archived explicitly with archived=True, archive_reason, review_on.
 """
 
 import datetime as dt
@@ -21,6 +27,10 @@ ALERTS = HERE / "alerts.json"
 
 TODAY = dt.date.today()
 CLOSING_SOON_DAYS = 14
+# Closed calls come up for review ~9 months after their deadline: about three
+# months before a yearly call's next deadline, in time to prepare.
+REVIEW_AFTER_CLOSE_DAYS = 270
+REVIEW_AFTER_REMOVAL_DAYS = 90
 HIGH_VALUE_EUR = 25_000
 
 # Lines of work the radar matches calls against (see CLAUDE.md).
@@ -36,6 +46,7 @@ FIELDS = [
     "amount_min", "amount_max", "amount_text",
     "opens", "deadline", "deadline_kind", "status", "verification",
     "url", "source", "fit", "requirements", "action",
+    "archived", "archive_reason", "review_on",
 ]
 # Fields whose changes are logged (status included, so open -> closed shows up).
 TRACKED = [f for f in FIELDS if f != "id"]
@@ -61,6 +72,9 @@ CREATE TABLE IF NOT EXISTS opportunities (
     fit           TEXT,
     requirements  TEXT,
     action        TEXT,
+    archived      INTEGER NOT NULL DEFAULT 0,  -- 1 = archived (never deleted)
+    archive_reason TEXT,
+    review_on     TEXT,               -- ISO date to review an archived row: recover or keep as reference
     first_seen    TEXT NOT NULL,
     last_checked  TEXT NOT NULL
 );
@@ -71,7 +85,17 @@ CREATE TABLE IF NOT EXISTS changes (
     new_value      TEXT,
     changed_on     TEXT NOT NULL
 );
+CREATE TRIGGER IF NOT EXISTS opportunities_no_delete BEFORE DELETE ON opportunities
+BEGIN SELECT RAISE(ABORT, 'money-radar: entries are archived, never deleted'); END;
+CREATE TRIGGER IF NOT EXISTS changes_no_delete BEFORE DELETE ON changes
+BEGIN SELECT RAISE(ABORT, 'money-radar: the change history is append-only'); END;
 """
+# Columns added after the first release; ALTER TABLE them into older databases.
+MIGRATIONS = {
+    "archived": "INTEGER NOT NULL DEFAULT 0",
+    "archive_reason": "TEXT",
+    "review_on": "TEXT",
+}
 
 # ---------------------------------------------------------------------------
 # Tracked opportunities. Never invent amounts or dates: leave them None and
@@ -164,6 +188,7 @@ ROWS = [
         verification="verified",
         url="https://www.boe.es/boe/dias/2026/06/27/pdfs/BOE-B-2026-22034.pdf",
         source="BOE-B-2026-22034 (27 Jun 2026): applications 1 Jul – 16 Sep 2026 13:00",
+        review_on="2027-04-01",
         fit="The most natural fit for Cloudy (science communication for families, citizen science) and for SEMF outreach (art–science–technology category).",
         requirements="Eligible entity with legal personality (check the bases for non-profit associations). Activities run between Jul 2027 and Jun 2029.",
         action="Closed for 2026. Prepare the 2027 application from April 2027; the call usually opens around July.",
@@ -365,11 +390,51 @@ def derive_status(row):
     return "open"
 
 
+def archive_state(raw, row):
+    """(archived, archive_reason, review_on) for a ROWS entry."""
+    if raw.get("archived"):
+        return 1, raw.get("archive_reason"), raw.get("review_on")
+    if row["status"] == "closed":
+        review = raw.get("review_on") or (
+            dt.date.fromisoformat(row["deadline"]) + dt.timedelta(days=REVIEW_AFTER_CLOSE_DAYS)).isoformat()
+        return 1, raw.get("archive_reason") or "Deadline passed; kept to prepare the next edition", review
+    return 0, None, None
+
+
+def migrate(conn):
+    have = {r[1] for r in conn.execute("PRAGMA table_info(opportunities)")}
+    for col, decl in MIGRATIONS.items():
+        if col not in have:
+            conn.execute(f"ALTER TABLE opportunities ADD COLUMN {col} {decl}")
+
+
+def log_change(conn, oid, field, old, new, today):
+    conn.execute(
+        "INSERT INTO changes VALUES (?, ?, ?, ?, ?)",
+        (oid, field, None if old is None else str(old), None if new is None else str(new), today),
+    )
+
+
+def archive_removed(conn, today):
+    """Rows that left ROWS are archived, never deleted."""
+    ids = {r["id"] for r in ROWS}
+    review = (TODAY + dt.timedelta(days=REVIEW_AFTER_REMOVAL_DAYS)).isoformat()
+    reason = "Removed from build.py ROWS; re-add it there to restore"
+    for cur in conn.execute("SELECT id, archived FROM opportunities").fetchall():
+        if cur["id"] in ids or cur["archived"]:
+            continue
+        for field, new in (("archived", 1), ("archive_reason", reason), ("review_on", review)):
+            log_change(conn, cur["id"], field, None if field != "archived" else 0, new, today)
+            conn.execute(f"UPDATE opportunities SET {field} = ? WHERE id = ?", (new, cur["id"]))
+        print(f"archived (removed from ROWS): {cur['id']}")
+
+
 def sync(conn):
     today = TODAY.isoformat()
     for raw in ROWS:
         row = {f: raw.get(f) for f in FIELDS}
         row["status"] = derive_status(row)
+        row["archived"], row["archive_reason"], row["review_on"] = archive_state(raw, row)
         cur = conn.execute("SELECT * FROM opportunities WHERE id = ?", (row["id"],)).fetchone()
         if cur is None:
             conn.execute(
@@ -381,12 +446,10 @@ def sync(conn):
         for field in TRACKED:
             old, new = cur[field], row[field]
             if old != new:
-                conn.execute(
-                    "INSERT INTO changes VALUES (?, ?, ?, ?, ?)",
-                    (row["id"], field, None if old is None else str(old), None if new is None else str(new), today),
-                )
+                log_change(conn, row["id"], field, old, new, today)
                 conn.execute(f"UPDATE opportunities SET {field} = ? WHERE id = ?", (new, row["id"]))
         conn.execute("UPDATE opportunities SET last_checked = ? WHERE id = ?", (today, row["id"]))
+    archive_removed(conn, today)
     conn.commit()
 
 
@@ -402,19 +465,22 @@ def alerts(opps, changes):
     today = TODAY.isoformat()
     soon = []
     for o in opps:
-        if o["verification"] == "verified" and o["status"] == "open" and o["deadline"]:
+        if o["verification"] == "verified" and o["status"] == "open" and o["deadline"] and not o["archived"]:
             days = (dt.date.fromisoformat(o["deadline"]) - TODAY).days
             if 0 <= days <= CLOSING_SOON_DAYS:
                 soon.append({**_brief(o), "days_left": days})
     new_high = [_brief(o) for o in opps
                 if o["first_seen"] == today and (o["amount_max"] or 0) >= HIGH_VALUE_EUR
-                and o["status"] != "closed"]
+                and not o["archived"]]
     return {
         "generated": today,
         "closing_soon": soon,
         "new_high_value": new_high,
         "new_today": [o["id"] for o in opps if o["first_seen"] == today],
         "changed_today": sorted({c["opportunity_id"] for c in changes if c["changed_on"] == today}),
+        # Archived rows whose review date has come: recover (new edition / unarchive) or re-date.
+        "review_due": [{**_brief(o), "archive_reason": o["archive_reason"], "review_on": o["review_on"]}
+                       for o in opps if o["archived"] and o["review_on"] and o["review_on"] <= today],
     }
 
 
@@ -446,6 +512,7 @@ def main():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    migrate(conn)
     sync(conn)
     opps, changes = load(conn)
     conn.close()
@@ -456,8 +523,9 @@ def main():
 
     counts = {}
     for o in opps:
-        counts[o["status"]] = counts.get(o["status"], 0) + 1
-    print(f"{len(opps)} opportunities {counts}; "
+        key = "archived" if o["archived"] else o["status"]
+        counts[key] = counts.get(key, 0) + 1
+    print(f"{len(opps)} opportunities {counts}; {len(report['review_due'])} archive reviews due; "
           f"{len(report['new_today'])} new, {len(report['changed_today'])} changed today; "
           f"{len(report['closing_soon'])} closing within {CLOSING_SOON_DAYS} days")
 
