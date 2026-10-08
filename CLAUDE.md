@@ -53,7 +53,7 @@ Eligibility matters more than topic.
 | `build.py` | The `ROWS` list (one dict per call; **add or edit calls here**), DB schema and migrations, upsert with change log, archive logic, `alerts.json`, `graphify-out/graph.json`, and dashboard rendering. |
 | `monitor.py` | Runs first. Closes past-deadline rows; validates `ROWS` (fields, enums, dates, URLs, archive and winners rules) and `strategy.json` (via `planner.check`); lists archive reviews due. Exits non-zero on bad data, which stops the run. |
 | `strategy.json` | The strategy model: faces, legal entities (status `exists \| planned \| proposed \| unknown \| external`), milestones, value levels, the 8 application stages with checklists, the municipality assessment, the ecosystem `graph`, and per-call strategy. Edit by hand; milestone status also changes through the orchestrator. |
-| `planner.py` | Shared logic, loaded by file path. Contains the plan per call (`make_plan`), the "what to do now" view (`what_now`), the agenda (`calendar`), the graph export (`graph_export`, `ascii_text`) and consistency checks (`check`). |
+| `planner.py` | Shared logic, loaded by file path. Contains the plan per call (`make_plan`), the "what to do now" view (`what_now`), the agenda (`calendar`), the Gantt rows (`gantt`), the graph export (`graph_export`, `ascii_text`) and consistency checks (`check`). |
 | `orchestrator.py` | Spanish CLI that guides applications (see below). |
 | `winners.py` | Past winners of a call from the public BDNS API. |
 | `dashboard_template.html` | Dashboard UI: vanilla JS, no CDN, light/dark mode. `build.py` injects the JSON at `/*__DATA__*/null` and the date at `__GENERATED__`. |
@@ -95,6 +95,7 @@ Five tabs. The selected tab and the filters are remembered per viewer. Filters r
    - milestones ranked by the value they unlock;
    - the plan per call, the applications in progress and the stage checklists.
 3. **Calendario**:
+   - a **Gantt chart** (`planner.gantt`): pending milestones as grey bars ending on the date they are needed (if they are already late, the bar runs "from today"); calls run from start-preparing to the deadline ◆ with the official window in bold, coloured by lead face; estimated next editions dashed; late rows marked ▲;
    - a "late" box, then a monthly agenda: deadlines, start-preparing dates, milestone need dates, openings, archive reviews, and estimated next editions;
    - undated milestones;
    - `.ics` export;

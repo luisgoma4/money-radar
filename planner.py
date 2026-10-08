@@ -134,8 +134,9 @@ def make_plan(opps, strategy, applications=(), today=None):
                                                      order[p["grade"]], -p["score"]))
     now = what_now(plans, ms, [p["id"] for p in ranking], strategy["stages"], applications, today)
     events = calendar(opps, plans, ms, today)
+    gantt_rows = gantt(opps, plans, ms, today)
     return {
-        "today": today.isoformat(), "now": now, "calendar": events,
+        "today": today.isoformat(), "now": now, "calendar": events, "gantt": gantt_rows,
         "project": strategy["project"], "faces": strategy["faces"], "entities": strategy["entities"],
         "levels": strategy["levels"], "stages": strategy["stages"],
         "municipalities": strategy["municipalities"], "graph": strategy.get("graph", {}),
@@ -296,6 +297,47 @@ def graph_export(plan, opps, include_calls=True):
     ids = {n["id"] for n in nodes}
     return {"directed": True, "nodes": nodes,
             "links": [l for l in links if l["source"] in ids and l["target"] in ids]}
+
+
+def gantt(opps, plans, milestones, today, months_ahead=12):
+    """Rows for the Gantt chart: milestones (work → need date) and calls (prep → deadline)."""
+    start = (today.replace(day=1) - dt.timedelta(days=1)).replace(day=1)  # previous month
+    end = today + dt.timedelta(days=31 * months_ahead)
+    rows = []
+    for m in milestones:
+        if m["status"] == "done":
+            continue
+        need = sorted(d for d in (plans[i]["milestones_by"] for i in m["blocked"]) if d)
+        if not need:
+            continue
+        future = [d for d in need if d >= today.isoformat()]
+        if future:
+            due = _date(future[0])
+            begin = due - dt.timedelta(weeks=m["weeks"])
+            note = f"~{m['weeks']} semanas · necesario el {due.strftime('%d/%m/%Y')}"
+        else:  # every need date has passed: show what starting today would give
+            begin, due = today, today + dt.timedelta(weeks=m["weeks"])
+            note = f"~{m['weeks']} semanas · ya va tarde: si empieza hoy, listo el {due.strftime('%d/%m/%Y')}"
+        rows.append({"kind": "milestone", "id": m["id"], "name": m["name"], "face": None,
+                     "start": begin.isoformat(), "end": due.isoformat(), "late": begin < today or not future,
+                     "status": m["status"], "detail": note + f" · bloquea {len(m['blocked'])} convocatorias"})
+    names = {o["id"]: o for o in opps}
+    calls = []
+    for oid, p in plans.items():
+        if not p["target"] or not p["start_by"] or (p["archived"] and not p["target_estimated"]):
+            continue
+        tgt = _date(p["target"])
+        if tgt < today or _date(p["start_by"]) > end:
+            continue
+        o = names[oid]
+        opens = o.get("opens") if not p["target_estimated"] else None
+        calls.append({"kind": "call", "id": oid, "name": p["name"], "face": p["lead"], "grade": p["grade"],
+                      "start": p["start_by"], "end": p["target"], "opens": opens,
+                      "estimated": p["target_estimated"], "late": p["start_by"] < today.isoformat(),
+                      "pending": p["pending"], "detail": o.get("amount_text") or ""})
+    calls.sort(key=lambda r: (r["end"], r["start"]))
+    rows.sort(key=lambda r: r["end"])
+    return {"from": start.isoformat(), "to": end.isoformat(), "rows": rows + calls}
 
 
 def check(strategy, opp_ids):

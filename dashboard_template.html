@@ -229,6 +229,21 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .late-box { border-color: color-mix(in srgb, var(--critical) 45%, var(--border)); }
 @media (max-width: 600px) { .ev { grid-template-columns: 44px minmax(0, 1fr); } .ev .kind { grid-column: 2; } .ev .what { grid-column: 1 / -1; } }
 #flow svg, #graph svg { display: block; width: 100%; height: auto; }
+.gantt-wrap { overflow-x: auto; position: relative; }
+.gantt-wrap svg { display: block; width: 100%; min-width: 900px; height: auto; }
+.gt-grid { stroke: var(--grid); } .gt-month { fill: var(--muted); font-size: 11px; }
+.gt-group { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.gt-label { fill: var(--ink); font-size: 12px; } .gt-label.late { fill: var(--critical); font-weight: 600; }
+.gt-row:hover .gt-band { fill: var(--surface-2); }
+.gt-band { fill: transparent; }
+.gt-today { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.gt-ms { fill: var(--muted); opacity: .55; }
+.gt-ms.doing { opacity: .85; }
+.gt-bar { opacity: .35; } .gt-bar.est { opacity: .18; }
+.gt-win { opacity: .95; }
+.gt-outline { fill: none; stroke-width: 1.5; } .gt-outline.est { stroke-dasharray: 4 3; }
+.gt-late { fill: none; stroke: var(--critical); stroke-width: 1.5; }
+.gt-dl { fill: var(--ink); }
 .fl-box { fill: var(--surface); stroke: var(--axis); stroke-width: 1.5; }
 .fl-box.human { stroke: var(--critical); stroke-width: 2; }
 .fl-dec { fill: var(--surface-2); stroke: var(--axis); stroke-width: 1.5; }
@@ -369,6 +384,9 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       <p class="small">Plazos, fechas para empezar a preparar (según el plan), hitos que hay que tener listos, aperturas y revisiones del archivo. «Estimado» = próxima edición calculada a partir de la anterior (≈ +1 año).</p>
       <div class="chipline" id="cal-legend"></div>
     </section>
+    <section class="panel section-gap"><h2>Diagrama de Gantt</h2>
+      <p class="small">Hitos: barra gris desde que hay que empezar hasta la fecha en que deben estar listos. Convocatorias: desde «empezar a preparar» hasta el plazo (◆), con la ventana oficial de solicitud en trazo grueso. Discontinuo = próxima edición estimada; ▲ = ya debería haber empezado. Pulsa una convocatoria para ver su ficha.</p>
+      <div class="gantt-wrap" id="gantt"></div><div class="tooltip" id="gtt" role="tooltip" hidden></div></section>
     <section class="panel section-gap late-box" id="cal-late"></section>
     <section class="section-gap" id="cal-months"></section>
     <section class="panel section-gap"><h2>Hitos sin fecha límite todavía</h2><p class="small">No bloquean ninguna convocatoria con fecha, pero sí convocatorias abiertas todo el año o por anunciar.</p><ul class="log" id="cal-undated"></ul></section>
@@ -888,6 +906,72 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     a.download = "money-radar.ics"; document.body.append(a); a.click(); a.remove();
   });
 
+  // ---- Gantt ----
+  function renderGantt() {
+    const G = PLAN.gantt; const host = document.getElementById("gantt"); if (!G || !G.rows.length) { host.textContent = "Sin fechas que mostrar."; return; }
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
+    const day = (d) => new Date(d + "T00:00:00").getTime();
+    const t0 = day(G.from), t1 = day(G.to);
+    const W = 1160, L = 300, R = 16, rowH = 26, top = 30;
+    const ms = G.rows.filter((r) => r.kind === "milestone"), calls = G.rows.filter((r) => r.kind === "call");
+    const groups = [["Hitos", ms], ["Convocatorias", calls]].filter(([, l]) => l.length);
+    const H = top + groups.reduce((a, [, l]) => a + 22 + l.length * rowH, 0) + 8;
+    const x = (d) => L + (W - L - R) * Math.min(1, Math.max(0, (day(d) - t0) / (t1 - t0)));
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Diagrama de Gantt de hitos y convocatorias" });
+    const m = new Date(G.from + "T00:00:00");
+    for (; m.getTime() <= t1; m.setMonth(m.getMonth() + 1)) {
+      const iso = m.toISOString().slice(0, 10), xx = x(iso);
+      svg.append(s("line", { class: "gt-grid", x1: xx, x2: xx, y1: top - 8, y2: H }));
+      svg.append(s("text", { class: "gt-month", x: xx + 4, y: top - 12 },
+        m.toLocaleDateString("es-ES", { month: "short", ...(m.getMonth() === 0 ? { year: "2-digit" } : {}) })));
+    }
+    const tip = document.getElementById("gtt");
+    const show = (evt, r) => {
+      tip.replaceChildren(el("div", { class: "t-name" }, r.name),
+        el("div", { class: "t-meta" }, (r.kind === "call" ? `Preparar ${fmtDate(r.start)} → plazo ${fmtDate(r.end)}` : `Empezar ${fmtDate(r.start)} → listo ${fmtDate(r.end)}`) + (r.estimated ? " (estimado)" : "")),
+        r.opens ? el("div", { class: "t-meta" }, `Ventana oficial: ${fmtDate(r.opens)} → ${fmtDate(r.end)}`) : null,
+        r.late ? el("div", { class: "t-meta late" }, "▲ Ya debería haber empezado") : null,
+        r.pending && r.pending.length ? el("div", { class: "t-meta" }, "Bloqueada por: " + r.pending.map(msName).join(", ")) : null,
+        r.detail ? el("div", { class: "t-meta" }, r.detail) : null);
+      tip.hidden = false;
+      const box = tip.parentElement.getBoundingClientRect();
+      tip.style.left = Math.max(4, Math.min(evt.clientX - box.left + 12, box.width - 280)) + "px";
+      tip.style.top = (evt.clientY - box.top + 14) + "px";
+    };
+    let y = top;
+    groups.forEach(([gname, list]) => {
+      svg.append(s("text", { class: "gt-group", x: 8, y: y + 14 }, gname)); y += 22;
+      list.forEach((r) => {
+        const g = s("g", { class: "gt-row", tabindex: 0 });
+        g.append(s("rect", { class: "gt-band", x: 0, y, width: W, height: rowH }));
+        const label = (r.late ? "▲ " : "") + (r.kind === "call" ? `[${r.grade}] ` : "") + (r.name.length > 35 ? r.name.slice(0, 34) + "…" : r.name);
+        g.append(s("text", { class: "gt-label" + (r.late ? " late" : ""), x: 8, y: y + 17 }, label));
+        const x1 = x(r.start), x2 = Math.max(x(r.end), x1 + 3), by = y + 6, bh = rowH - 12;
+        if (r.kind === "milestone") {
+          g.append(s("rect", { class: "gt-ms" + (r.status === "doing" ? " doing" : ""), x: x1, y: by, width: x2 - x1, height: bh, rx: 4 }));
+        } else {
+          const col = lineColor(r.face);
+          g.append(s("rect", { class: "gt-bar" + (r.estimated ? " est" : ""), x: x1, y: by, width: x2 - x1, height: bh, rx: 4, style: `fill:${col}` }));
+          g.append(s("rect", { class: "gt-outline" + (r.estimated ? " est" : ""), x: x1, y: by, width: x2 - x1, height: bh, rx: 4, style: `stroke:${col}` }));
+          if (r.opens) { const xo = x(r.opens); g.append(s("rect", { class: "gt-win", x: xo, y: by + 3, width: Math.max(2, x2 - xo), height: bh - 6, rx: 3, style: `fill:${col}` })); }
+          g.append(s("path", { class: "gt-dl", d: `M${x2},${by - 2} l5,${bh / 2 + 2} l-5,${bh / 2 + 2} l-5,${-(bh / 2 + 2)} z` }));
+          g.addEventListener("click", () => { showTab("radar"); focusCard(r.id); });
+          g.style.cursor = "pointer";
+        }
+        if (r.late) g.append(s("rect", { class: "gt-late", x: x1, y: by, width: x2 - x1, height: bh, rx: 4 }));
+        g.addEventListener("mousemove", (e) => show(e, r)); g.addEventListener("mouseleave", () => { tip.hidden = true; });
+        g.addEventListener("focus", () => { const b = g.getBoundingClientRect(); show({ clientX: b.left + 300, clientY: b.bottom }, r); });
+        g.addEventListener("blur", () => { tip.hidden = true; });
+        svg.append(g); y += rowH;
+      });
+    });
+    const tx = x(DATA.today);
+    svg.append(s("line", { class: "gt-today", x1: tx, x2: tx, y1: top - 8, y2: H }));
+    svg.append(s("text", { class: "gt-month", x: tx + 4, y: H - 4, style: "fill:var(--ink);font-weight:600" }, "Hoy"));
+    host.replaceChildren(svg);
+  }
+
   // ---- flowchart (hand-laid SVG) ----
   function renderFlow() {
     const NS = "http://www.w3.org/2000/svg";
@@ -1065,7 +1149,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   }
   document.getElementById("tab-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.v); });
 
-  renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderFlow(); renderGraph();
+  renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph();
   const savedTab = store.get("tab"); if (savedTab && savedTab !== "radar") showTab(savedTab);
 })();
 </script>
