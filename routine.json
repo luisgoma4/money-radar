@@ -92,6 +92,7 @@
       "WebSearch in Spanish and English, starting with Madrid West municipalities (Las Rozas / Las Rozas Innova, Majadahonda, Pozuelo: BOCM extracts, BDNS, municipal sedes), for new or changed calls across every line of work in applicant_profile: CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BDNS/infosubvenciones, BOE, Comunidad de Madrid / madri+d, EIC/Horizon Europe/EU4Health/COST/Erasmus+/Funding & Tenders portal, NLnet, Spanish and EU private foundations (la Caixa, BBVA, Telefonica, Carasso), startup/research prizes. Prioritise the gaps named in the latest LESSONS.md entry.",
       "Verify each candidate on an official page with WebFetch (binary PDFs: save and run pdftotext -layout). Set verification 'verified' only from an official page, else 'unverified', and cite it in `source`. Never invent amounts or dates. Record the matching line(s) of work in `lines`.",
       "Add new rows (or a new id for a new edition) to ROWS in build.py; update changed facts in place (changes are logged automatically). Then run: python3 -I monitor.py && python3 -I build.py. If monitor.py exits non-zero, fix the reported rows and rerun.",
+      "Strategy: for each new call worth pursuing, add an entry to strategy.json -> opportunities (applicant order, lead/support faces, level 1-3, fit/value/strategic, prereqs, offer, ask). Then run python3 -I orchestrator.py and note any started application whose start_by date has passed or whose deadline is within 14 days.",
       "Commit money.db, dashboard.html, build.py and LESSONS.md and push to the repository's default branch with: git push -u origin <branch>.",
       "Winners research: for every call that closed (or whose `winners` says pending), find who won and what was funded — run python3 -I winners.py <BDNS number> (or --find), else the funder's resolution/press. Record count, total, median, range, beneficiary types, 2-5 comparable winners (legal entities only) and a one-line lesson in `winners`, with source and date; store the BDNS number in `bdns`.",
       "Archive review: for each entry in alerts.json review_due, either recover it (new row with a new id for the next edition, or unarchive if the situation changed) or keep it archived with a new review_on and an updated archive_reason recording what was learned.",
@@ -100,6 +101,7 @@
     "notify_when": [
       "alerts.json closing_soon is non-empty (a verified opportunity has a deadline within 14 days).",
       "alerts.json new_high_value is non-empty (a new opportunity >= EUR 25k).",
+      "An application in progress (orchestrator.py estado) is late against its start-by date or its deadline is within 14 days.",
       "The run fails (push denied, network blocked, bad token, monitor.py validation error)."
     ],
     "stay_silent_when": "alerts.json new_today and changed_today are both empty (nothing new or changed since the last run).",
