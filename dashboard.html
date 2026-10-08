@@ -243,6 +243,7 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .g-node rect.box { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
 .g-node.planned rect.box, .g-node.proposed rect.box { stroke-dasharray: 5 4; fill: var(--surface-2); }
 .g-node.external rect.box { stroke-dasharray: 1.5 3; stroke-width: 2; }
+.g-node.external.pending rect.box { fill: url(#shade); }
 .g-node text { fill: var(--ink); font-size: 12.5px; }
 .g-node .st { fill: var(--muted); font-size: 10.5px; }
 .g-node { cursor: default; }
@@ -956,6 +957,13 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       list.forEach((n, i) => { pos[n.id] = { x: 20 + ci * colW, y: y0 + i * (nh + gapY), col: ci, n }; });
     });
     const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Grafo de figuras legales, caras, productos y socios" });
+    // Shading for external partners whose relationship is still to be created.
+    const defs = s("defs", {});
+    const pat = s("pattern", { id: "shade", width: 7, height: 7, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+    pat.append(s("rect", { width: 7, height: 7, style: "fill:var(--surface-2)" }));
+    pat.append(s("line", { x1: 0, y1: 0, x2: 0, y2: 7, style: "stroke:var(--grid);stroke-width:2.5" }));
+    defs.append(pat); svg.append(defs);
+    const linked = new Set(g.edges.filter((e) => e.status === "exists").flatMap((e) => [e.from, e.to]));
     g.columns.forEach((c, ci) => svg.append(s("text", { class: "g-col", x: 20 + ci * colW, y: 18 }, c.name)));
     const edgesEl = [];
     g.edges.forEach((e) => {
@@ -972,12 +980,14 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     const ST = { exists: "existe", planned: "por crear", proposed: "propuesta", external: "socio externo" };
     const name = (id) => (g.nodes.find((n) => n.id === id) || {}).label || id;
     Object.values(pos).forEach(({ x, y, n }) => {
-      const grp = s("g", { class: `g-node ${n.status}`, tabindex: 0, role: "button", "aria-label": `${n.label} (${ST[n.status]})` });
+      const pending = n.status === "external" && !linked.has(n.id);
+      const stText = pending ? "socio externo · relación por crear" : ST[n.status];
+      const grp = s("g", { class: `g-node ${n.status}${pending ? " pending" : ""}`, tabindex: 0, role: "button", "aria-label": `${n.label} (${stText})` });
       grp.append(s("rect", { class: "box", x, y, width: nw, height: nh, rx: 9 }));
       grp.append(s("rect", { x: x + 1, y: y + 8, width: 5, height: nh - 16, rx: 2.5, fill: lineColor(n.face) }));
       const label = n.label.length > 36 ? n.label.slice(0, 35) + "…" : n.label;
       grp.append(s("text", { x: x + 14, y: y + 20 }, label));
-      grp.append(s("text", { class: "st", x: x + 14, y: y + 36 }, ST[n.status]));
+      grp.append(s("text", { class: "st", x: x + 14, y: y + 36 }, stText));
       const on = (evt) => {
         svg.classList.add("dim"); grp.classList.add("hl");
         const rel = [];
@@ -986,7 +996,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
           const nd = svg.querySelector(`[data-id="${other}"]`); if (nd) nd.classList.add("hl");
           const ed = g.edges.find((e) => e.from === p.dataset.from && e.to === p.dataset.to);
           rel.push(`${p.dataset.from === n.id ? "→" : "←"} ${name(other)} · ${ed.label}${ed.status === "planned" ? " (por crear)" : ""}`); } });
-        tip.replaceChildren(el("div", { class: "t-name" }, n.label), el("div", { class: "t-meta" }, `${ST[n.status]} · ${n.detail}`), ...rel.map((r) => el("div", { class: "t-meta" }, r)));
+        tip.replaceChildren(el("div", { class: "t-name" }, n.label), el("div", { class: "t-meta" }, `${stText} · ${n.detail}`), ...rel.map((r) => el("div", { class: "t-meta" }, r)));
         tip.hidden = false;
         const host = tip.parentElement.getBoundingClientRect(), r = grp.getBoundingClientRect();
         tip.style.left = Math.max(4, Math.min(r.left - host.left, host.width - 270)) + "px";
@@ -1001,7 +1011,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     document.getElementById("graph").replaceChildren(svg);
     const legend = document.getElementById("graph-legend");
     legend.replaceChildren(...faceOrder.map(faceDot),
-      el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"));
+      el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"), el("span", { class: "mini", style: "background:repeating-linear-gradient(45deg,var(--surface-2) 0 4px,var(--grid) 4px 6px)" }, "sombreado = socio por crear"));
     document.getElementById("graph-table").replaceChildren(el("table", {},
       el("thead", {}, el("tr", {}, ["Desde", "Relación", "Hacia", "Estado"].map((h) => el("th", { scope: "col" }, h)))),
       el("tbody", {}, g.edges.map((e) => el("tr", {}, el("td", {}, name(e.from)), el("td", {}, e.label), el("td", {}, name(e.to)),
