@@ -82,6 +82,10 @@ def check(rows):
             problems.append(f"{rid}: amount_min > amount_max")
         if not str(r.get("url", "")).startswith("https://"):
             problems.append(f"{rid}: url must be https")
+        past = r.get("deadline_kind") == "fixed" and r.get("deadline") and ISO.match(str(r["deadline"])) \
+            and dt.date.fromisoformat(r["deadline"]) < TODAY
+        if past and not r.get("winners"):
+            problems.append(f"{rid}: closed call needs `winners` (past winners/award stats, or 'pending' + when)")
         if r.get("archived") and not (r.get("archive_reason") and r.get("review_on")):
             problems.append(f"{rid}: archived rows need archive_reason and review_on")
         if r.get("review_on") is not None and not ISO.match(str(r["review_on"])):

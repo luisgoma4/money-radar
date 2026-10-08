@@ -47,6 +47,7 @@ FIELDS = [
     "amount_min", "amount_max", "amount_text",
     "opens", "deadline", "deadline_kind", "status", "verification",
     "url", "source", "fit", "requirements", "action",
+    "bdns", "winners",
     "archived", "archive_reason", "review_on",
 ]
 # Fields whose changes are logged (status included, so open -> closed shows up).
@@ -73,6 +74,8 @@ CREATE TABLE IF NOT EXISTS opportunities (
     fit           TEXT,
     requirements  TEXT,
     action        TEXT,
+    bdns          TEXT,               -- BDNS call number (infosubvenciones), if any
+    winners       TEXT,               -- who won past/this edition: counts, amounts, comparable winners, source + date
     archived      INTEGER NOT NULL DEFAULT 0,  -- 1 = archived (never deleted)
     archive_reason TEXT,
     review_on     TEXT,               -- ISO date to review an archived row: recover or keep as reference
@@ -93,6 +96,8 @@ BEGIN SELECT RAISE(ABORT, 'money-radar: the change history is append-only'); END
 """
 # Columns added after the first release; ALTER TABLE them into older databases.
 MIGRATIONS = {
+    "bdns": "TEXT",
+    "winners": "TEXT",
     "archived": "INTEGER NOT NULL DEFAULT 0",
     "archive_reason": "TEXT",
     "review_on": "TEXT",
@@ -193,6 +198,8 @@ ROWS = [
         fit="The most natural fit for Cloudy (science communication for families, citizen science) and for SEMF outreach (art–science–technology category).",
         requirements="Eligible entity with legal personality (check the bases for non-profit associations). Activities run between Jul 2027 and Jun 2029.",
         action="Closed for 2026. Prepare the 2027 application from April 2027; the call usually opens around July.",
+        bdns=None,
+        winners="2026 awards not published yet (the 2024 edition was resolved on 27 May 2025, about 8 months after its deadline). FECYT 2024 (BDNS 776848): 193 awards, EUR 4.5M total, median EUR 20,500 (range 715–82,200). Winners by type: universities 100, CSIC 27, foundations 25 (median EUR 20,000), associations 5 (median EUR 12,000). Comparable small winners: Asociación Valentia Scientia 27,000; Fundación Albireo Cultura Científica 25,000; Asociación Asíntota 12,000 + 10,000; Fundación madri+d 35,000. Lesson: the 100k ceiling is rare — a realistic request for an association or foundation is EUR 15–25k. Source: BDNS concessions API + FECYT definitive resolution 2024; checked 2026-10-09.",
     ),
     dict(
         id="cdti-neotec-2026",
@@ -206,8 +213,10 @@ ROWS = [
         url="https://www.ciencia.gob.es/Convocatorias/2026/NEOTEC2026.html",
         source="Search snippet from ciencia.gob.es (not fetched): applications 14 Apr – 14 May 2026",
         fit="Technology-based small companies building on research results — Causality Graphs if it develops its own technology.",
-        requirements="Small technology-based company (EBT); check the age limit and own-funds rules in the 2027 bases.",
+        requirements="2026 rules (per the Moncloa/CDTI announcement): small technology-based company under 3 years old, share capital at least EUR 20,000, no distributed profits; grant up to 70% of budget (85% when hiring a PhD), cap EUR 250k (325k with a PhD).",
         action="Closed. Watch for NEOTEC 2027 around April 2027.",
+        bdns="896999",
+        winners="2026 awards not yet in BDNS (the 2025 edition was resolved on 22 Dec 2025, so expect December 2026). NEOTEC 2025 (BDNS 829858): 128 companies, EUR 39.35M, median EUR 325,000 — most winners reached the cap that applies when a PhD holder is hired (cap 250k, 325k with a PhD). Lesson: plan a PhD hire into the project. Galicia (GAIN) runs a 'Recuperación Excelencia NEOTEC' call for companies above the threshold but unfunded; Madrid has no equivalent found. Source: BDNS concessions API; checked 2026-10-09.",
     ),
     dict(
         id="healthstart-madrimasd",
@@ -329,6 +338,8 @@ ROWS = [
         fit="Community-rooted organisations and local partnerships with municipalities improving neighbourhoods and shared spaces — the community side of a coworking/coliving hub.",
         requirements="Co-create NEB needs a local partnership including the municipality.",
         action="Closed. Watch for the next edition (published around July) and line up a municipal partner in advance.",
+        bdns=None,
+        winners="Not researched yet: the 2027-call results come after the 30 Sep 2026 deadline; the previous edition's winners list still needs to be looked up on new-european-bauhaus.europa.eu. Pending for the next run.",
     ),
     dict(
         id="madrid-cheque-innovacion",
@@ -409,6 +420,8 @@ ROWS = [
         fit="Explicitly funds publications and cultural events — Cloudy's books and SEMF events, if the entity is based in Pozuelo.",
         requirements="Non-profit cultural entity registered in Pozuelo's Registro Municipal de Asociaciones Vecinales, with main activity and registered office in Pozuelo.",
         action="Closed (window was only 15 days). Decide which municipality hosts the registered office; if Pozuelo, register before February 2027 to catch the 2027 call.",
+        bdns="894351",
+        winners="Winners not published in BDNS: none of Pozuelo's culture calls (2016–2026) has awards uploaded (checked 2026-10-09). Look for the Junta de Gobierno Local award decision on the Pozuelo sede / transparency portal. Call history: yearly since 2016, but published at irregular times (2026: 20 Mar; 2025: 10 Jun; 2024: 6 Nov) with only a 15-day window — monitor BDNS for Pozuelo.",
     ),
     dict(
         id="majadahonda-emprende-2026",
@@ -424,6 +437,8 @@ ROWS = [
         fit="Small, but local visibility for BranchOut startups based in Majadahonda.",
         requirements="Entrepreneurs and companies of Majadahonda, up to date with AEAT, Social Security and the council.",
         action="Closed. Enter BranchOut (or a resident startup) in the 2027 edition if the hub is in Majadahonda.",
+        bdns="906922",
+        winners="2026 winners not published yet (the 2025 edition was awarded on 12 Nov 2025). 2025 edition (BDNS 848973): 7 prizes, EUR 12,000. Company winners: The Natural Healthy and Honest Food Company SL 2,800; Gambooza Market SL 2,500; Majadahonda Te Va SL 2,000; Vulnscan Tech SL 1,500; Ramos y Werner SL 1,500; plus 2 individuals (700, 1,000; names masked in BDNS). Lesson: open to any local business; only one clearly tech winner. Source: BDNS concessions API; checked 2026-10-09.",
     ),
     dict(
         id="lasrozas-innova-foro",

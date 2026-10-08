@@ -39,6 +39,7 @@ Eligibility matters more than topic. Cloudy's legal form is unclear (check befor
 - `dashboard.html` — generated; never hand-edit. Committed so it can be served by GitHub Pages.
 - `money.db` — SQLite with two tables. `opportunities` holds the current state, including the archive fields `archived`, `archive_reason` and `review_on`. `changes` keeps an append-only history of field changes. Triggers block every `DELETE` on both tables.
 - `alerts.json` — generated each run and git-ignored. It holds `closing_soon`, `new_high_value`, `new_today`, `changed_today` and `review_due`, and drives the notification decision.
+- `winners.py` — summarises past winners of a call from the public BDNS API (stdlib only; see the winners rule).
 - `LESSONS.md` — one bullet per run: which sources and queries were useful, noisy or broken. The last 10 are shown on the dashboard.
 - `routine.json` — the scheduled-routine definition. Keep it in sync with this file.
 
@@ -63,6 +64,24 @@ Entries are **archived, never deleted**. The archive is used two ways: to recove
 - **To drop a call that is still open** (not eligible, bad fit), set `archived=True` with an `archive_reason` (why) and a `review_on` (when to look again). `monitor.py` enforces both.
 - **Review:** `alerts.json` → `review_due` and `monitor.py` list archived entries whose `review_on` has passed. For each one, either recover it (add a new row with a new id for the next edition, or drop `archived=True` if the situation changed), or keep it archived with a new `review_on` and an updated `archive_reason` saying what was learned.
 
+## Winners rule: always research who won
+
+For every call that has closed, and before recommending any recurring call, find out **who won and what was funded**. The `winners` field records it, and `monitor.py` rejects a closed call without it.
+
+- **Where to look:**
+  - BDNS first: `python3 -I winners.py <BDNS number>` prints award count, total, median, range, beneficiary types and the largest entity awards. `--find "<title words>"` finds call numbers, including past editions.
+  - If the funder doesn't upload awards to BDNS (e.g. Pozuelo culture): its resolution PDF, the council's Junta de Gobierno decision, a press release or the funder's results page.
+- **What to write:**
+  - Edition and BDNS number.
+  - Number of awards, total, median and range.
+  - Who wins by type (university / foundation / association / company).
+  - 2–5 comparable winners: small associations, foundations or startups like ours.
+  - A one-line **lesson** (e.g. "median EUR 20k — don't ask for the 100k ceiling", "winners max out the PhD-hire bonus").
+  - Source and check date.
+- **Not published yet:** write that, plus when the previous edition was resolved, so the next run knows when to check.
+- **Privacy:** name legal entities only. BDNS masks individuals; never try to identify them.
+- **Store the BDNS call number in `bdns`** whenever there is one.
+
 ## Data model rules
 
 - `deadline_kind`:
@@ -82,8 +101,9 @@ Entries are **archived, never deleted**. The archive is used two ways: to recove
 3. Verify each candidate with WebFetch on an official page. Some official PDFs (BOE, COST) come back as binary; extract them with `pdftotext -layout`.
 4. Add or update rows in `ROWS`, then run the commands above.
 5. Commit `money.db`, `dashboard.html`, `build.py` and `LESSONS.md`, then push to the default branch (`git push -u origin <branch>`). No pull requests unless asked.
-6. Review every entry in `review_due` (see the archive rule): recover it or re-date the review.
-7. Append one lesson to `LESSONS.md`.
+6. For every call that closed since the last run, or still says "pending" in `winners`, research the winners (winners rule).
+7. Review every entry in `review_due` (see the archive rule): recover it or re-date the review.
+8. Append one lesson to `LESSONS.md`.
 
 ## Notifications
 

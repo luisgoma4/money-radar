@@ -529,9 +529,10 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
         o.archive_reason || "") : null,
       o.action ? el("div", { class: "action" }, el("b", {}, "Next step"), o.action) : null,
       el("details", {},
-        el("summary", {}, "Fit and requirements"),
+        el("summary", {}, o.winners ? "Fit, requirements and past winners" : "Fit and requirements"),
         o.fit ? el("p", {}, el("strong", {}, "Why it fits: "), o.fit) : null,
         o.requirements ? el("p", {}, el("strong", {}, "Requirements: "), o.requirements) : null,
+        o.winners ? el("p", {}, el("strong", {}, "Past winners: "), o.winners) : null,
         el("p", { class: "src" }, `Source: ${o.source || "—"} · first seen ${fmtDate(o.first_seen)} · checked ${fmtDate(o.last_checked)}`)),
       el("div", { class: "links" }, el("a", { href: o.url, target: "_blank", rel: "noopener" }, "Official page ↗")));
   }
