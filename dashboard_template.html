@@ -504,7 +504,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     <div class="od-options" id="od-options"></div>
     <div class="od-interim" id="od-interim"></div>
     <form class="od-input" id="od-form">
-      <button type="button" class="od-mic" id="od-mic" title="Mantén pulsado (o la barra espaciadora) y habla">🎙</button>
+      <button type="button" class="od-mic" id="od-mic" title="Toca y habla (se detiene al callarte) · mantén pulsado para hablar mientras lo sujetas · también con la barra espaciadora">🎙</button>
       <input id="od-text" type="text" placeholder="Habla o escribe… («qué hago ahora», «empieza la ceremonia»)" autocomplete="off" aria-label="Mensaje al oráculo">
       <button type="submit" class="btn">↵</button>
     </form>
@@ -1315,15 +1315,32 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     $("od-log").append(m); $("od-log").scrollTop = $("od-log").scrollHeight;
     if (who !== "or") return;
     OD.lastSay = text;
-    if (OD.muted || !("speechSynthesis" in window)) return;
+    speak(text);
+  }
+  // Voices load asynchronously (Safari, Chrome); Safari only speaks after a first user gesture.
+  let VOICE = null, TTS_UNLOCKED = false, PENDING_SPEECH = null;
+  function pickVoice() {
+    if (!("speechSynthesis" in window)) return;
+    const vs = speechSynthesis.getVoices();
+    VOICE = vs.find((x) => /^es[-_]ES$/i.test(x.lang) && /monica|mónica|paulina|google/i.test(x.name))
+      || vs.find((x) => /^es[-_]ES$/i.test(x.lang)) || vs.find((x) => /^es/i.test(x.lang)) || null;
+  }
+  if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.addEventListener?.("voiceschanged", pickVoice); }
+  function speak(text) {
+    if (OD.muted || !("speechSynthesis" in window) || !text) return;
+    if (!TTS_UNLOCKED) { PENDING_SPEECH = text; return; }
+    if (OD.listening) stopListening();
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text.replace(/[«»]/g, ""));
-    u.lang = "es-ES";
-    const v = speechSynthesis.getVoices().find((x) => x.lang === "es-ES") || speechSynthesis.getVoices().find((x) => x.lang.startsWith("es"));
-    if (v) u.voice = v;
-    u.rate = 1.05;
-    if (OD.listening) stopListening();
-    speechSynthesis.speak(u);
+    u.lang = "es-ES"; if (VOICE) u.voice = VOICE; u.rate = 1.05;
+    // Safari sometimes drops an utterance queued right after cancel(); defer a tick.
+    setTimeout(() => speechSynthesis.speak(u), 30);
+  }
+  function unlockTTS() {
+    if (TTS_UNLOCKED || !("speechSynthesis" in window)) return;
+    TTS_UNLOCKED = true;
+    const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u);  // must happen inside the gesture
+    if (PENDING_SPEECH) { const s = PENDING_SPEECH; PENDING_SPEECH = null; setTimeout(() => speak(s), 150); }
   }
   function setOptions(opts) {
     OD.options = opts || [];
@@ -1509,21 +1526,48 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     } else { ceremony("next"); }
   }
 
-  // ---- speech input (Web Speech API, es-ES, push-to-talk) ----
+  // ---- speech input (Web Speech API, es-ES). Tap: listen until you stop talking. Hold: push-to-talk. ----
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let rec = null;
+  const IS_SAFARI = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+  let rec = null, pressAt = 0, heard = "";
+  const MIC_HELP = {
+    "not-allowed": IS_SAFARI
+      ? "Safari no tiene permiso. Safari › Ajustes para 127.0.0.1 › Micrófono: Permitir. En macOS: Ajustes del Sistema › Privacidad › Micrófono y Reconocimiento de voz para Safari."
+      : "El navegador no tiene permiso para el micrófono: pulsa el candado de la barra de direcciones y permítelo.",
+    "service-not-allowed": "El reconocimiento de voz del sistema está desactivado. En macOS: Ajustes del Sistema › Teclado › Dictado: activar (y Siri si lo pide). Luego recarga la página.",
+    "audio-capture": "No encuentro micrófono. Revisa la entrada de sonido en Ajustes del Sistema › Sonido.",
+    "network": "El servicio de reconocimiento de voz no responde (sin conexión).",
+    "language-not-supported": "El reconocimiento en español no está disponible; añade Español en Ajustes del Sistema › Teclado › Dictado › Idiomas.",
+  };
   function startListening() {
-    if (!SR) { say("Este navegador no reconoce voz; usa Chrome o Safari, o escribe.", "sys"); return; }
+    unlockTTS();
+    if (!SR) { say("Este navegador no tiene reconocimiento de voz. Usa Safari 14.1+ o Chrome, o escribe.", "sys"); return; }
     if (OD.listening) return;
     if ("speechSynthesis" in window) speechSynthesis.cancel();
-    rec = new SR(); rec.lang = "es-ES"; rec.interimResults = true; rec.continuous = false;
-    let final = "";
-    rec.onresult = (e) => { let interim = ""; for (const r of e.results) { if (r.isFinal) final = r[0].transcript; else interim += r[0].transcript; } $("od-interim").textContent = interim; };
-    rec.onend = () => { OD.listening = false; $("od-mic").classList.remove("on"); $("od-interim").textContent = ""; if (final) handle(final); };
-    rec.onerror = (e) => { if (e.error !== "no-speech" && e.error !== "aborted") say("Micrófono: " + e.error, "sys"); };
-    OD.listening = true; $("od-mic").classList.add("on"); rec.start();
+    heard = "";
+    try {
+      rec = new SR();
+      rec.lang = "es-ES"; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+      rec.onresult = (e) => {
+        let txt = "";
+        for (let k = 0; k < e.results.length; k++) txt += e.results[k][0].transcript;
+        heard = txt;  // Safari often never marks the result as final: keep the latest transcript
+        $("od-interim").textContent = txt;
+      };
+      rec.onerror = (e) => { if (e.error !== "no-speech" && e.error !== "aborted") say(MIC_HELP[e.error] || ("Micrófono: " + e.error), "sys"); };
+      rec.onend = () => {
+        OD.listening = false; $("od-mic").classList.remove("on"); $("od-interim").textContent = "";
+        const txt = heard.trim(); heard = "";
+        if (txt) handle(txt);
+      };
+      rec.start();
+      OD.listening = true; $("od-mic").classList.add("on"); $("od-interim").textContent = "Escuchando…";
+    } catch (err) { OD.listening = false; say("No he podido abrir el micrófono: " + err.message, "sys"); }
   }
-  function stopListening() { if (rec && OD.listening) rec.stop(); }
+  function stopListening() { if (rec && OD.listening) { try { rec.stop(); } catch (e) {} } }
+  // A short press toggles listening (ends by itself when you stop talking); a long press is push-to-talk.
+  function micDown() { pressAt = Date.now(); if (OD.listening) { stopListening(); pressAt = 0; } else startListening(); }
+  function micUp() { if (pressAt && Date.now() - pressAt > 600) stopListening(); pressAt = 0; }
   function toggleMute(force) {
     OD.muted = force ?? !OD.muted; store.set("od-muted", OD.muted);
     if (OD.muted && "speechSynthesis" in window) speechSynthesis.cancel();
@@ -1537,12 +1581,15 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     $("oracle-dock").hidden = false;
     toggleMute(OD.muted);
     const mic = $("od-mic");
-    mic.addEventListener("pointerdown", (e) => { e.preventDefault(); startListening(); });
-    mic.addEventListener("pointerup", stopListening); mic.addEventListener("pointerleave", stopListening);
+    mic.addEventListener("pointerdown", (e) => { e.preventDefault(); micDown(); });
+    mic.addEventListener("pointerup", micUp);
     document.addEventListener("keydown", (e) => {
-      if (e.code === "Space" && !e.repeat && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); startListening(); }
+      if (e.code === "Space" && !e.repeat && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); micDown(); }
     });
-    document.addEventListener("keyup", (e) => { if (e.code === "Space" && OD.listening) stopListening(); });
+    document.addEventListener("keyup", (e) => { if (e.code === "Space" && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName)) micUp(); });
+    // Safari: speech output only works after a user gesture; unlock on the first interaction anywhere.
+    ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, unlockTTS, { once: false, capture: true }));
+    if (!SR) say("Tu navegador no reconoce voz: puedes escribir. Safari 14.1+ y Chrome sí lo hacen.", "sys");
     $("od-form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("od-text").value; $("od-text").value = ""; handle(v); });
     $("od-yes").addEventListener("click", () => confirm(true)); $("od-no").addEventListener("click", () => confirm(false));
     $("od-mute").addEventListener("click", () => toggleMute());
