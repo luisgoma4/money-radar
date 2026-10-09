@@ -106,6 +106,17 @@ CREATE TABLE IF NOT EXISTS applications (
 );
 CREATE TRIGGER IF NOT EXISTS applications_no_delete BEFORE DELETE ON applications
 BEGIN SELECT RAISE(ABORT, 'money-radar: applications are closed, never deleted'); END;
+-- Oracle ceremonies (oraculo.py registrar): decisions and commitments by role, never by name.
+CREATE TABLE IF NOT EXISTS ceremonies (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    held_on     TEXT NOT NULL,
+    summary     TEXT,
+    decisions   TEXT NOT NULL,        -- JSON list of strings
+    commitments TEXT NOT NULL,        -- JSON list of {rol, tarea, fecha}
+    next_on     TEXT
+);
+CREATE TRIGGER IF NOT EXISTS ceremonies_no_delete BEFORE DELETE ON ceremonies
+BEGIN SELECT RAISE(ABORT, 'money-radar: ceremonies are a record, never deleted'); END;
 """
 
 
@@ -682,13 +693,15 @@ def main():
     sync(conn)
     opps, changes = load(conn)
     apps = [dict(r) for r in conn.execute("SELECT * FROM applications ORDER BY updated_on DESC")]
+    ceremonies = [dict(r, decisions=json.loads(r["decisions"]), commitments=json.loads(r["commitments"]))
+                  for r in conn.execute("SELECT * FROM ceremonies ORDER BY held_on DESC, id DESC")]
     conn.close()
 
     planner = load_planner()
-    plan = planner.make_plan(opps, planner.load_strategy(), apps, TODAY)
+    plan = planner.make_plan(opps, planner.load_strategy(), apps, TODAY, ceremonies)
     out = HERE / "graphify-out"
     out.mkdir(exist_ok=True)
-    (out / "graph.json").write_text(json.dumps(planner.graph_export(plan, opps), ensure_ascii=False, indent=1) + "\n",
+    (out / "graph.json").write_text(json.dumps(planner.graph_export(plan), ensure_ascii=False, indent=1) + "\n",
                                     encoding="utf-8")
     plan["has_3d"] = (out / "graph3d.html").exists()
     DASHBOARD.write_text(render(opps, changes, read_lessons(), plan), encoding="utf-8")

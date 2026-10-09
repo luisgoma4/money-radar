@@ -170,6 +170,34 @@
    "community_name": "socio externo - relacion por crear"
   },
   {
+   "id": "z_sede",
+   "label": "Sede y registro en Las Rozas",
+   "source_file": "Fundacion Delfina Leon/factor",
+   "source_location": "factor",
+   "community_name": "factor de contexto"
+  },
+  {
+   "id": "z_reputacion",
+   "label": "Reputacion cientifica",
+   "source_file": "SEMF/factor",
+   "source_location": "factor",
+   "community_name": "factor de contexto"
+  },
+  {
+   "id": "z_red",
+   "label": "Red internacional",
+   "source_file": "SEMF/factor",
+   "source_location": "factor",
+   "community_name": "factor de contexto"
+  },
+  {
+   "id": "z_fondos",
+   "label": "Fondos propios y tesoreria",
+   "source_file": "BranchOut/factor",
+   "source_location": "factor",
+   "community_name": "factor de contexto"
+  },
+  {
    "id": "c_caixaresearch-health-next",
    "label": "[A] CaixaResearch Health Research Call (next edition)",
    "source_file": "Causality Graphs/convocatoria",
@@ -420,770 +448,1373 @@
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
+  },
+  {
+   "id": "m_M_CG_FORM",
+   "label": "Confirmar la forma juridica de Causality Graphs",
+   "source_file": "Hitos/hito",
+   "source_location": "hito",
+   "community_name": "hito hecho"
   }
  ],
  "links": [
   {
    "source": "e_fund",
    "target": "f_cloudy",
-   "relation": "vehiculo legal",
+   "weight": 0.6,
+   "relation": "vehiculo legal (peso 0.60)",
    "confidence": "INFERRED"
   },
   {
    "source": "e_fund",
    "target": "f_semf",
-   "relation": "acoge en Madrid",
+   "weight": 0.4,
+   "relation": "acoge en Madrid (peso 0.40)",
    "confidence": "INFERRED"
   },
   {
-   "source": "e_fund",
-   "target": "f_cg",
-   "relation": "agrupa",
+   "source": "f_cg",
+   "target": "e_fund",
+   "weight": 0.3,
+   "relation": "aporta a la fundacion (peso 0.30)",
    "confidence": "INFERRED"
   },
   {
-   "source": "e_fund",
-   "target": "f_bo",
-   "relation": "agrupa",
+   "source": "f_bo",
+   "target": "e_fund",
+   "weight": 0.3,
+   "relation": "aporta a la fundacion (peso 0.30)",
    "confidence": "INFERRED"
   },
   {
    "source": "e_asoc",
    "target": "f_cloudy",
-   "relation": "actividades locales",
+   "weight": 0.5,
+   "relation": "actividades locales (peso 0.50)",
    "confidence": "INFERRED"
   },
   {
    "source": "e_asoc",
    "target": "f_semf",
-   "relation": "actividades locales",
+   "weight": 0.5,
+   "relation": "actividades locales (peso 0.50)",
    "confidence": "INFERRED"
   },
   {
    "source": "e_semf",
    "target": "f_semf",
-   "relation": "titular",
+   "weight": 1.0,
+   "relation": "titular (peso 1.00)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "e_cg",
    "target": "f_cg",
-   "relation": "titular",
+   "weight": 1.0,
+   "relation": "titular (peso 1.00)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "e_bo",
    "target": "f_bo",
-   "relation": "titular",
+   "weight": 1.0,
+   "relation": "titular (peso 1.00)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "f_cloudy",
    "target": "p_books",
-   "relation": "produce",
+   "weight": 0.9,
+   "relation": "produce (peso 0.90)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "f_cloudy",
    "target": "p_sessions",
-   "relation": "produce",
+   "weight": 0.8,
+   "relation": "produce (peso 0.80)",
    "confidence": "INFERRED"
   },
   {
    "source": "f_semf",
    "target": "p_events",
-   "relation": "organiza",
+   "weight": 0.9,
+   "relation": "organiza (peso 0.90)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "f_semf",
    "target": "p_ciclo",
-   "relation": "organiza",
+   "weight": 0.7,
+   "relation": "organiza (peso 0.70)",
    "confidence": "INFERRED"
   },
   {
    "source": "f_cg",
    "target": "p_consult",
-   "relation": "vende",
+   "weight": 0.9,
+   "relation": "vende (peso 0.90)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "f_cg",
    "target": "p_lib",
-   "relation": "desarrolla",
+   "weight": 0.7,
+   "relation": "desarrolla (peso 0.70)",
    "confidence": "INFERRED"
   },
   {
    "source": "f_cg",
    "target": "p_eval",
-   "relation": "aporta",
+   "weight": 0.8,
+   "relation": "aporta (peso 0.80)",
    "confidence": "INFERRED"
   },
   {
    "source": "f_bo",
    "target": "p_hub",
-   "relation": "opera",
+   "weight": 0.9,
+   "relation": "opera (peso 0.90)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "f_bo",
    "target": "p_cowork",
-   "relation": "opera",
+   "weight": 0.8,
+   "relation": "opera (peso 0.80)",
    "confidence": "INFERRED"
   },
   {
    "source": "f_bo",
    "target": "p_coliving",
-   "relation": "opera",
+   "weight": 0.6,
+   "relation": "opera (peso 0.60)",
    "confidence": "INFERRED"
   },
   {
    "source": "f_bo",
    "target": "p_lib",
-   "relation": "desarrollo",
+   "weight": 0.4,
+   "relation": "desarrollo (peso 0.40)",
    "confidence": "INFERRED"
   },
   {
    "source": "e_fund",
    "target": "p_space",
-   "relation": "titular",
+   "weight": 0.7,
+   "relation": "titular (peso 0.70)",
    "confidence": "INFERRED"
   },
   {
    "source": "p_space",
    "target": "p_cowork",
-   "relation": "aloja",
+   "weight": 0.7,
+   "relation": "aloja (peso 0.70)",
    "confidence": "INFERRED"
   },
   {
    "source": "p_space",
    "target": "p_ciclo",
-   "relation": "aloja",
+   "weight": 0.5,
+   "relation": "aloja (peso 0.50)",
    "confidence": "INFERRED"
   },
   {
    "source": "p_eval",
    "target": "p_books",
-   "relation": "mide impacto",
+   "weight": 0.3,
+   "relation": "mide impacto (peso 0.30)",
    "confidence": "INFERRED"
   },
   {
    "source": "p_eval",
    "target": "p_ciclo",
-   "relation": "mide impacto",
+   "weight": 0.3,
+   "relation": "mide impacto (peso 0.30)",
    "confidence": "INFERRED"
   },
   {
    "source": "x_csic",
    "target": "f_cg",
-   "relation": "investigador externo",
+   "weight": 0.6,
+   "relation": "investigador externo (peso 0.60)",
    "confidence": "EXTRACTED"
   },
   {
    "source": "x_csic",
    "target": "p_lib",
-   "relation": "direccion cientifica",
+   "weight": 0.5,
+   "relation": "direccion cientifica (peso 0.50)",
    "confidence": "INFERRED"
   },
   {
    "source": "x_uned",
    "target": "f_semf",
-   "relation": "aval academico",
+   "weight": 0.4,
+   "relation": "aval academico (peso 0.40)",
    "confidence": "INFERRED"
   },
   {
    "source": "x_uned",
    "target": "p_sessions",
-   "relation": "estudiantes de Fisica",
+   "weight": 0.4,
+   "relation": "estudiantes de Fisica (peso 0.40)",
    "confidence": "INFERRED"
   },
   {
    "source": "x_idiphisa",
    "target": "f_cg",
-   "relation": "socio clinico",
+   "weight": 0.5,
+   "relation": "socio clinico (peso 0.50)",
    "confidence": "INFERRED"
   },
   {
    "source": "x_lr",
    "target": "p_space",
-   "relation": "convenio / cesion",
+   "weight": 0.7,
+   "relation": "convenio / cesion (peso 0.70)",
    "confidence": "INFERRED"
   },
   {
    "source": "x_lr",
    "target": "p_hub",
-   "relation": "ecosistema tech",
+   "weight": 0.4,
+   "relation": "ecosistema tech (peso 0.40)",
    "confidence": "INFERRED"
   },
   {
-   "source": "c_caixaresearch-health-next",
-   "target": "x_csic",
-   "relation": "solicita"
+   "source": "z_sede",
+   "target": "e_asoc",
+   "weight": 0.9,
+   "relation": "permite inscribir (peso 0.90)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_caixaresearch-health-next",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "z_sede",
+   "target": "p_space",
+   "weight": 0.8,
+   "relation": "localiza (peso 0.80)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_caixaresearch-health-next",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "z_sede",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.7,
+   "relation": "condiciona (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-convenios-entidades",
+   "source": "z_sede",
+   "target": "c_lasrozas-cesion-espacios-cultura",
+   "weight": 0.9,
+   "relation": "requisito (peso 0.90)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "z_sede",
+   "target": "c_madrid-cesion-centros-educativos",
+   "weight": 0.4,
+   "relation": "facilita (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "z_fondos",
    "target": "e_fund",
-   "relation": "solicita"
+   "weight": 0.8,
+   "relation": "dotacion 30.000 EUR (peso 0.80)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-convenios-entidades",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "z_fondos",
+   "target": "c_enisa-prestamo-participativo",
+   "weight": 0.9,
+   "relation": "fondos propios  prestamo (peso 0.90)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_lasrozas-convenios-entidades",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "z_fondos",
+   "target": "c_cdti-neotec-2026",
+   "weight": 0.4,
+   "relation": "capital minimo (peso 0.40)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_lasrozas-convenios-entidades",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "p_consult",
+   "target": "z_fondos",
+   "weight": 0.5,
+   "relation": "ingresos (peso 0.50)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_lasrozas-convenios-entidades",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "p_hub",
+   "target": "z_fondos",
+   "weight": 0.3,
+   "relation": "ingresos (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_semf",
+   "target": "z_reputacion",
+   "weight": 0.6,
+   "relation": "trayectoria (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_csic",
+   "target": "z_reputacion",
+   "weight": 0.7,
+   "relation": "aval cientifico (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_uned",
+   "target": "z_reputacion",
+   "weight": 0.4,
+   "relation": "aval academico (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "z_reputacion",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.5,
+   "relation": "puntua (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "z_reputacion",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.5,
+   "relation": "puntua (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "z_reputacion",
+   "target": "c_caixaresearch-health-next",
+   "weight": 0.7,
+   "relation": "puntua (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "z_reputacion",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 0.5,
+   "relation": "puntua (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_semf",
+   "target": "z_red",
+   "weight": 0.9,
+   "relation": "red de socios (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "z_red",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.9,
+   "relation": "requisito 7+ paises (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "z_red",
+   "target": "c_erasmus-ka210-2027",
+   "weight": 0.6,
+   "relation": "socio UE (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "z_red",
+   "target": "c_startup-europe-2027",
+   "weight": 0.6,
+   "relation": "consorcio (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_csic",
+   "target": "c_caixaresearch-health-next",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_cg",
+   "target": "c_caixaresearch-health-next",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_cloudy",
+   "target": "c_caixaresearch-health-next",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_consult",
+   "target": "c_caixaresearch-health-next",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "e_fund",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_cloudy",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_semf",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_cg",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_space",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_eval",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_ciclo",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_LR_REUNION",
    "target": "c_lasrozas-convenios-entidades",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_FUND",
    "target": "c_lasrozas-convenios-entidades",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEDE_LR",
    "target": "c_lasrozas-convenios-entidades",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_fecyt-fcc-2026",
-   "target": "e_semf",
-   "relation": "solicita"
+   "source": "e_semf",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_fecyt-fcc-2026",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.8,
+   "relation": "lidera la oferta (peso 0.80)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_fecyt-fcc-2026",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_fecyt-fcc-2026",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_books",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_eval",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEMF_REG",
    "target": "c_fecyt-fcc-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_startup-europe-2027",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_startup-europe-2027",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_startup-europe-2027",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_startup-europe-2027",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_startup-europe-2027",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_startup-europe-2027",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_startup-europe-2027",
-   "target": "e_fund",
-   "relation": "aporta valor"
+   "source": "e_fund",
+   "target": "c_startup-europe-2027",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_hub",
+   "target": "c_startup-europe-2027",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_cowork",
+   "target": "c_startup-europe-2027",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_EU_PIC",
    "target": "c_startup-europe-2027",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_startup-europe-2027",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_horizon-hlth-2027-01-02",
-   "target": "e_cg",
-   "relation": "solicita"
+   "source": "e_cg",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_horizon-hlth-2027-01-02",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_horizon-hlth-2027-01-02",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_consult",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_CG_FORM",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
    "source": "m_M_EU_PIC",
    "target": "c_horizon-hlth-2027-01-02",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_PARTNER_IDIPHISA",
    "target": "c_horizon-hlth-2027-01-02",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_cost-oc-2026-1",
-   "target": "e_semf",
-   "relation": "solicita"
+   "source": "e_semf",
+   "target": "c_cost-oc-2026-1",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_cost-oc-2026-1",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.8,
+   "relation": "lidera la oferta (peso 0.80)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_cost-oc-2026-1",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_cost-oc-2026-1",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_events",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_RED_COST",
    "target": "c_cost-oc-2026-1",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEMF_REG",
    "target": "c_cost-oc-2026-1",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-cesion-espacios-cultura",
-   "target": "e_asoc",
-   "relation": "solicita"
+   "source": "e_asoc",
+   "target": "c_lasrozas-cesion-espacios-cultura",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-cesion-espacios-cultura",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_lasrozas-cesion-espacios-cultura",
+   "weight": 0.8,
+   "relation": "lidera la oferta (peso 0.80)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-cesion-espacios-cultura",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_lasrozas-cesion-espacios-cultura",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_ciclo",
+   "target": "c_lasrozas-cesion-espacios-cultura",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_ASOC_LOCAL",
    "target": "c_lasrozas-cesion-espacios-cultura",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_madrid-cesion-centros-educativos",
-   "target": "e_fund",
-   "relation": "solicita"
+   "source": "e_fund",
+   "target": "c_madrid-cesion-centros-educativos",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_madrid-cesion-centros-educativos",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_madrid-cesion-centros-educativos",
+   "weight": 0.8,
+   "relation": "lidera la oferta (peso 0.80)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_madrid-cesion-centros-educativos",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_madrid-cesion-centros-educativos",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_sessions",
+   "target": "c_madrid-cesion-centros-educativos",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEGURO",
    "target": "c_madrid-cesion-centros-educativos",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_FUND",
    "target": "c_madrid-cesion-centros-educativos",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEDE_LR",
    "target": "c_madrid-cesion-centros-educativos",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_cdti-neotec-2026",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_cdti-neotec-2026",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_cdti-neotec-2026",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_cdti-neotec-2026",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_cdti-neotec-2026",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_cdti-neotec-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_lib",
+   "target": "c_cdti-neotec-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_PRODUCTO",
    "target": "c_cdti-neotec-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_cdti-neotec-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_pozuelo-subv-cultura-2026",
-   "target": "e_asoc",
-   "relation": "solicita"
+   "source": "e_asoc",
+   "target": "c_pozuelo-subv-cultura-2026",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_pozuelo-subv-cultura-2026",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_pozuelo-subv-cultura-2026",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_pozuelo-subv-cultura-2026",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_pozuelo-subv-cultura-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_books",
+   "target": "c_pozuelo-subv-cultura-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_ASOC_LOCAL",
    "target": "c_pozuelo-subv-cultura-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_healthstart-madrimasd",
-   "target": "e_cg",
-   "relation": "solicita"
+   "source": "e_cg",
+   "target": "c_healthstart-madrimasd",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_healthstart-madrimasd",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_healthstart-madrimasd",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_healthstart-madrimasd",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_healthstart-madrimasd",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_consult",
+   "target": "c_healthstart-madrimasd",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_CG_FORM",
+   "target": "c_healthstart-madrimasd",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
    "source": "m_M_PRODUCTO",
    "target": "c_healthstart-madrimasd",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_erasmus-ka210-2027",
-   "target": "e_fund",
-   "relation": "solicita"
+   "source": "e_fund",
+   "target": "c_erasmus-ka210-2027",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_erasmus-ka210-2027",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_erasmus-ka210-2027",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_erasmus-ka210-2027",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_erasmus-ka210-2027",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_books",
+   "target": "c_erasmus-ka210-2027",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_EU_PIC",
    "target": "c_erasmus-ka210-2027",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_FUND",
    "target": "c_erasmus-ka210-2027",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEDE_LR",
    "target": "c_erasmus-ka210-2027",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_carasso-componer-saberes",
-   "target": "e_semf",
-   "relation": "solicita"
+   "source": "e_semf",
+   "target": "c_carasso-componer-saberes",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_carasso-componer-saberes",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_carasso-componer-saberes",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_carasso-componer-saberes",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_carasso-componer-saberes",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_carasso-componer-saberes",
-   "target": "e_fund",
-   "relation": "aporta valor"
+   "source": "e_fund",
+   "target": "c_carasso-componer-saberes",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_ciclo",
+   "target": "c_carasso-componer-saberes",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_events",
+   "target": "c_carasso-componer-saberes",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEMF_REG",
    "target": "c_carasso-componer-saberes",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-innova-foro",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_lasrozas-innova-foro",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_lasrozas-innova-foro",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_lasrozas-innova-foro",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_hub",
+   "target": "c_lasrozas-innova-foro",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_lasrozas-innova-foro",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_enisa-prestamo-participativo",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_enisa-prestamo-participativo",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_enisa-prestamo-participativo",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_enisa-prestamo-participativo",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_hub",
+   "target": "c_enisa-prestamo-participativo",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_enisa-prestamo-participativo",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_nlnet-2026-11",
-   "target": "e_cg",
-   "relation": "solicita"
+   "source": "e_cg",
+   "target": "c_nlnet-2026-11",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_nlnet-2026-11",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_nlnet-2026-11",
+   "weight": 0.7,
+   "relation": "lidera la oferta (peso 0.70)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_nlnet-2026-11",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_nlnet-2026-11",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_lib",
+   "target": "c_nlnet-2026-11",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_PRODUCTO",
    "target": "c_nlnet-2026-11",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_eic-accelerator-2026-11",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_eic-accelerator-2026-11",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_eic-accelerator-2026-11",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_eic-accelerator-2026-11",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_eic-accelerator-2026-11",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_eic-accelerator-2026-11",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_lib",
+   "target": "c_eic-accelerator-2026-11",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_PRODUCTO",
    "target": "c_eic-accelerator-2026-11",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_eic-accelerator-2026-11",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_EU_PIC",
    "target": "c_eic-accelerator-2026-11",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_horizon-neb-2026",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_horizon-neb-2026",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_horizon-neb-2026",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_horizon-neb-2026",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_horizon-neb-2026",
-   "target": "e_fund",
-   "relation": "aporta valor"
+   "source": "e_fund",
+   "target": "c_horizon-neb-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_horizon-neb-2026",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_horizon-neb-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_coliving",
+   "target": "c_horizon-neb-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_cowork",
+   "target": "c_horizon-neb-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_EU_PIC",
    "target": "c_horizon-neb-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_horizon-neb-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_plan-vivienda-2026-coliving",
-   "target": "e_fund",
-   "relation": "solicita"
+   "source": "e_fund",
+   "target": "c_plan-vivienda-2026-coliving",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_plan-vivienda-2026-coliving",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_plan-vivienda-2026-coliving",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_coliving",
+   "target": "c_plan-vivienda-2026-coliving",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_FUND",
    "target": "c_plan-vivienda-2026-coliving",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_SEDE_LR",
    "target": "c_plan-vivienda-2026-coliving",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_madrid-sello-excelencia",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_madrid-sello-excelencia",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_madrid-sello-excelencia",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_madrid-sello-excelencia",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_madrid-sello-excelencia",
-   "target": "f_cg",
-   "relation": "aporta valor"
+   "source": "f_cg",
+   "target": "c_madrid-sello-excelencia",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_PRODUCTO",
    "target": "c_madrid-sello-excelencia",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_madrid-sello-excelencia",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-cultura-asociaciones-2026",
-   "target": "e_asoc",
-   "relation": "solicita"
+   "source": "e_asoc",
+   "target": "c_lasrozas-cultura-asociaciones-2026",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-cultura-asociaciones-2026",
-   "target": "f_semf",
-   "relation": "aporta valor"
+   "source": "f_semf",
+   "target": "c_lasrozas-cultura-asociaciones-2026",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_lasrozas-cultura-asociaciones-2026",
-   "target": "f_cloudy",
-   "relation": "aporta valor"
+   "source": "f_cloudy",
+   "target": "c_lasrozas-cultura-asociaciones-2026",
+   "weight": 0.3,
+   "relation": "apoya la oferta (peso 0.30)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_ASOC_LOCAL",
    "target": "c_lasrozas-cultura-asociaciones-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_madrid-cheque-innovacion",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_madrid-cheque-innovacion",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_madrid-cheque-innovacion",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_madrid-cheque-innovacion",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_madrid-cheque-innovacion",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_pozuelo-innpar-vivero",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_pozuelo-innpar-vivero",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_pozuelo-innpar-vivero",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_pozuelo-innpar-vivero",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_pozuelo-innpar-vivero",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_neb-connect-cocreate-2027",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_neb-connect-cocreate-2027",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_neb-connect-cocreate-2027",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_neb-connect-cocreate-2027",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_neb-connect-cocreate-2027",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   },
   {
-   "source": "c_majadahonda-emprende-2026",
-   "target": "e_bo",
-   "relation": "solicita"
+   "source": "e_bo",
+   "target": "c_majadahonda-emprende-2026",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
   },
   {
-   "source": "c_majadahonda-emprende-2026",
-   "target": "f_bo",
-   "relation": "aporta valor"
+   "source": "f_bo",
+   "target": "c_majadahonda-emprende-2026",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
   },
   {
    "source": "m_M_CERT",
    "target": "c_majadahonda-emprende-2026",
-   "relation": "bloquea"
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
   }
  ]
 }

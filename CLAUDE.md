@@ -53,17 +53,21 @@ Eligibility matters more than topic.
 | `build.py` | The `ROWS` list (one dict per call; **add or edit calls here**), DB schema and migrations, upsert with change log, archive logic, `alerts.json`, `graphify-out/graph.json`, and dashboard rendering. |
 | `monitor.py` | Runs first. Closes past-deadline rows; validates `ROWS` (fields, enums, dates, URLs, archive and winners rules) and `strategy.json` (via `planner.check`); lists archive reviews due. Exits non-zero on bad data, which stops the run. |
 | `strategy.json` | The strategy model: faces, legal entities (status `exists \| planned \| proposed \| unknown \| external`), milestones, value levels, the 8 application stages with checklists, the municipality assessment, the ecosystem `graph`, and per-call strategy. Edit by hand; milestone status also changes through the orchestrator. |
-| `planner.py` | Shared logic, loaded by file path. Contains the plan per call (`make_plan`), the "what to do now" view (`what_now`), the agenda (`calendar`), the Gantt rows (`gantt`), the graph export (`graph_export`, `ascii_text`) and consistency checks (`check`). |
+| `planner.py` | Shared logic, loaded by file path. Contains the plan per call (`make_plan`), the "what to do now" view (`what_now`), the agenda (`calendar`), the Gantt rows (`gantt`), the **single ecosystem graph** (`ecosystem`), causal analysis (`paths`, `analyze`, `flows`, `causal_summary`), the oracle's reading (`oracle`), the 3D export (`graph_export`, `ascii_text`) and consistency checks including acyclicity (`check`). |
+| `causal.py` | Spanish CLI for causal analysis of the ecosystem graph: summary (mediators, confounders), `nodos`, `relaciones <id>`, `analiza <T> <Y>`. |
+| `oraculo.py` | Spanish CLI for the oracle: its reading, `registrar` (a ceremony's decisions and role-based commitments) and `historial`. |
 | `orchestrator.py` | Spanish CLI that guides applications (see below). |
 | `winners.py` | Past winners of a call from the public BDNS API. |
 | `dashboard_template.html` | Dashboard UI: vanilla JS, no CDN, light/dark mode. `build.py` injects the JSON at `/*__DATA__*/null` and the date at `__GENERATED__`. |
 | `dashboard.html`, `index.html` | `dashboard.html` is generated (never hand-edit); `index.html` redirects to it. Both are committed for GitHub Pages. |
-| `money.db` | SQLite with three tables: `opportunities` (current state, including archive fields, `bdns` and `winners`), `changes` (append-only history, including stage and milestone changes) and `applications` (orchestrator). Triggers block every `DELETE`. |
+| `money.db` | SQLite with four tables: `opportunities` (current state, including archive fields, `bdns` and `winners`), `changes` (append-only history, including stage, milestone and ceremony changes), `applications` (orchestrator) and `ceremonies` (oracle). Triggers block every `DELETE`. |
 | `graphify-out/graph.json` | Ecosystem graph in graphify format, rewritten by every build. |
 | `graphify-out/graph3d.html` | 3D viewer, generated locally by `orchestrator.py grafo3d`. |
 | `alerts.json` | Generated each run, git-ignored. Holds `closing_soon`, `new_high_value`, `new_today`, `changed_today` and `review_due`. |
 | `solicitudes/<id>/` | Application work folders (`PLAN.md` plus drafts). **Git-ignored**: drafts and budgets must never reach the public repo. |
 | `.claude/skills/becas/` | The `/becas` skill: Claude guides applications on top of the orchestrator. It includes the 3D-graph specialization. |
+| `.claude/skills/ceremonia/` | The `/ceremonia` skill: Claude acts as the **oracle** and runs the 7-phase ceremony (opening, graph reading, round of faces, deliberation, verdict, commitments, record). |
+| `.claude/agents/arquitecto-causal.md` | The **arquitecto-causal** subagent, for discussing and proposing nodes, relations, mediators, confounders and weights. The oracle consults it in the graph-reading phase. |
 | `LESSONS.md` | One bullet per run: useful or noisy sources, broken queries, gaps to search next. The last 10 are shown on the dashboard. |
 | `routine.json` | The scheduled-routine definition. Keep it in sync with this file. |
 
@@ -74,19 +78,21 @@ python3 -I monitor.py && python3 -I build.py   # validate + rebuild everything (
 python3 -I orchestrator.py                      # what to do now: applications, milestones, recommended calls
 python3 -I orchestrator.py plan <id>            # full strategy for one call
 python3 -I orchestrator.py iniciar <id> | avanzar <id> [--nota "..."] | hito <M_ID> pendiente|en-curso|hecho | etapas
-python3 -I orchestrator.py grafo3d [--sin-convocatorias] [--abrir]   # regenerate the 3D viewer (local only)
+python3 -I orchestrator.py grafo3d [--abrir]   # regenerate the 3D viewer (local only; same graph as the 2D)
+python3 -I causal.py [nodos|relaciones <id>|analiza <T> <Y>]   # causal analysis of the ecosystem graph
+python3 -I oraculo.py [registrar ...|historial] # the oracle's reading and the ceremony record
 python3 -I winners.py <BDNS number>             # past winners; --find "<title words>" to locate call numbers
 ```
 
 `-I` (isolated mode) drops user site-packages **and the script's own directory** from `sys.path`. So:
 - The radar uses the standard library only.
-- Shared code lives in `planner.py`, which `build.py`, `monitor.py` and `orchestrator.py` load by file path (`importlib.util.spec_from_file_location`).
+- Shared code lives in `planner.py`, which `build.py`, `monitor.py`, `orchestrator.py`, `causal.py` and `oraculo.py` load by file path (`importlib.util.spec_from_file_location`).
 - `monitor.py` reads `ROWS` from `build.py` with `ast` instead of importing it.
 - The one exception is the 3D viewer (`~/.claude/scripts/graphify_3d.py`, which needs networkx and scipy). `grafo3d` runs it without `-I`. It lives outside the repo, so the cloud routine cannot regenerate the 3D HTML; it only refreshes `graph.json`.
 
 ## Dashboard
 
-Five tabs. The selected tab and the filters are remembered per viewer. Filters remember which faces you *hid*, so a newly added face always starts visible.
+Six tabs. The selected tab and the filters are remembered per viewer. Filters remember which faces you *hid*, so a newly added face always starts visible.
 
 1. **Radar**: KPIs, filters (face, status including **Archive**, scope including Madrid West, verified only, search, sort), deadline timeline, and calls as cards or a table. Each card shows its plan grade, applicant and past winners.
 2. **Estrategia**:
@@ -100,10 +106,14 @@ Five tabs. The selected tab and the filters are remembered per viewer. Filters r
    - undated milestones;
    - `.ics` export;
    - the flowchart of the 8-stage process with its decisions.
-4. **Grafo**: a **2D / 3D switcher**.
-   - 2D: column diagram (legal entities → faces → products/spaces ← partners). Existing items have solid lines, to-be-created dashed, external partners dotted, partners with no real relationship yet shaded. Includes a relations table.
-   - 3D: the embedded `graphify-out/graph3d.html`, which also contains calls and blocking milestones. Colours are pinned to the faces; the dashboard theme syncs into the iframe.
-5. **Madrid Oeste**: the three-municipality comparison.
+4. **Grafo**: a **2D / 3D switcher** over **one graph**, so both views have the same nodes and relations.
+   - The graph is `planner.ecosystem()`: 7 columns (context factors → partners → legal entities → faces → products/spaces → milestones → calls/ships).
+   - Arrows run cause → effect; stroke width is the weight (0–1).
+   - Existing items are solid, to-be-created dashed, external partners dotted, partners with no real relationship yet shaded, and factors rounded.
+   - A relations table lists every edge with its weight and status.
+   - 3D: the embedded `graphify-out/graph3d.html`, built from the same graph (ASCII text, face colours pinned, theme synced).
+5. **Oráculo**: the 7 ceremony phases; the oracle's reading (next ship and its strongest causal path, the milestone that opens most doors, the key mediator, the confounder to watch, delays); one question per face; the proposed verdict; mediator and confounder bars; the ceremony record.
+6. **Madrid Oeste**: the three-municipality comparison.
 
 Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causality aqua, BranchOut yellow, Fundación pink, milestones grey. Status always comes with an icon and a label, never colour alone.
 
@@ -120,14 +130,32 @@ Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causal
   - it won't enter "preparar" while milestones are pending;
   - it won't leave "presentar" without a filing-receipt note.
   Applications are closed, never deleted.
-- **Graph upkeep:** whenever an entity, product, partner or relationship is created, update `strategy.json` → `graph` (status `exists` / `planned` / `proposed` / `external`). Then run `grafo3d` locally and push.
+- **Graph upkeep:** whenever an entity, product, partner, factor or relationship is created, update `strategy.json` → `graph`.
+  - Node status is `exists`, `planned`, `proposed`, `external` or `factor`.
+  - Every edge has a cause → effect direction, a `weight` between 0 and 1 (a planning judgement, not a measure) and a nameable mechanism.
+  - Edges may point at calls as `c_<id>`. A call's own relations come from `strategy.json` → `opportunities`: the applicant, the faces, `products` and prerequisites.
+  - The graph must stay a **DAG**; `monitor.py` enforces it. Organisational links ("agrupa") are not causes, and they create false cycles.
+  - Then run `grafo3d` locally and push.
+
+## Causal layer, oracle and ceremony
+
+- **Causal analysis** (`causal.py`, using Wright's path rules): a path's weight is the product of its edges, and the total effect is the sum of the paths.
+  - A **mediator** is a node on the paths; its weight is the flow through it.
+  - A **confounder** is a common cause of T and Y with a path to Y that avoids T.
+  - The adjustment set is T's parents that reach Y.
+  - The current main confounders are fondos propios (16 calls) and sede en Las Rozas (13).
+- **Agent `arquitecto-causal`**: discusses and proposes nodes, relations, mediators, confounders and weights. Every proposal comes with a mechanism, evidence and a weight range; at most 2 changes per ceremony.
+- **The oracle and the ceremony** (`/ceremonia`, `oraculo.py`): every `ceremony.cadence_days` days (14 by default), Claude as oracle reads the state, poses a question to each face and proposes a verdict.
+  - The team decides.
+  - Commitments are recorded as **role | task | date**, never with names, in the `ceremonies` table.
+  - The dashboard's Oráculo tab shows all of it.
 - **3D graph text must be plain ASCII.** No accents, ñ, ·, →, «» or €: they break in the viewer. `planner.ascii_text()` folds every exported label, group and relation, and the orchestrator adds `<meta charset="utf-8">` to the viewer. The 2D dashboard keeps normal Spanish text.
 
 ## Archive rule: nothing is ever deleted
 
 Entries are **archived, never deleted**. The archive is used to recover calls (a new edition, a changed situation) and as guidance for the future (funders, amounts, timings, requirements).
 
-- **Enforced in the database:** triggers abort any `DELETE` on `opportunities`, `changes` or `applications`. Never drop them or work around them, e.g. by recreating the DB.
+- **Enforced in the database:** triggers abort any `DELETE` on `opportunities`, `changes`, `applications` or `ceremonies`. Never drop them or work around them, e.g. by recreating the DB.
 - **Don't remove a dict from `ROWS`.** If one is removed anyway, `build.py` archives it automatically (review in 90 days); re-adding the dict restores it.
 - **Closed calls archive automatically**, with `review_on` = deadline + 270 days, about three months before a yearly call's next deadline. Override it with an explicit `review_on`.
 - **To drop a call that is still open:** `archived=True` plus an `archive_reason` and a `review_on`. `monitor.py` enforces both.

@@ -12,7 +12,7 @@ Uso (desde la carpeta del proyecto):
   python3 -I orchestrator.py avanzar <id> [--nota "texto"]
   python3 -I orchestrator.py hito <M_ID> pendiente|en-curso|hecho
   python3 -I orchestrator.py etapas               # el proceso y sus listas de control
-  python3 -I orchestrator.py grafo3d [--sin-convocatorias] [--abrir]   # grafo 3D del ecosistema
+  python3 -I orchestrator.py grafo3d [--abrir]   # grafo 3D del ecosistema (mismos nodos y relaciones que el 2D)
 
 Reglas: la presentación la hace siempre una persona en la sede oficial con su
 certificado; este programa nunca envía nada ni guarda datos personales. Las
@@ -56,7 +56,9 @@ def context():
     conn = connect()
     opps = [dict(r) for r in conn.execute("SELECT * FROM opportunities")]
     apps = {r["opportunity_id"]: dict(r) for r in conn.execute("SELECT * FROM applications")}
-    plan = planner.make_plan(opps, strategy, list(apps.values()), TODAY)
+    cers = [dict(r, decisions=json.loads(r["decisions"]), commitments=json.loads(r["commitments"]))
+            for r in conn.execute("SELECT * FROM ceremonies ORDER BY held_on DESC, id DESC")]
+    plan = planner.make_plan(opps, strategy, list(apps.values()), TODAY, cers)
     return planner, strategy, conn, {o["id"]: o for o in opps}, apps, plan
 
 
@@ -314,7 +316,7 @@ def cmd_grafo3d(args):
     planner, _, _, opps, _, plan = context()
     out = HERE / "graphify-out"
     out.mkdir(exist_ok=True)
-    data = planner.graph_export(plan, list(opps.values()), include_calls="--sin-convocatorias" not in args)
+    data = planner.graph_export(plan)
     (out / "graph.json").write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"graphify-out/graph.json · {len(data['nodes'])} nodos, {len(data['links'])} relaciones")
     if not VIEWER.exists():

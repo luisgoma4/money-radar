@@ -440,6 +440,9 @@
       "offer": "SEMF lidera una red europea que ya funciona (congresos, escuela de verano); Causality aporta un grupo de trabajo de métodos y Cloudy convierte resultados en contenido para familias.",
       "prereqs": [
         "M_RED_COST"
+      ],
+      "products": [
+        "p_events"
       ]
     },
     "nlnet-2026-11": {
@@ -462,6 +465,9 @@
       "offer": "Software abierto útil para Europa: Causality aporta el método, BranchOut el desarrollo y mantenimiento.",
       "prereqs": [
         "M_PRODUCTO"
+      ],
+      "products": [
+        "p_lib"
       ]
     },
     "eic-accelerator-2026-11": {
@@ -485,6 +491,9 @@
         "M_PRODUCTO",
         "M_CERT",
         "M_EU_PIC"
+      ],
+      "products": [
+        "p_lib"
       ]
     },
     "horizon-hlth-2027-01-02": {
@@ -509,6 +518,9 @@
         "M_CG_FORM",
         "M_EU_PIC",
         "M_PARTNER_IDIPHISA"
+      ],
+      "products": [
+        "p_consult"
       ]
     },
     "enisa-prestamo-participativo": {
@@ -528,6 +540,9 @@
       "offer": "Plan de negocio del hub con ingresos por puestos y servicios a startups.",
       "prereqs": [
         "M_CERT"
+      ],
+      "products": [
+        "p_hub"
       ]
     },
     "healthstart-madrimasd": {
@@ -550,6 +565,9 @@
       "prereqs": [
         "M_CG_FORM",
         "M_PRODUCTO"
+      ],
+      "products": [
+        "p_consult"
       ]
     },
     "caixaresearch-health-next": {
@@ -569,7 +587,10 @@
       "value_basis": "Proyectos de investigación con financiación alta; lidera un centro de investigación.",
       "ask": "Proyecto liderado por IDIPHISA con Causality como socio de métodos y Cloudy para la difusión a pacientes y familias.",
       "offer": "El PI del CSIC (neurociencia computacional) lidera desde su centro; Causality Graphs aporta los métodos causales y Cloudy la difusión a pacientes y familias.",
-      "prereqs": []
+      "prereqs": [],
+      "products": [
+        "p_consult"
+      ]
     },
     "erasmus-ka210-2027": {
       "applicant": [
@@ -591,6 +612,9 @@
       "offer": "Cloudy aporta el contenido bilingüe, SEMF el socio europeo y la fundación el vehículo.",
       "prereqs": [
         "M_EU_PIC"
+      ],
+      "products": [
+        "p_books"
       ]
     },
     "carasso-componer-saberes": {
@@ -611,7 +635,11 @@
       "value_basis": "Convocatoria bienal arte + ciencia + comunidad; importe por confirmar.",
       "ask": "Programa arte-ciencia-comunidad en Madrid Oeste con públicos familiares.",
       "offer": "SEMF (confluencia arte-ciencia) + Cloudy (comunidad familiar) en el espacio compartido de la fundación.",
-      "prereqs": []
+      "prereqs": [],
+      "products": [
+        "p_ciclo",
+        "p_events"
+      ]
     },
     "plan-vivienda-2026-coliving": {
       "applicant": [
@@ -629,7 +657,10 @@
       "value_basis": "Línea de coliving con alquiler protegido 20 años; Madrid no se adhiere según prensa.",
       "ask": "Coliving de alquiler limitado gestionado por la fundación (entidad sin ánimo de lucro) — solo si la región convoca.",
       "offer": "Alojamiento asequible para emprendedores e investigadores ligado al hub.",
-      "prereqs": []
+      "prereqs": [],
+      "products": [
+        "p_coliving"
+      ]
     },
     "horizon-neb-2026": {
       "applicant": [
@@ -651,6 +682,10 @@
       "offer": "Sitio piloto de vida y trabajo compartido; Causality mide el impacto en bienestar.",
       "prereqs": [
         "M_EU_PIC"
+      ],
+      "products": [
+        "p_coliving",
+        "p_cowork"
       ]
     },
     "startup-europe-2027": {
@@ -674,6 +709,10 @@
       "offer": "Hub con coliving, red científica internacional (SEMF) y evaluación de impacto (Causality).",
       "prereqs": [
         "M_EU_PIC"
+      ],
+      "products": [
+        "p_hub",
+        "p_cowork"
       ]
     },
     "madrid-cheque-innovacion": {
@@ -732,6 +771,9 @@
       "offer": "Programa cultural estable: talleres interdisciplinares y lectura científica en familia.",
       "prereqs": [
         "M_ASOC_LOCAL"
+      ],
+      "products": [
+        "p_ciclo"
       ]
     },
     "lasrozas-innova-foro": {
@@ -750,6 +792,9 @@
       "offer": "Startup tecnológica local con tracción.",
       "prereqs": [
         "M_CERT"
+      ],
+      "products": [
+        "p_hub"
       ]
     },
     "pozuelo-innpar-vivero": {
@@ -792,6 +837,11 @@
       "offer": "El ecosistema completo para el municipio: programa familiar (Cloudy), ciclo internacional de conferencias (SEMF), evaluación de impacto medible (Causality) y conexión con startups (BranchOut).",
       "prereqs": [
         "M_LR_REUNION"
+      ],
+      "products": [
+        "p_space",
+        "p_eval",
+        "p_ciclo"
       ]
     },
     "madrid-cesion-centros-educativos": {
@@ -813,6 +863,9 @@
       "offer": "Actividad familiar de ciencia y salud gratuita, cerca de las familias.",
       "prereqs": [
         "M_SEGURO"
+      ],
+      "products": [
+        "p_sessions"
       ]
     },
     "fecyt-fcc-2026": {
@@ -834,7 +887,11 @@
       "value_basis": "Mediana de ganadores 2024: 20.500 €; asociaciones 12.000 €, fundaciones 20.000 €.",
       "ask": "15.000–25.000 € para un proyecto de comunicación o ciencia ciudadana con familias.",
       "offer": "Cloudy produce el contenido, SEMF aporta científicos y Causality evalúa el impacto (pocos competidores miden impacto causal). Con aval académico del coordinador del grado en Física de la UNED.",
-      "prereqs": []
+      "prereqs": [],
+      "products": [
+        "p_books",
+        "p_eval"
+      ]
     },
     "cdti-neotec-2026": {
       "applicant": [
@@ -856,6 +913,9 @@
       "prereqs": [
         "M_PRODUCTO",
         "M_CERT"
+      ],
+      "products": [
+        "p_lib"
       ]
     },
     "pozuelo-subv-cultura-2026": {
@@ -876,6 +936,9 @@
       "offer": "Publicación científica familiar y actos culturales.",
       "prereqs": [
         "M_ASOC_LOCAL"
+      ],
+      "products": [
+        "p_books"
       ]
     },
     "majadahonda-emprende-2026": {
@@ -918,8 +981,16 @@
     }
   },
   "graph": {
-    "_doc": "Grafo del ecosistema: figuras legales, caras, productos y socios. status: exists | planned | proposed | external. Aristas: status exists (relación real) o planned (por crear).",
+    "_doc": "Grafo único del ecosistema (2D y 3D usan exactamente los mismos nodos y relaciones). Dirección = causa -> efecto. weight 0-1 = fuerza de la contribución (juicio de planificación, no medida). status de nodo: exists | planned | proposed | external | factor. planner.ecosystem() añade las convocatorias (c_<id>) y los hitos (m_<ID>) con sus relaciones desde strategy.json -> opportunities; las aristas pueden apuntar a c_<id> de una convocatoria.",
     "columns": [
+      {
+        "id": "factor",
+        "name": "Factores de contexto"
+      },
+      {
+        "id": "partner",
+        "name": "Socios y territorio"
+      },
       {
         "id": "entity",
         "name": "Figuras legales"
@@ -933,8 +1004,12 @@
         "name": "Productos y espacios"
       },
       {
-        "id": "partner",
-        "name": "Socios y territorio"
+        "id": "milestone",
+        "name": "Hitos"
+      },
+      {
+        "id": "call",
+        "name": "Convocatorias (ships)"
       }
     ],
     "nodes": [
@@ -1129,6 +1204,38 @@
         "status": "external",
         "face": "delfina",
         "detail": "Convenios, espacios y ecosistema tech."
+      },
+      {
+        "id": "z_sede",
+        "label": "Sede y registro en Las Rozas",
+        "type": "factor",
+        "status": "factor",
+        "face": "delfina",
+        "detail": "Domicilio social e inscripción municipal: condiciona espacios, ayudas y convenios locales."
+      },
+      {
+        "id": "z_reputacion",
+        "label": "Reputación científica",
+        "type": "factor",
+        "status": "factor",
+        "face": "semf",
+        "detail": "Track record, publicaciones y avales académicos; pesa en la evaluación de convocatorias competitivas."
+      },
+      {
+        "id": "z_red",
+        "label": "Red internacional",
+        "type": "factor",
+        "status": "factor",
+        "face": "semf",
+        "detail": "Socios en varios países: requisito de COST, Erasmus+ y consorcios europeos."
+      },
+      {
+        "id": "z_fondos",
+        "label": "Fondos propios y tesorería",
+        "type": "factor",
+        "status": "factor",
+        "face": "branchout",
+        "detail": "Capital y caja: limitan préstamos (ENISA exige fondos propios ≥ préstamo) y la dotación de la fundación."
       }
     ],
     "edges": [
@@ -1136,193 +1243,413 @@
         "from": "e_fund",
         "to": "f_cloudy",
         "label": "vehículo legal",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.6
       },
       {
         "from": "e_fund",
         "to": "f_semf",
         "label": "acoge en Madrid",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.4
       },
       {
-        "from": "e_fund",
-        "to": "f_cg",
-        "label": "agrupa",
-        "status": "planned"
+        "from": "f_cg",
+        "to": "e_fund",
+        "label": "aporta a la fundación",
+        "status": "planned",
+        "weight": 0.3
       },
       {
-        "from": "e_fund",
-        "to": "f_bo",
-        "label": "agrupa",
-        "status": "planned"
+        "from": "f_bo",
+        "to": "e_fund",
+        "label": "aporta a la fundación",
+        "status": "planned",
+        "weight": 0.3
       },
       {
         "from": "e_asoc",
         "to": "f_cloudy",
         "label": "actividades locales",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.5
       },
       {
         "from": "e_asoc",
         "to": "f_semf",
         "label": "actividades locales",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.5
       },
       {
         "from": "e_semf",
         "to": "f_semf",
         "label": "titular",
-        "status": "exists"
+        "status": "exists",
+        "weight": 1.0
       },
       {
         "from": "e_cg",
         "to": "f_cg",
         "label": "titular",
-        "status": "exists"
+        "status": "exists",
+        "weight": 1.0
       },
       {
         "from": "e_bo",
         "to": "f_bo",
         "label": "titular",
-        "status": "exists"
+        "status": "exists",
+        "weight": 1.0
       },
       {
         "from": "f_cloudy",
         "to": "p_books",
         "label": "produce",
-        "status": "exists"
+        "status": "exists",
+        "weight": 0.9
       },
       {
         "from": "f_cloudy",
         "to": "p_sessions",
         "label": "produce",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.8
       },
       {
         "from": "f_semf",
         "to": "p_events",
         "label": "organiza",
-        "status": "exists"
+        "status": "exists",
+        "weight": 0.9
       },
       {
         "from": "f_semf",
         "to": "p_ciclo",
         "label": "organiza",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.7
       },
       {
         "from": "f_cg",
         "to": "p_consult",
         "label": "vende",
-        "status": "exists"
+        "status": "exists",
+        "weight": 0.9
       },
       {
         "from": "f_cg",
         "to": "p_lib",
         "label": "desarrolla",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.7
       },
       {
         "from": "f_cg",
         "to": "p_eval",
         "label": "aporta",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.8
       },
       {
         "from": "f_bo",
         "to": "p_hub",
         "label": "opera",
-        "status": "exists"
+        "status": "exists",
+        "weight": 0.9
       },
       {
         "from": "f_bo",
         "to": "p_cowork",
         "label": "opera",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.8
       },
       {
         "from": "f_bo",
         "to": "p_coliving",
         "label": "opera",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.6
       },
       {
         "from": "f_bo",
         "to": "p_lib",
         "label": "desarrollo",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.4
       },
       {
         "from": "e_fund",
         "to": "p_space",
         "label": "titular",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.7
       },
       {
         "from": "p_space",
         "to": "p_cowork",
         "label": "aloja",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.7
       },
       {
         "from": "p_space",
         "to": "p_ciclo",
         "label": "aloja",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.5
       },
       {
         "from": "p_eval",
         "to": "p_books",
         "label": "mide impacto",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.3
       },
       {
         "from": "p_eval",
         "to": "p_ciclo",
         "label": "mide impacto",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.3
       },
       {
         "from": "x_csic",
         "to": "f_cg",
         "label": "investigador externo",
-        "status": "exists"
+        "status": "exists",
+        "weight": 0.6
       },
       {
         "from": "x_csic",
         "to": "p_lib",
         "label": "dirección científica",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.5
       },
       {
         "from": "x_uned",
         "to": "f_semf",
         "label": "aval académico",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.4
       },
       {
         "from": "x_uned",
         "to": "p_sessions",
         "label": "estudiantes de Física",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.4
       },
       {
         "from": "x_idiphisa",
         "to": "f_cg",
         "label": "socio clínico",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.5
       },
       {
         "from": "x_lr",
         "to": "p_space",
         "label": "convenio / cesión",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.7
       },
       {
         "from": "x_lr",
         "to": "p_hub",
         "label": "ecosistema tech",
-        "status": "planned"
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "z_sede",
+        "to": "e_asoc",
+        "label": "permite inscribir",
+        "status": "planned",
+        "weight": 0.9
+      },
+      {
+        "from": "z_sede",
+        "to": "p_space",
+        "label": "localiza",
+        "status": "planned",
+        "weight": 0.8
+      },
+      {
+        "from": "z_sede",
+        "to": "c_lasrozas-convenios-entidades",
+        "label": "condiciona",
+        "status": "planned",
+        "weight": 0.7
+      },
+      {
+        "from": "z_sede",
+        "to": "c_lasrozas-cesion-espacios-cultura",
+        "label": "requisito",
+        "status": "planned",
+        "weight": 0.9
+      },
+      {
+        "from": "z_sede",
+        "to": "c_madrid-cesion-centros-educativos",
+        "label": "facilita",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "z_fondos",
+        "to": "e_fund",
+        "label": "dotación 30.000 €",
+        "status": "planned",
+        "weight": 0.8
+      },
+      {
+        "from": "z_fondos",
+        "to": "c_enisa-prestamo-participativo",
+        "label": "fondos propios ≥ préstamo",
+        "status": "exists",
+        "weight": 0.9
+      },
+      {
+        "from": "z_fondos",
+        "to": "c_cdti-neotec-2026",
+        "label": "capital mínimo",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "p_consult",
+        "to": "z_fondos",
+        "label": "ingresos",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "p_hub",
+        "to": "z_fondos",
+        "label": "ingresos",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "f_semf",
+        "to": "z_reputacion",
+        "label": "trayectoria",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "x_csic",
+        "to": "z_reputacion",
+        "label": "aval científico",
+        "status": "exists",
+        "weight": 0.7
+      },
+      {
+        "from": "x_uned",
+        "to": "z_reputacion",
+        "label": "aval académico",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "z_reputacion",
+        "to": "c_fecyt-fcc-2026",
+        "label": "puntúa",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "z_reputacion",
+        "to": "c_cost-oc-2026-1",
+        "label": "puntúa",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "z_reputacion",
+        "to": "c_caixaresearch-health-next",
+        "label": "puntúa",
+        "status": "exists",
+        "weight": 0.7
+      },
+      {
+        "from": "z_reputacion",
+        "to": "c_horizon-hlth-2027-01-02",
+        "label": "puntúa",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "f_semf",
+        "to": "z_red",
+        "label": "red de socios",
+        "status": "exists",
+        "weight": 0.9
+      },
+      {
+        "from": "z_red",
+        "to": "c_cost-oc-2026-1",
+        "label": "requisito 7+ países",
+        "status": "exists",
+        "weight": 0.9
+      },
+      {
+        "from": "z_red",
+        "to": "c_erasmus-ka210-2027",
+        "label": "socio UE",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "z_red",
+        "to": "c_startup-europe-2027",
+        "label": "consorcio",
+        "status": "exists",
+        "weight": 0.6
+      }
+    ]
+  },
+  "ceremony": {
+    "_doc": "Ceremonia del oráculo: reunión periódica del ecosistema que dirige Claude como oráculo (skill /ceremonia). Las fases se muestran en la pestaña Oráculo.",
+    "cadence_days": 14,
+    "phases": [
+      {
+        "id": "apertura",
+        "name": "Apertura",
+        "detail": "El oráculo lee el estado: naves (convocatorias) a la vista, atrasos y hitos."
+      },
+      {
+        "id": "lectura",
+        "name": "Lectura del grafo",
+        "detail": "Caminos de valor, mediadores clave y confusores; el arquitecto causal propone cambios de pesos y relaciones."
+      },
+      {
+        "id": "ronda",
+        "name": "Ronda de caras",
+        "detail": "Cada cara (Cloudy, SEMF, Causality, BranchOut, Fundación) responde a la pregunta que el oráculo le plantea."
+      },
+      {
+        "id": "deliberacion",
+        "name": "Deliberación",
+        "detail": "Se discuten como máximo 2 relaciones o pesos y se actualiza strategy.json -> graph."
+      },
+      {
+        "id": "dictamen",
+        "name": "Dictamen",
+        "detail": "El oráculo propone qué nave perseguir y qué hito mover; el equipo decide."
+      },
+      {
+        "id": "compromisos",
+        "name": "Compromisos",
+        "detail": "Cada compromiso: rol (no nombres), tarea y fecha."
+      },
+      {
+        "id": "cierre",
+        "name": "Registro y cierre",
+        "detail": "oraculo.py registrar guarda decisiones y compromisos; se fija la próxima ceremonia."
       }
     ]
   }

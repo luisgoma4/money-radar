@@ -230,6 +230,21 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 @media (max-width: 600px) { .ev { grid-template-columns: 44px minmax(0, 1fr); } .ev .kind { grid-column: 2; } .ev .what { grid-column: 1 / -1; } }
 #flow svg, #graph svg { display: block; width: 100%; height: auto; }
 .gantt-wrap { overflow-x: auto; position: relative; }
+.phases { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; counter-reset: ph; }
+.phases li { position: relative; padding: 34px 8px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); font-size: 12.5px; color: var(--ink-2); counter-increment: ph; }
+.phases li::before { content: counter(ph); position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: var(--surface); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.phases li b { display: block; color: var(--ink); font-size: 13px; margin-bottom: 2px; }
+@media (max-width: 980px) { .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.or-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.or-card h3 { font-size: 13px; color: var(--ink-2); margin: 0 0 6px; font-weight: 600; }
+.or-card .big { font-size: 16px; font-weight: 650; line-height: 1.3; }
+.chain { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; }
+.verdict { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.verdict p { font-size: 16px; margin: 0; }
+.hbar { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 8px; align-items: center; font-size: 13px; padding: 4px 0; }
+.hbar .bar { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+.hbar .bar span { display: block; height: 100%; background: var(--accent); }
+.due { color: var(--critical); font-weight: 600; }
 .gantt-wrap svg { display: block; width: 100%; min-width: 900px; height: auto; }
 .gt-grid { stroke: var(--grid); } .gt-month { fill: var(--muted); font-size: 11px; }
 .gt-group { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
@@ -255,12 +270,15 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .graph-wrap { overflow-x: auto; margin-top: 8px; }
 #graph-3d-wrap { margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 #graph3d-frame { display: block; width: 100%; height: min(78vh, 760px); border: 0; background: var(--page); }
-.graph-wrap svg { min-width: 760px; }
+.graph-wrap svg { min-width: 1400px; }
 .g-col { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .g-node rect.box { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
 .g-node.planned rect.box, .g-node.proposed rect.box { stroke-dasharray: 5 4; fill: var(--surface-2); }
 .g-node.external rect.box { stroke-dasharray: 1.5 3; stroke-width: 2; }
 .g-node.external.pending rect.box { fill: url(#shade); }
+.g-node.factor rect.box { stroke-dasharray: 2 3; fill: var(--surface-2); }
+.g-node.k-milestone rect.box { fill: var(--surface-2); }
+.g-node.k-call.exists rect.box { stroke-width: 1.8; }
 .g-node text { fill: var(--ink); font-size: 12.5px; }
 .g-node .st { fill: var(--muted); font-size: 10.5px; }
 .g-node { cursor: default; }
@@ -300,6 +318,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     <button type="button" data-v="strategy" aria-pressed="false">Estrategia</button>
     <button type="button" data-v="calendar" aria-pressed="false">Calendario</button>
     <button type="button" data-v="graph" aria-pressed="false">Grafo</button>
+    <button type="button" data-v="oracle" aria-pressed="false">Oráculo</button>
     <button type="button" data-v="west" aria-pressed="false">Madrid Oeste</button>
   </div></nav>
 
@@ -397,7 +416,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 
   <div class="view" id="view-graph" hidden>
     <section class="panel section-gap"><h2>Grafo del ecosistema</h2>
-      <p class="small">Un solo proyecto: figuras legales → caras → productos y espacios, con los socios y el territorio. Línea continua = existe; discontinua = por crear. Pasa el ratón (o enfoca con el teclado) sobre un nodo para ver sus relaciones.</p>
+      <p class="small">Un solo grafo para 2D y 3D: factores de contexto, socios, figuras legales, caras, productos, hitos y convocatorias (ships). Las flechas van de causa a efecto y el grosor es el peso (0–1, juicio de planificación). Línea continua = existe; discontinua = por crear. Pasa el ratón sobre un nodo para ver sus relaciones; pulsa una convocatoria para abrir su ficha.</p>
       <div class="cal-head"><div class="seg" id="gmode-seg" role="group" aria-label="Vista del grafo">
         <button type="button" data-v="2d" aria-pressed="true">2D</button>
         <button type="button" data-v="3d" aria-pressed="false">3D</button></div>
@@ -410,6 +429,22 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       <div class="tooltip" id="gtip" role="tooltip" hidden></div>
     </section>
     <section class="panel section-gap table-wrap" id="graph-rel"><h2>Relaciones</h2><div id="graph-table"></div></section>
+  </div>
+
+  <div class="view" id="view-oracle" hidden>
+    <section class="panel section-gap">
+      <div class="cal-head"><h2>Oráculo · ceremonia del ecosistema</h2><span id="or-next"></span></div>
+      <p class="small">Claude actúa como oráculo y dirige la ceremonia con <code>/ceremonia</code>. Lee el plan y el grafo causal, plantea una pregunta a cada cara y propone un dictamen; el equipo decide y registra compromisos con <code>python3 -I oraculo.py registrar</code>. El arquitecto causal (agente <code>arquitecto-causal</code>) asiste en la lectura del grafo.</p>
+      <ol class="phases" id="or-phases"></ol>
+    </section>
+    <section class="section-gap or-grid" id="or-reading"></section>
+    <section class="panel section-gap"><h2>Preguntas a cada cara</h2><ul class="log" id="or-questions"></ul></section>
+    <section class="panel section-gap verdict"><h2>Dictamen propuesto</h2><p id="or-verdict"></p></section>
+    <section class="section-gap now-grid">
+      <div class="panel"><h3>Mediadores clave</h3><p class="small">Flujo ponderado de valor que pasa por cada nodo hacia todas las convocatorias (1 = máximo).</p><div id="or-med"></div></div>
+      <div class="panel"><h3>Confusores a vigilar</h3><p class="small">Causas comunes de varias convocatorias: ajusta por ellas al comparar resultados.</p><div id="or-conf"></div></div>
+      <div class="panel"><h3>Registro de ceremonias</h3><div id="or-log"></div></div>
+    </section>
   </div>
 
   <div class="view" id="view-west" hidden>
@@ -1036,13 +1071,15 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 
   // ---- ecosystem graph ----
   function renderGraph() {
-    const g = PLAN.graph; if (!g || !g.nodes) return;
+    const g = PLAN.ecosystem; if (!g || !g.nodes) return;
     const NS = "http://www.w3.org/2000/svg";
     const s = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
     const faceOrder = Object.keys(PLAN.faces);
     const cols = g.columns.map((c) => c.id);
-    const nw = 250, nh = 46, gapY = 14, colW = 310, top = 40;
-    const byCol = cols.map((c) => g.nodes.filter((n) => n.type === c).sort((a, b) => faceOrder.indexOf(a.face) - faceOrder.indexOf(b.face)));
+    const nw = 200, nh = 42, gapY = 10, colW = 236, top = 40;
+    const fo = (n) => n.face ? faceOrder.indexOf(n.face) : 99;
+    const byCol = cols.map((c) => g.nodes.filter((n) => n.kind === c).sort((a, b) =>
+      c === "call" ? (fo(a) - fo(b)) || (a.grade < b.grade ? -1 : 1) : fo(a) - fo(b)));
     const H = top + Math.max(...byCol.map((l) => l.length)) * (nh + gapY) + 10;
     const W = 20 + cols.length * colW - (colW - nw) + 20;
     const pos = {};
@@ -1050,67 +1087,111 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       const colH = list.length * (nh + gapY) - gapY, y0 = top + (H - top - colH) / 2;
       list.forEach((n, i) => { pos[n.id] = { x: 20 + ci * colW, y: y0 + i * (nh + gapY), col: ci, n }; });
     });
-    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Grafo de figuras legales, caras, productos y socios" });
-    // Shading for external partners whose relationship is still to be created.
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Grafo del ecosistema: factores, socios, figuras legales, caras, productos, hitos y convocatorias" });
     const defs = s("defs", {});
     const pat = s("pattern", { id: "shade", width: 7, height: 7, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
     pat.append(s("rect", { width: 7, height: 7, style: "fill:var(--surface-2)" }));
     pat.append(s("line", { x1: 0, y1: 0, x2: 0, y2: 7, style: "stroke:var(--grid);stroke-width:2.5" }));
     defs.append(pat); svg.append(defs);
-    const linked = new Set(g.edges.filter((e) => e.status === "exists").flatMap((e) => [e.from, e.to]));
     g.columns.forEach((c, ci) => svg.append(s("text", { class: "g-col", x: 20 + ci * colW, y: 18 }, c.name)));
     const edgesEl = [];
     g.edges.forEach((e) => {
       const a = pos[e.from], b = pos[e.to]; if (!a || !b) return;
       let x1, y1 = a.y + nh / 2, x2, y2 = b.y + nh / 2;
       if (a.col < b.col) { x1 = a.x + nw; x2 = b.x; } else if (a.col > b.col) { x1 = a.x; x2 = b.x + nw; } else { x1 = a.x + nw; x2 = b.x + nw; }
-      const dx = a.col === b.col ? 60 : Math.abs(x2 - x1) / 2;
-      const c1 = a.col <= b.col ? x1 + dx : x1 - dx, c2 = a.col < b.col ? x2 - dx : (a.col === b.col ? x2 + dx : x2 + dx);
-      const path = s("path", { class: "g-edge " + e.status, d: `M${x1},${y1} C${c1},${y1} ${c2},${y2} ${x2},${y2}` });
+      const dx = a.col === b.col ? 50 : Math.max(40, Math.abs(x2 - x1) / 2);
+      const c1 = a.col <= b.col ? x1 + dx : x1 - dx, c2 = a.col < b.col ? x2 - dx : x2 + dx;
+      const path = s("path", { class: "g-edge " + e.status, d: `M${x1},${y1} C${c1},${y1} ${c2},${y2} ${x2},${y2}`,
+        style: `stroke-width:${(0.6 + 2.6 * (e.weight ?? 0.5)).toFixed(2)}` });
       path.dataset.from = e.from; path.dataset.to = e.to;
       svg.append(path); edgesEl.push(path);
     });
     const tip = document.getElementById("gtip");
-    const ST = { exists: "existe", planned: "por crear", proposed: "propuesta", external: "socio externo" };
+    const ST = { exists: "existe", planned: "por crear", proposed: "propuesta", external: "socio externo", factor: "factor de contexto" };
+    const stOf = (n) => n.kind === "call" ? `convocatoria · grado ${n.grade}` + (n.status === "planned" ? " · próxima edición" : "")
+      : n.kind === "milestone" ? (n.status === "exists" ? "hito hecho" : "hito pendiente")
+      : n.pending ? "socio externo · relación por crear" : ST[n.status];
     const name = (id) => (g.nodes.find((n) => n.id === id) || {}).label || id;
     Object.values(pos).forEach(({ x, y, n }) => {
-      const pending = n.status === "external" && !linked.has(n.id);
-      const stText = pending ? "socio externo · relación por crear" : ST[n.status];
-      const grp = s("g", { class: `g-node ${n.status}${pending ? " pending" : ""}`, tabindex: 0, role: "button", "aria-label": `${n.label} (${stText})` });
-      grp.append(s("rect", { class: "box", x, y, width: nw, height: nh, rx: 9 }));
-      grp.append(s("rect", { x: x + 1, y: y + 8, width: 5, height: nh - 16, rx: 2.5, fill: lineColor(n.face) }));
-      const label = n.label.length > 36 ? n.label.slice(0, 35) + "…" : n.label;
-      grp.append(s("text", { x: x + 14, y: y + 20 }, label));
-      grp.append(s("text", { class: "st", x: x + 14, y: y + 36 }, stText));
-      const on = (evt) => {
+      const cls = `g-node ${n.status} k-${n.kind}${n.pending ? " pending" : ""}`;
+      const grp = s("g", { class: cls, tabindex: 0, role: "button", "aria-label": `${n.label} (${stOf(n)})` });
+      grp.append(s("rect", { class: "box", x, y, width: nw, height: nh, rx: n.kind === "factor" ? 21 : 9 }));
+      grp.append(s("rect", { x: x + 1, y: y + 8, width: 5, height: nh - 16, rx: 2.5, fill: n.face ? lineColor(n.face) : "var(--muted)" }));
+      const pre = n.kind === "call" ? `[${n.grade}] ` : "";
+      const lab = pre + n.label;
+      grp.append(s("text", { x: x + 13, y: y + 18 }, lab.length > 30 ? lab.slice(0, 29) + "…" : lab));
+      grp.append(s("text", { class: "st", x: x + 13, y: y + 33 }, stOf(n)));
+      const on = () => {
         svg.classList.add("dim"); grp.classList.add("hl");
         const rel = [];
         edgesEl.forEach((p) => { if (p.dataset.from === n.id || p.dataset.to === n.id) { p.classList.add("hl");
           const other = p.dataset.from === n.id ? p.dataset.to : p.dataset.from;
-          const nd = svg.querySelector(`[data-id="${other}"]`); if (nd) nd.classList.add("hl");
+          const nd = svg.querySelector(`[data-id="${CSS.escape(other)}"]`); if (nd) nd.classList.add("hl");
           const ed = g.edges.find((e) => e.from === p.dataset.from && e.to === p.dataset.to);
-          rel.push(`${p.dataset.from === n.id ? "→" : "←"} ${name(other)} · ${ed.label}${ed.status === "planned" ? " (por crear)" : ""}`); } });
-        tip.replaceChildren(el("div", { class: "t-name" }, n.label), el("div", { class: "t-meta" }, `${stText} · ${n.detail}`), ...rel.map((r) => el("div", { class: "t-meta" }, r)));
+          rel.push(`${p.dataset.from === n.id ? "→" : "←"} ${name(other)} · ${ed.label} · peso ${(ed.weight ?? 0.5).toFixed(2)}${ed.status === "planned" ? " (por crear)" : ""}`); } });
+        tip.replaceChildren(el("div", { class: "t-name" }, n.label), el("div", { class: "t-meta" }, `${stOf(n)} · ${n.detail || ""}`),
+          ...rel.slice(0, 14).map((r) => el("div", { class: "t-meta" }, r)), rel.length > 14 ? el("div", { class: "t-meta" }, `… y ${rel.length - 14} más`) : null);
         tip.hidden = false;
         const host = tip.parentElement.getBoundingClientRect(), r = grp.getBoundingClientRect();
-        tip.style.left = Math.max(4, Math.min(r.left - host.left, host.width - 270)) + "px";
+        tip.style.left = Math.max(4, Math.min(r.left - host.left, host.width - 280)) + "px";
         tip.style.top = (r.bottom - host.top + 6) + "px";
       };
-      const off = () => { svg.classList.remove("dim"); svg.querySelectorAll(".hl").forEach((x) => x.classList.remove("hl")); tip.hidden = true; };
+      const off = () => { svg.classList.remove("dim"); svg.querySelectorAll(".hl").forEach((q) => q.classList.remove("hl")); tip.hidden = true; };
       grp.dataset.id = n.id;
       grp.addEventListener("mouseenter", on); grp.addEventListener("focus", on);
       grp.addEventListener("mouseleave", off); grp.addEventListener("blur", off);
+      if (n.kind === "call") { grp.style.cursor = "pointer"; grp.addEventListener("click", () => { showTab("radar"); focusCard(n.id.slice(2)); }); }
       svg.append(grp);
     });
     document.getElementById("graph").replaceChildren(svg);
+    document.getElementById("graph-legend").replaceChildren(...faceOrder.map(faceDot),
+      el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"),
+      el("span", { class: "mini", style: "background:repeating-linear-gradient(45deg,var(--surface-2) 0 4px,var(--grid) 4px 6px)" }, "sombreado = socio por crear"),
+      el("span", { class: "mini", style: "border-radius:999px" }, "( ) factor de contexto"), el("span", { class: "mini" }, "grosor = peso"));
+    const kindEs = { factor: "factor", partner: "socio", entity: "figura legal", face: "cara", product: "producto", milestone: "hito", call: "convocatoria" };
+    const k = (id) => kindEs[(g.nodes.find((n) => n.id === id) || {}).kind] || "";
+    document.getElementById("graph-table").replaceChildren(
+      el("p", { class: "small" }, `${g.nodes.length} nodos y ${g.edges.length} relaciones: exactamente los mismos en 2D y en 3D.`),
+      el("table", {},
+      el("thead", {}, el("tr", {}, ["Desde (causa)", "Relación", "Hacia (efecto)", "Peso", "Estado"].map((h) => el("th", { scope: "col" }, h)))),
+      el("tbody", {}, g.edges.slice().sort((a, b) => (b.weight ?? 0.5) - (a.weight ?? 0.5)).map((e) => el("tr", {},
+        el("td", {}, name(e.from), el("div", { class: "small" }, k(e.from))), el("td", {}, e.label),
+        el("td", {}, name(e.to), el("div", { class: "small" }, k(e.to))),
+        el("td", { class: "num" }, (e.weight ?? 0.5).toFixed(2)), el("td", {}, e.status === "exists" ? "existe" : "por crear"))))));
     setGraphMode(store.get("gmode") || "2d");
-    const legend = document.getElementById("graph-legend");
-    legend.replaceChildren(...faceOrder.map(faceDot),
-      el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"), el("span", { class: "mini", style: "background:repeating-linear-gradient(45deg,var(--surface-2) 0 4px,var(--grid) 4px 6px)" }, "sombreado = socio por crear"));
-    document.getElementById("graph-table").replaceChildren(el("table", {},
-      el("thead", {}, el("tr", {}, ["Desde", "Relación", "Hacia", "Estado"].map((h) => el("th", { scope: "col" }, h)))),
-      el("tbody", {}, g.edges.map((e) => el("tr", {}, el("td", {}, name(e.from)), el("td", {}, e.label), el("td", {}, name(e.to)),
-        el("td", {}, e.status === "exists" ? "existe" : "por crear"))))));
+  }
+
+  // ---- oracle tab ----
+  function renderOracle() {
+    const o = PLAN.oracle; if (!o) return;
+    document.getElementById("or-next").replaceChildren(el("span", { class: o.due ? "due" : "small" },
+      (o.due ? "▲ Toca ceremonia: " : "Próxima ceremonia: ") + fmtDate(o.next_on)));
+    document.getElementById("or-phases").replaceChildren(...o.phases.map((ph) => el("li", {}, el("b", {}, ph.name), ph.detail)));
+    const card = (title, big, ...rest) => el("div", { class: "panel or-card" }, el("h3", {}, title), el("div", { class: "big" }, big), ...rest);
+    const cards = [];
+    if (o.ship) cards.push(card("Nave en el horizonte", el("span", {}, gradeEl({ grade: o.ship.grade, score: "" }), " ", o.ship.name),
+      el("div", { class: "chain" }, "Camino más fuerte: " + o.ship.path.join(" → ")),
+      o.ship.pending.length ? el("div", { class: "chain" }, "Bloqueada por: " + o.ship.pending.map(msName).join(", ")) : null,
+      o.ship.when === "late" ? el("div", { class: "chain late" }, "▲ va tarde") : null));
+    if (o.milestone) cards.push(card("Hito que más puertas abre", o.milestone.name, el("div", { class: "chain" }, `~${o.milestone.weeks} semanas · desbloquea ${o.milestone.blocked} convocatorias`)));
+    if (o.mediator) cards.push(card("Mediador clave", o.mediator.label, el("div", { class: "chain" }, "Por este nodo pasa el mayor flujo de valor hacia las convocatorias.")));
+    if (o.confounder) cards.push(card("Confusor a vigilar", o.confounder.label, el("div", { class: "chain" }, `Causa común de ${o.confounder.calls} convocatorias: compara resultados ajustando por él.`)));
+    cards.push(card("Atrasos", o.late.length ? `${o.late.length}` : "Ninguno", ...o.late.map((l) => el("div", { class: "chain late" }, "▲ " + l))));
+    document.getElementById("or-reading").replaceChildren(...cards);
+    document.getElementById("or-questions").replaceChildren(...o.questions.map((q) => el("li", {}, faceDot(q.face), " ", q.question)));
+    document.getElementById("or-verdict").textContent = o.verdict;
+    const bars = (list, val, max, lab) => list.map((x) => el("div", { class: "hbar" }, el("div", {}, x.label, el("div", { class: "small" }, lab(x))),
+      el("div", {}, el("div", { class: "bar" }, el("span", { style: `width:${100 * val(x) / max}%` })))));
+    const c = PLAN.causal || { mediators: [], confounders: [] };
+    document.getElementById("or-med").replaceChildren(...bars(c.mediators.slice(0, 8), (m) => m.flow, 1, (m) => `${m.kind} · ${m.flow.toFixed(2)}`));
+    const cmax = Math.max(1, ...c.confounders.map((z) => z.calls));
+    document.getElementById("or-conf").replaceChildren(...bars(c.confounders.slice(0, 6), (z) => z.calls, cmax, (z) => `${z.kind} · ${z.calls} convocatorias`));
+    const log = o.ceremonies || [];
+    document.getElementById("or-log").replaceChildren(...(log.length ? log.map((r) => el("div", { class: "ms" }, el("div", {},
+      el("div", { class: "name" }, fmtDate(r.held_on) + (r.summary ? " · " + r.summary : "")),
+      el("ul", { class: "small" }, r.decisions.map((d) => el("li", {}, "✓ " + d)), r.commitments.map((m) => el("li", {}, `→ ${m.rol}: ${m.tarea} (${fmtDate(m.fecha)})`))),
+      el("div", { class: "small" }, "Próxima: " + fmtDate(r.next_on))))) :
+      [el("p", { class: "small" }, "Aún no hay ceremonias. Empieza con /ceremonia en Claude Code.")]));
   }
 
   // ---- 2D / 3D switcher for the graph tab ----
@@ -1142,14 +1223,14 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   document.getElementById("gmode-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && !b.disabled) setGraphMode(b.dataset.v); });
 
   function showTab(t) {
-    ["radar", "strategy", "calendar", "graph", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
+    ["radar", "strategy", "calendar", "graph", "oracle", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
     document.querySelectorAll("#tab-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === t)));
     store.set("tab", t);
     if (t === "radar") renderTimeline(sorted(DATA.opportunities.filter(matches)));
   }
   document.getElementById("tab-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.v); });
 
-  renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph();
+  renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph(); renderOracle();
   const savedTab = store.get("tab"); if (savedTab && savedTab !== "radar") showTab(savedTab);
 })();
 </script>

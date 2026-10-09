@@ -113,7 +113,7 @@ def plan_one(o, st, strategy, today):
     }
 
 
-def make_plan(opps, strategy, applications=(), today=None):
+def make_plan(opps, strategy, applications=(), today=None, ceremonies=()):
     today = today or dt.date.today()
     plans = {}
     for o in opps:
@@ -135,14 +135,19 @@ def make_plan(opps, strategy, applications=(), today=None):
     now = what_now(plans, ms, [p["id"] for p in ranking], strategy["stages"], applications, today)
     events = calendar(opps, plans, ms, today)
     gantt_rows = gantt(opps, plans, ms, today)
-    return {
+    eco = ecosystem(strategy, plans, [p["id"] for p in ranking], ms, opps)
+    causal = causal_summary(eco)
+    plan = {
         "today": today.isoformat(), "now": now, "calendar": events, "gantt": gantt_rows,
+        "ecosystem": eco, "causal": causal,
         "project": strategy["project"], "faces": strategy["faces"], "entities": strategy["entities"],
         "levels": strategy["levels"], "stages": strategy["stages"],
-        "municipalities": strategy["municipalities"], "graph": strategy.get("graph", {}),
+        "municipalities": strategy["municipalities"],
         "milestones": ms, "plans": plans, "ranking": [p["id"] for p in ranking],
         "applications": list(applications),
     }
+    plan["oracle"] = oracle(plan, eco, causal, strategy, ceremonies, today)
+    return plan
 
 
 def what_now(plans, milestones, ranking, stages, applications, today, n_milestones=5, n_recommended=8):
@@ -235,68 +240,281 @@ def ascii_text(text):
     return "".join(c for c in text if ord(c) < 128 and not unicodedata.combining(c))
 
 
-def graph_export(plan, opps, include_calls=True):
-    """Ecosystem as a graphify-style graph.json (nodes + links) for the 3D viewer.
+# Legal entities / faces of strategy.json mapped onto graph nodes.
+ENTITY_NODE = {"fundacion_dl": "e_fund", "asoc_local": "e_asoc", "semf_asoc": "e_semf", "causality_ent": "e_cg",
+               "branchout_sl": "e_bo", "partner_csic": "x_csic", "partner_uned": "x_uned", "partner_research": "x_idiphisa"}
+FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
+NODE_STATUSES = ("exists", "planned", "proposed", "external", "factor")
 
-    source_file's first segment is the colour group (the face, or "Hitos");
-    community_name carries the existence status; source_location the node kind.
-    """
-    faces = plan["faces"]
-    status_es = {"exists": "existe", "planned": "por crear", "proposed": "propuesta", "external": "socio externo"}
-    g = plan.get("graph", {})
-    linked = {x for e in g.get("edges", []) if e["status"] == "exists" for x in (e["from"], e["to"])}
-    nodes, links = [], []
 
-    def node(nid, label, face_or_group, kind, status):
-        group = faces[face_or_group]["name"] if face_or_group in faces else face_or_group
-        nodes.append({"id": nid, "label": label, "source_file": f"{group}/{kind}",
-                      "source_location": kind, "community_name": status})
+def _call_edges(oid, st, applicant, pending_ms=None, applicant_status="exists"):
+    """Relations of one call (c_<id>): applicant, faces, products, milestones. Direction cause -> effect."""
+    cid = "c_" + oid
+    en = ENTITY_NODE.get(applicant)
+    out = []
+    if en:
+        out.append({"from": en, "to": cid, "label": "solicita", "weight": 1.0,
+                    "status": "exists" if applicant_status in ("exists", "external") else "planned"})
+    faces = [st["lead"]] + [f for f in st.get("support", []) if f != st["lead"]]
+    for i, f in enumerate(faces):
+        fn = FACE_NODE.get(f)
+        if fn and fn != en:
+            w = round(0.3 + 0.1 * st.get("fit", 2), 2) if i == 0 else 0.3
+            out.append({"from": fn, "to": cid, "label": "lidera la oferta" if i == 0 else "apoya la oferta",
+                        "weight": w, "status": "planned"})
+    for pr in st.get("products", []):
+        out.append({"from": pr, "to": cid, "label": "evidencia", "weight": 0.5, "status": "planned"})
+    for m in st.get("prereqs_all", st.get("prereqs", [])):
+        out.append({"from": "m_" + m, "to": cid, "label": "habilita", "weight": 1.0,
+                    "status": "planned" if pending_ms is None or m in pending_ms else "exists"})
+    return out
 
-    kinds = {"entity": "figura legal", "face": "cara", "product": "producto", "partner": "socio"}
-    for n in g.get("nodes", []):
-        st = status_es.get(n["status"], n["status"])
-        if n["status"] == "external" and n["id"] not in linked:
-            st = "socio externo · relación por crear"
-        label = n["label"] + ("" if n["status"] in ("exists", "external") else f" ({st})")
-        node(n["id"], label, n["face"], kinds.get(n["type"], n["type"]), st)
-    for e in g.get("edges", []):
-        links.append({"source": e["from"], "target": e["to"], "relation": e["label"],
-                      "confidence": "EXTRACTED" if e["status"] == "exists" else "INFERRED"})
 
-    if include_calls:
-        # Map strategy entities / faces onto graph nodes so calls hang off the right places.
-        ent_node = {"fundacion_dl": "e_fund", "asoc_local": "e_asoc", "semf_asoc": "e_semf",
-                    "causality_ent": "e_cg", "branchout_sl": "e_bo", "partner_csic": "x_csic",
-                    "partner_uned": "x_uned", "partner_research": "x_idiphisa"}
-        face_node = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
-        names = {o["id"]: o["name"] for o in opps}
-        used_ms = set()
-        for oid in plan["ranking"]:
-            p = plan["plans"][oid]
-            if p["archived"] and not p["target_estimated"]:
-                continue
-            node("c_" + oid, f"[{p['grade']}] {names.get(oid, oid)}", p["lead"], "convocatoria",
-                 f"convocatoria · grado {p['grade']}" + (" · próxima edición" if p["target_estimated"] else ""))
-            if ent_node.get(p["applicant"]):
-                links.append({"source": "c_" + oid, "target": ent_node[p["applicant"]], "relation": "solicita"})
-            for f in p["faces"]:
-                if face_node.get(f) and face_node[f] != ent_node.get(p["applicant"]):
-                    links.append({"source": "c_" + oid, "target": face_node[f], "relation": "aporta valor"})
-            for m in p["pending"]:
-                used_ms.add(m)
-                links.append({"source": "m_" + m, "target": "c_" + oid, "relation": "bloquea"})
-        for m in plan["milestones"]:
-            if m["id"] in used_ms:
-                node("m_" + m["id"], m["name"], "Hitos", "hito", "hito " + {"pending": "pendiente", "doing": "en curso", "done": "hecho"}[m["status"]])
-    for n in nodes:
-        for k in ("label", "source_file", "source_location", "community_name"):
-            n[k] = ascii_text(n[k])
-    for l in links:
-        if "relation" in l:
-            l["relation"] = ascii_text(l["relation"])
+def ecosystem(strategy, plans, ranking, milestones, opps):
+    """The single ecosystem graph used by BOTH the 2D diagram and the 3D viewer."""
+    g = strategy.get("graph", {})
+    names = {o["id"]: o for o in opps}
+    nodes = [dict(n, kind=n["type"]) for n in g.get("nodes", [])]
+    edges = [dict(e) for e in g.get("edges", [])]
+    used_ms = set()
+    for oid in ranking:
+        p = plans[oid]
+        if p["archived"] and not p["target_estimated"]:
+            continue
+        st = dict(strategy["opportunities"].get(oid) or default_strategy(names[oid]))
+        st["prereqs_all"] = p["prereqs"]
+        used_ms.update(p["prereqs"])
+        o = names[oid]
+        nodes.append({"id": "c_" + oid, "label": p["name"], "type": "call", "kind": "call",
+                      "status": "planned" if p["target_estimated"] else "exists", "face": p["lead"],
+                      "grade": p["grade"], "score": p["score"],
+                      "detail": (f"Grado {p['grade']} ({p['score']}) · " + (o.get("amount_text") or "")
+                                 + (f" · plazo {p['target']}" if p["target"] else "")
+                                 + (" (próxima edición estimada)" if p["target_estimated"] else ""))})
+        edges += _call_edges(oid, st, p["applicant"], set(p["pending"]), p["applicant_status"])
+    for m in milestones:
+        if m["id"] in used_ms:
+            nodes.append({"id": "m_" + m["id"], "label": m["name"], "type": "milestone", "kind": "milestone",
+                          "status": "exists" if m["status"] == "done" else "planned", "face": None,
+                          "detail": f"{m['detail']} (~{m['weeks']} semanas)"})
     ids = {n["id"] for n in nodes}
-    return {"directed": True, "nodes": nodes,
-            "links": [l for l in links if l["source"] in ids and l["target"] in ids]}
+    edges = [e for e in edges if e["from"] in ids and e["to"] in ids]
+    linked = {x for e in edges if e["status"] == "exists" for x in (e["from"], e["to"])}
+    for n in nodes:
+        n["pending"] = n["status"] == "external" and n["id"] not in linked
+    return {"columns": g.get("columns", []), "nodes": nodes, "edges": edges}
+
+
+# ---------------------------------------------------------------- causal analysis
+def _links(eco):
+    ch, pa = {}, {}
+    for e in eco["edges"]:
+        ch.setdefault(e["from"], []).append((e["to"], e.get("weight", 0.5)))
+        pa.setdefault(e["to"], []).append((e["from"], e.get("weight", 0.5)))
+    return ch, pa
+
+
+def _reach(adj, start):
+    seen, todo = set(), [start]
+    while todo:
+        for nxt, _ in adj.get(todo.pop(), []):
+            if nxt not in seen:
+                seen.add(nxt)
+                todo.append(nxt)
+    return seen
+
+
+def topo_order(eco):
+    """Kahn's algorithm; returns (order, cycle_nodes)."""
+    ids = [n["id"] for n in eco["nodes"]]
+    ch, pa = _links(eco)
+    indeg = {i: len(pa.get(i, [])) for i in ids}
+    order, todo = [], [i for i in ids if indeg[i] == 0]
+    while todo:
+        n = todo.pop()
+        order.append(n)
+        for c, _ in ch.get(n, []):
+            indeg[c] -= 1
+            if indeg[c] == 0:
+                todo.append(c)
+    return order, [i for i in ids if indeg[i] > 0]
+
+
+def paths(eco, a, b, limit=500):
+    """Directed paths a -> b with their weight (product of edge weights: Wright's path rule)."""
+    ch, _ = _links(eco)
+    out = []
+
+    def walk(n, path, w):
+        if len(out) >= limit:
+            return
+        if n == b:
+            out.append((path, round(w, 4)))
+            return
+        for c, ew in ch.get(n, []):
+            if c not in path:
+                walk(c, path + [c], w * ew)
+    walk(a, [a], 1.0)
+    return sorted(out, key=lambda x: -x[1])
+
+
+def analyze(eco, t, y):
+    """Total/direct effect, mediators, confounders and a back-door adjustment set for t -> y."""
+    ch, pa = _links(eco)
+    ps = paths(eco, t, y)
+    direct = next((w for c, w in ch.get(t, []) if c == y), 0.0)
+    med = {}
+    for path, w in ps:
+        for n in path[1:-1]:
+            med[n] = med.get(n, 0) + w
+    desc_t = _reach(ch, t)
+    anc_t = _reach(pa, t)
+    no_t = {k: [(c, w) for c, w in v if c != t] for k, v in ch.items() if k != t}  # graph with T removed
+
+    def reaches_y_avoiding_t(z):
+        return y in _reach(no_t, z)
+    # Confounder: common cause of T and Y with an open path to Y that does not go through T.
+    confounders = sorted(z for z in anc_t if z not in desc_t and reaches_y_avoiding_t(z))
+    # Parent adjustment (Pearl): conditioning on T's parents blocks every back-door path.
+    adjust = sorted(p for p, _ in pa.get(t, []) if p not in desc_t and reaches_y_avoiding_t(p))
+    return {"treatment": t, "outcome": y, "paths": ps[:20], "n_paths": len(ps),
+            "total": round(sum(w for _, w in ps), 4), "direct": direct, "indirect": round(sum(w for _, w in ps) - direct, 4),
+            "mediators": sorted(med.items(), key=lambda kv: -kv[1]), "confounders": confounders, "adjust": adjust}
+
+
+def flows(eco, targets):
+    """Weighted path flow through each node into the target set (forward x backward DP on the DAG)."""
+    order, cyc = topo_order(eco)
+    if cyc:
+        return {}
+    ch, pa = _links(eco)
+    fin = {n: (1.0 if not pa.get(n) else 0.0) for n in order}
+    for n in order:
+        for c, w in ch.get(n, []):
+            fin[c] += fin[n] * w
+    fout = {n: (1.0 if n in targets else 0.0) for n in order}
+    for n in reversed(order):
+        if n not in targets:
+            fout[n] = sum(fout[c] * w for c, w in ch.get(n, []))
+    return {n: fin[n] * fout[n] for n in order}
+
+
+def causal_summary(eco):
+    calls = {n["id"] for n in eco["nodes"] if n["kind"] == "call"}
+    label = {n["id"]: n["label"] for n in eco["nodes"]}
+    kind = {n["id"]: n["kind"] for n in eco["nodes"]}
+    order, cyc = topo_order(eco)
+    f = flows(eco, calls)
+    top = max(f.values() or [1]) or 1
+    mediators = [{"id": n, "label": label[n], "kind": kind[n], "flow": round(v / top, 3)}
+                 for n, v in sorted(f.items(), key=lambda kv: -kv[1]) if n not in calls and kind[n] != "milestone" and v > 0][:10]
+    ch, _ = _links(eco)
+    conf = []
+    for n in order:
+        kids = ch.get(n, [])
+        if len(kids) < 2:
+            continue
+        reach_calls = sorted(c for c in _reach(ch, n) if c in calls)
+        if len(reach_calls) >= 2 and kind[n] in ("factor", "partner", "entity"):
+            conf.append({"id": n, "label": label[n], "kind": kind[n], "calls": len(reach_calls), "children": len(kids)})
+    conf.sort(key=lambda c: (c["kind"] != "factor", -c["calls"]))
+    return {"dag": not cyc, "cycle": cyc, "mediators": mediators, "confounders": conf[:8]}
+
+
+def best_path_into(eco, y):
+    """Strongest single path from any source into y (max product of weights)."""
+    order, cyc = topo_order(eco)
+    if cyc:
+        return []
+    ch, pa = _links(eco)
+    best = {n: (1.0, [n]) for n in order if not pa.get(n)}
+    for n in order:
+        if n in best:
+            for c, w in ch.get(n, []):
+                cand = (best[n][0] * w, best[n][1] + [c])
+                if c not in best or cand[0] > best[c][0]:
+                    best[c] = cand
+    return best.get(y, (0, []))[1]
+
+
+def oracle(plan, eco, causal, strategy, ceremonies, today):
+    """The oracle's reading for the ceremony: deterministic, from the plan and the causal graph."""
+    label = {n["id"]: n["label"] for n in eco["nodes"]}
+    now = plan["now"]
+    rec = now["recommended"][0] if now["recommended"] else None
+    ship = None
+    if rec:
+        path = best_path_into(eco, "c_" + rec["id"])
+        ship = {"id": rec["id"], "name": rec["name"], "grade": rec["grade"], "when": rec["when"],
+                "path": [label.get(n, n) for n in path], "pending": rec["pending"]}
+    ms = next((m for m in plan["milestones"] if m["status"] != "done"), None)
+    med = causal["mediators"][0] if causal["mediators"] else None
+    conf = causal["confounders"][0] if causal["confounders"] else None
+    late = [r["name"] for r in now["recommended"] if r["when"] == "late"] + [a["name"] for a in now["active"] if a["late"]]
+    questions = []
+    plans = plan["plans"]
+    for k, f in strategy["faces"].items():
+        led = [p for p in plans.values() if p["lead"] == k and not (p["archived"] and not p["target_estimated"])]
+        led.sort(key=lambda p: -p["score"])
+        q = None
+        for p in led:
+            if p["pending"]:
+                mname = next((m["name"] for m in plan["milestones"] if m["id"] == p["pending"][0]), p["pending"][0])
+                q = f"¿Quién asume «{mname}» para desbloquear {p['name']} (grado {p['grade']})?"
+                break
+        if not q and led:
+            q = f"¿Iniciamos {led[0]['name']} (grado {led[0]['grade']}) esta quincena?"
+        if not q:
+            q = f"¿Qué producto de {f['name']} puede reforzar la nave principal?"
+        questions.append({"face": k, "name": f["name"], "question": q})
+    cadence = strategy.get("ceremony", {}).get("cadence_days", 14)
+    last = ceremonies[0] if ceremonies else None
+    next_on = (last or {}).get("next_on") or ((_date(last["held_on"]) + dt.timedelta(days=cadence)).isoformat() if last else today.isoformat())
+    verdict = []
+    if ship:
+        verdict.append(f"Perseguir {ship['name']} (grado {ship['grade']})")
+    if ms:
+        verdict.append(f"mover «{ms['name']}», que desbloquea {len(ms['blocked'])} convocatorias")
+    if conf:
+        verdict.append(f"y vigilar «{conf['label']}» como confusor al comparar resultados entre convocatorias")
+    return {"ship": ship, "milestone": ms and {"id": ms["id"], "name": ms["name"], "weeks": ms["weeks"], "blocked": len(ms["blocked"])},
+            "mediator": med, "confounder": conf, "late": late, "questions": questions,
+            "verdict": (", ".join(verdict) + ".") if verdict else "Sin naves a la vista.",
+            "phases": strategy.get("ceremony", {}).get("phases", []), "cadence_days": cadence,
+            "next_on": next_on, "due": next_on <= today.isoformat(), "ceremonies": list(ceremonies)[:12]}
+
+
+def graph_export(plan, opps=None):
+    """The ecosystem (same nodes and relations as the 2D view) as graphify graph.json for the 3D viewer.
+
+    Group (colour) = face name, or "Hitos"; community_name = status; relation carries the weight.
+    All text is folded to plain ASCII (accents break in the viewer).
+    """
+    eco = plan["ecosystem"]
+    faces = plan["faces"]
+    st_es = {"exists": "existe", "planned": "por crear", "proposed": "propuesta", "external": "socio externo", "factor": "factor de contexto"}
+    kind_es = {"entity": "figura legal", "face": "cara", "product": "producto", "partner": "socio", "factor": "factor",
+               "milestone": "hito", "call": "convocatoria"}
+    nodes = []
+    for n in eco["nodes"]:
+        st = st_es.get(n["status"], n["status"])
+        if n.get("pending"):
+            st = "socio externo · relación por crear"
+        if n["kind"] == "call":
+            st = f"convocatoria · grado {n['grade']}" + (" · próxima edición" if n["status"] == "planned" else "")
+            label = f"[{n['grade']}] {n['label']}"
+        elif n["kind"] == "milestone":
+            st = "hito " + ("hecho" if n["status"] == "exists" else "pendiente")
+            label = n["label"]
+        else:
+            label = n["label"] + ("" if n["status"] in ("exists", "external", "factor") else f" ({st})")
+        group = faces[n["face"]]["name"] if n.get("face") in faces else "Hitos"
+        nodes.append({"id": n["id"], "label": ascii_text(label), "source_file": ascii_text(f"{group}/{kind_es[n['kind']]}"),
+                      "source_location": ascii_text(kind_es[n["kind"]]), "community_name": ascii_text(st)})
+    links = [{"source": e["from"], "target": e["to"], "weight": e.get("weight", 0.5),
+              "relation": ascii_text(f"{e['label']} (peso {e.get('weight', 0.5):.2f})"),
+              "confidence": "EXTRACTED" if e["status"] == "exists" else "INFERRED"} for e in eco["edges"]]
+    return {"directed": True, "nodes": nodes, "links": links}
 
 
 def gantt(opps, plans, milestones, today, months_ahead=12):
@@ -364,16 +582,35 @@ def check(strategy, opp_ids):
                 problems.append(f"strategy entity {eid}: unknown milestone {m}")
     g = strategy.get("graph", {})
     nodes = {n["id"] for n in g.get("nodes", [])}
+    calls = {"c_" + i for i in opp_ids}
     for n in g.get("nodes", []):
-        if n.get("status") not in ("exists", "planned", "proposed", "external"):
+        if n.get("status") not in NODE_STATUSES:
             problems.append(f"graph node {n['id']}: bad status {n.get('status')}")
         if n.get("face") not in faces:
             problems.append(f"graph node {n['id']}: unknown face {n.get('face')}")
     for e in g.get("edges", []):
-        if e["from"] not in nodes or e["to"] not in nodes:
+        if e["from"] not in nodes or (e["to"] not in nodes and e["to"] not in calls):
             problems.append(f"graph edge {e['from']}->{e['to']}: unknown node")
         if e.get("status") not in ("exists", "planned"):
             problems.append(f"graph edge {e['from']}->{e['to']}: status must be exists|planned")
+        if not 0 <= e.get("weight", 0.5) <= 1:
+            problems.append(f"graph edge {e['from']}->{e['to']}: weight must be 0..1")
+    for oid, st in strategy["opportunities"].items():
+        for pr in st.get("products", []):
+            if pr not in nodes:
+                problems.append(f"strategy {oid}: unknown product node {pr}")
+    for k, v in list(ENTITY_NODE.items()) + list(FACE_NODE.items()):
+        if v not in nodes:
+            problems.append(f"planner mapping {k}: graph node {v} missing")
+    # The ecosystem must stay a DAG (causal analysis needs it): static edges + every call's relations.
+    eco = {"nodes": [{"id": n} for n in nodes | calls | {"m_" + m for m in ms}], "edges": list(g.get("edges", []))}
+    for oid, st in strategy["opportunities"].items():
+        for a in st.get("applicant", [])[:1]:
+            eco["edges"] += _call_edges(oid, st, a)
+    eco["edges"] = [e for e in eco["edges"] if e["from"] in {n["id"] for n in eco["nodes"]}]
+    _, cyc = topo_order(eco)
+    if cyc:
+        problems.append(f"graph has a cycle among: {', '.join(sorted(cyc)[:8])}")
     for mid, m in ms.items():
         if m.get("status") not in ("pending", "doing", "done"):
             problems.append(f"strategy milestone {mid}: status must be pending|doing|done")
