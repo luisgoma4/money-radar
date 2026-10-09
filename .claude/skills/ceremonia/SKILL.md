@@ -41,7 +41,7 @@ python3 -I oraculo.py registrar --resumen "…" --decision "…" [--decision "�
 Si no se indica, la próxima ceremonia es a `ceremony.cadence_days` días (14 por defecto). Cierra con una frase de dictamen y la fecha de la próxima. Haz commit y push solo si el usuario lo pide.
 
 ## Por voz en el dashboard
-La misma ceremonia se puede hacer hablando con el oráculo del dashboard local: `python3 -I oracle_server.py`, abrir http://127.0.0.1:8000/dashboard.html y decir «empieza la ceremonia». La web recorre las 7 fases, lleva la vista a cada tema y pide confirmación antes de registrar.
+La misma ceremonia se puede hacer hablando con el oráculo del dashboard local: `python3 -I oracle_server.py`, abrir http://127.0.0.1:8000/dashboard.html y decir «empieza la ceremonia». La web recorre las 7 fases, lleva la vista a cada tema y pide confirmación antes de registrar. También en **El Espacio** (`espacio.html`): cada fase vuela al nodo de la que trata (el mediador, el nodo de cada cara, el diamante) y muestra un rótulo con la fase.
 
 ## Reglas
 - El oráculo **no decide** ni presenta solicitudes: propone y registra lo que el equipo acuerda.

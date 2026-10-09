@@ -96,6 +96,61 @@ def find(text, st, kinds=None):
     return best if score >= 0.55 else None
 
 
+def find_node(text, st, among=None):
+    """Best fuzzy match among ecosystem nodes (calls are c_<id>, milestones m_<ID>). Returns node dict or None."""
+    q = [w for w in norm(text).split() if w not in STOP]
+    if not q:
+        return None
+    best, score = None, 0.0
+    for n in st["plan"]["ecosystem"]["nodes"]:
+        if among is not None and n["id"] not in among:
+            continue
+        words = set(norm(n["label"] + " " + n["id"].replace("-", " ").replace("_", " ")).split()) - STOP
+        overlap = sum(1 for w in q if w in words or any(x.startswith(w) and len(w) > 3 for x in words))
+        sim = difflib.SequenceMatcher(None, " ".join(q), norm(n["label"])).ratio()
+        bonus = 0.15 if n["kind"] in ("sphere", "entity", "face") else 0  # short names: prefer the core
+        sc = overlap / len(q) + 0.5 * sim + bonus
+        if sc > score:
+            best, score = n, sc
+    return best if score >= 0.55 else None
+
+
+def _eco_maps(st):
+    eco = st["plan"]["ecosystem"]
+    by = {n["id"]: n for n in eco["nodes"]}
+    out, inn = {}, {}
+    for e in eco["edges"]:
+        out.setdefault(e["from"], []).append(e)
+        inn.setdefault(e["to"], []).append(e)
+    return eco, by, out, inn
+
+
+def neighbor_options(st, nid, k=4):
+    _, by, out, inn = _eco_maps(st)
+    rel = [(e["weight"], e["to"], "→") for e in out.get(nid, [])] + [(e["weight"], e["from"], "←") for e in inn.get(nid, [])]
+    rel.sort(key=lambda r: -r[0])
+    return [{"label": f"{arrow} {by[o]['label'][:38]}", "utterance": f"sigue hacia {by[o]['label']}"} for _, o, arrow in rel[:k]]
+
+
+def _bfs(st, a, b):
+    _, _, out, inn = _eco_maps(st)
+    prev, todo = {a: None}, [a]
+    while todo:
+        n = todo.pop(0)
+        if n == b:
+            path = []
+            while n:
+                path.append(n)
+                n = prev[n]
+            return path[::-1]
+        for e in out.get(n, []) + inn.get(n, []):
+            o = e["to"] if e["from"] == n else e["from"]
+            if o not in prev:
+                prev[o] = n
+                todo.append(o)
+    return None
+
+
 def parse_date(text, today=None):
     """'2026-11-15', '15 de noviembre [de 2026]', 'en 3 meses|semanas|dias', 'manana', '15/11/2026'."""
     today = today or dt.date.today()
@@ -375,6 +430,84 @@ def intent(text, ctx, st):
         if "3d" in t and tab == "graph":
             view["mode"] = "3d"
         return _reply(f"Abro {m.group(2)}.", view=view)
+
+    # ---- the Espacio: live navigation through nodes and relations ----
+    page = ctx.get("page") or "dashboard"
+    if re.search(r"\b(abre|vamos a|ir a|llevame a|ensename)\b.*\b(espacio|grafo 3d|3d)\b", t):
+        if page == "espacio":
+            return _reply("Ya estás en el Espacio. Te llevo al diamante.", view={"focus": {"kind": "core"}})
+        return _reply("Abro el Espacio en 3D.", view={"page": "espacio", "focus": {"kind": "core"}},
+                      options=[{"label": "Abrir el Espacio 3D", "view": {"page": "espacio", "focus": {"kind": "core"}}}])
+    if re.fullmatch(r"(vuelve|volver|ve|llevame) (al|a el) (diamante|centro|nucleo|principio)|vista general|el diamante", t):
+        return _reply("El diamante: la Fundación arriba y Política, Bancos y Arte en la base.", view={"focus": {"kind": "core"}},
+                      options=[{"label": "Ir a Política", "utterance": "ve a política"}, {"label": "Ir a Bancos", "utterance": "ve a bancos"},
+                               {"label": "Ir a Arte", "utterance": "ve a arte"}, {"label": "Ir a la Fundación", "utterance": "ve a la fundación"}])
+    cam = {"acercate": "in", "mas cerca": "in", "zoom": "in", "alejate": "out", "mas lejos": "out", "gira": "spin", "rota": "spin",
+           "girar": "spin", "para de girar": "stop", "deja de girar": "stop", "quieto": "stop"}
+    if t in cam:
+        return _reply({"in": "Me acerco.", "out": "Me alejo.", "spin": "Giro.", "stop": "Quieto."}[cam[t]], view={"camera": cam[t]})
+    if m := re.search(r"\b(?:quien|quienes) (?:financia|financian|convoca|paga)\b (?:a |el |la |los )?(.+)", t):
+        calls = {x["id"] for x in st["plan"]["ecosystem"]["nodes"] if x["kind"] == "call"}
+        n = find_node(m.group(1), st, among=calls) or find_node(m.group(1), st)
+        if n:
+            _, by, out, inn = _eco_maps(st)
+            if n["kind"] == "funder":
+                sph = [e for e in inn.get(n["id"], []) if by[e["from"]]["kind"] == "sphere"]
+                sph.sort(key=lambda e: -e["weight"])
+                return _reply(f"{n['label']} es un financiador; lo canaliza " + " y ".join(f"{by[e['from']]['label']} ({e['weight']:.1f})" for e in sph) + ".",
+                              view={"path": [sph[0]["from"], n["id"]]} if sph else {"focus": {"kind": "node", "id": n["id"]}},
+                              options=neighbor_options(st, n["id"]))
+            funders = [e["from"] for e in inn.get(n["id"], []) if by[e["from"]]["kind"] == "funder" or e["label"] == "convoca"]
+            if not funders:
+                return _reply(f"{n['label']} no tiene financiador en el grafo.", view={"focus": {"kind": "node", "id": n["id"]}}, options=neighbor_options(st, n["id"]))
+            f = funders[0]
+            spheres = [e["from"] for e in inn.get(f, []) if by[e["from"]]["kind"] == "sphere"]
+            path = ([spheres[0]] if spheres else []) + [f, n["id"]]
+            return _reply(f"La convoca {by[f]['label']}" + (f", canalizada por la esfera {by[spheres[0]]['label']}." if spheres else ".")
+                          + (f" También: {', '.join(by[x]['label'] for x in funders[1:])}." if len(funders) > 1 else ""),
+                          view={"path": path}, options=neighbor_options(st, f))
+    if m := re.search(r"\b(?:camino|ruta|como llega|como se llega|conecta|une)\b (?:de |desde )?(.+?) (?:a|hasta|con|hacia) (.+)", t):
+        a, b = find_node(m.group(1), st), find_node(m.group(2), st)
+        if a and b and a["id"] != b["id"]:
+            planner = _load("planner")
+            eco = st["plan"]["ecosystem"]
+            ps = planner.paths(eco, a["id"], b["id"], limit=200) or planner.paths(eco, b["id"], a["id"], limit=200)
+            if ps:
+                path, w = ps[0]
+                kind = f"camino causal más fuerte (peso {w:.2f}, de {len(ps)} caminos)"
+            else:
+                path, kind = _bfs(st, a["id"], b["id"]), "conexión más corta, sin dirección causal"
+            if path:
+                _, by, _, _ = _eco_maps(st)
+                return _reply(f"{kind.capitalize()}: " + " → ".join(by[x]["label"] for x in path) + ".", view={"path": path},
+                              options=[{"label": f"Ir a {by[x]['label'][:34]}", "utterance": f"ve a {by[x]['label']}"} for x in path[1:-1][:3]])
+    if m := re.search(r"^(?:sigue|seguir|continua|avanza) (?:hacia|hasta|a|por) (.+)", t):
+        cur = (ctx.get("focus") or {}).get("id")
+        _, by, out, inn = _eco_maps(st)
+        if cur and cur in by:
+            nb = {e["to"] for e in out.get(cur, [])} | {e["from"] for e in inn.get(cur, [])}
+            n = find_node(m.group(1), st, among=nb)
+            if n:
+                e = next((e for e in out.get(cur, []) + inn.get(cur, []) if n["id"] in (e["from"], e["to"])), None)
+                rel = f" ({e['label']}, peso {e['weight']:.2f})" if e else ""
+                return _reply(f"{n['label']}{rel}. {n.get('detail', '')[:160]}", view={"path": [cur, n["id"]]}, options=neighbor_options(st, n["id"]))
+        n = find_node(m.group(1), st)
+        if n:
+            return _reply(f"{n['label']}.", view={"focus": {"kind": "node", "id": n["id"]}}, options=neighbor_options(st, n["id"]))
+    if m := re.search(r"^(?:vecinos|relaciones|conexiones)(?: de (.+))?$|^que (?:conecta|se conecta|esta conectado) con (.+)$", t):
+        q = m.group(1) or m.group(2)
+        n = find_node(q, st) if q else None
+        nid = n["id"] if n else (ctx.get("focus") or {}).get("id")
+        _, by, out, inn = _eco_maps(st)
+        if nid in by:
+            return _reply(f"{by[nid]['label']} tiene {len(inn.get(nid, []))} causas y {len(out.get(nid, []))} efectos. Estas son sus relaciones más fuertes.",
+                          view={"focus": {"kind": "node", "id": nid}}, options=neighbor_options(st, nid))
+    if m := re.search(r"^(?:ve|vete|vuela|viaja|llevame|lleva me|enfoca|centrate|centra|acercate|muestrame|ensename) (?:a |al |a la |a los |a las |en |el |la )?(.+)", t):
+        n = find_node(m.group(1), st)
+        if n and (page == "espacio" or n["kind"] in ("sphere", "funder", "factor", "partner", "product", "entity")):
+            d = n.get("detail") or ""
+            return _reply(f"{n['label']}. {d[:170]}", view={"focus": {"kind": "node", "id": n["id"]}} if page == "espacio"
+                          else {"tab": "graph", "focus": {"kind": "node", "id": n["id"]}}, options=neighbor_options(st, n["id"]))
 
     if re.search(r"\b(que hago ahora|que toca|que hacemos|por donde empiezo|estado general)\b", t):
         now = plan["now"]

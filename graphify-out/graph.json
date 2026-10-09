@@ -198,6 +198,125 @@
    "community_name": "factor de contexto"
   },
   {
+   "id": "s_politica",
+   "label": "Politica",
+   "source_file": "Esferas/esfera",
+   "source_location": "esfera",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "s_bancos",
+   "label": "Bancos",
+   "source_file": "Esferas/esfera",
+   "source_location": "esfera",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "s_arte",
+   "label": "Arte",
+   "source_file": "Esferas/esfera",
+   "source_location": "esfera",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_ce",
+   "label": "Comision Europea",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_cost",
+   "label": "COST Association",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_nlnet",
+   "label": "NLnet (fondos UE)",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_fecyt",
+   "label": "FECYT",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_cdti",
+   "label": "CDTI",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_enisa",
+   "label": "ENISA",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_vivienda",
+   "label": "Ministerio de Vivienda",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_cam",
+   "label": "Comunidad de Madrid",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_madrimasd",
+   "label": "Fundacion madri+d",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_pozuelo",
+   "label": "Ayto. Pozuelo de Alarcon",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_majadahonda",
+   "label": "Ayto. Majadahonda",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_lacaixa",
+   "label": "Fundacion \"la Caixa\"",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_carasso",
+   "label": "Fundacion Carasso",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_inversores",
+   "label": "Inversores (business angels)",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
    "id": "c_caixaresearch-health-next",
    "label": "[A] CaixaResearch Health Research Call (next edition)",
    "source_file": "Causality Graphs/convocatoria",
@@ -827,6 +946,405 @@
    "target": "c_startup-europe-2027",
    "weight": 0.6,
    "relation": "consorcio (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "s_bancos",
+   "weight": 0.4,
+   "relation": "banca publica y regulacion (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "s_arte",
+   "weight": 0.5,
+   "relation": "politica cultural (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "s_arte",
+   "weight": 0.5,
+   "relation": "mecenazgo (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "e_fund",
+   "weight": 0.7,
+   "relation": "protectorado y convenios (peso 0.70)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "e_fund",
+   "weight": 0.5,
+   "relation": "patronos y mecenazgo (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_arte",
+   "target": "e_fund",
+   "weight": 0.5,
+   "relation": "programa cultural (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_arte",
+   "target": "f_semf",
+   "weight": 0.6,
+   "relation": "confluencia arte-ciencia (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "f_cloudy",
+   "weight": 0.5,
+   "relation": "ilustracion y edicion (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "f_bo",
+   "weight": 0.6,
+   "relation": "inversion y credito (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_politica",
+   "target": "x_lr",
+   "weight": 0.8,
+   "relation": "gobierno local (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "x_csic",
+   "weight": 0.4,
+   "relation": "investigacion publica (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "x_uned",
+   "weight": 0.3,
+   "relation": "universidad publica (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_ce",
+   "weight": 0.9,
+   "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_eic-accelerator-2026-11",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_horizon-hlth-2027-01-02",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_horizon-neb-2026",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_startup-europe-2027",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_erasmus-ka210-2027",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_neb-connect-cocreate-2027",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_cost",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_cost",
+   "target": "c_cost-oc-2026-1",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_nlnet",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_nlnet",
+   "target": "c_nlnet-2026-11",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_fecyt",
+   "weight": 0.9,
+   "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_fecyt",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_cdti",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "u_cdti",
+   "weight": 0.3,
+   "relation": "canaliza (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_cdti",
+   "target": "c_cdti-neotec-2026",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "u_enisa",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_enisa",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_enisa",
+   "target": "c_enisa-prestamo-participativo",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_vivienda",
+   "weight": 0.9,
+   "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_vivienda",
+   "target": "c_plan-vivienda-2026-coliving",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_cam",
+   "weight": 0.9,
+   "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_cam",
+   "target": "c_madrid-cheque-innovacion",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_cam",
+   "target": "c_madrid-sello-excelencia",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_cam",
+   "target": "c_madrid-cesion-centros-educativos",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_madrimasd",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_madrimasd",
+   "target": "c_healthstart-madrimasd",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "x_lr",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_lr",
+   "target": "c_lasrozas-convenios-entidades",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_lr",
+   "target": "c_lasrozas-cesion-espacios-cultura",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_lr",
+   "target": "c_lasrozas-cultura-asociaciones-2026",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_lr",
+   "target": "c_lasrozas-innova-foro",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_pozuelo",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "u_pozuelo",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_pozuelo",
+   "target": "c_pozuelo-subv-cultura-2026",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_pozuelo",
+   "target": "c_pozuelo-innpar-vivero",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_majadahonda",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_majadahonda",
+   "target": "c_majadahonda-emprende-2026",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "u_lacaixa",
+   "weight": 0.9,
+   "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "u_lacaixa",
+   "weight": 0.3,
+   "relation": "canaliza (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_lacaixa",
+   "target": "c_caixaresearch-health-next",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "u_carasso",
+   "weight": 0.9,
+   "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_carasso",
+   "target": "c_carasso-componer-saberes",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "u_inversores",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_inversores",
+   "target": "c_lasrozas-innova-foro",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
    "confidence": "EXTRACTED"
   },
   {

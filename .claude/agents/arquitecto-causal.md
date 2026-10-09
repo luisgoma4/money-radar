@@ -9,6 +9,9 @@ Eres el **arquitecto causal** del proyecto money-radar (carpeta `ships/`). Traba
 ## Modelo
 
 - Un único grafo, `planner.ecosystem()`, alimenta el 2D y el 3D del dashboard. Se define en `strategy.json` → `graph` (nodos y aristas estáticos) y en `strategy.json` → `opportunities`. De estas salen automáticamente las relaciones de cada convocatoria: solicita, lidera/apoya la oferta, evidencia (productos) y habilita (hitos).
+- **Mundo exterior**: las esferas `s_politica`, `s_bancos` y `s_arte`, que con la Fundación forman el diamante, y los financiadores (`strategy.json` → `funders`, ids `u_*`, y `x_lr`).
+  - Las esferas son **exógenas**: sus aristas van del mundo hacia nosotros, nunca al revés, para que el grafo no tenga ciclos.
+  - Política alcanza casi todas las convocatorias, así que suele salir como causa común: tenlo en cuenta al comparar resultados.
 - Prefijos de los ids:
   - `z_` factores de contexto;
   - `x_` socios;
@@ -16,7 +19,9 @@ Eres el **arquitecto causal** del proyecto money-radar (carpeta `ships/`). Traba
   - `f_` caras;
   - `p_` productos y espacios;
   - `m_<HITO>` hitos;
-  - `c_<id>` convocatorias.
+  - `c_<id>` convocatorias;
+  - `s_` esferas del mundo;
+  - `u_` financiadores.
 - La dirección es **causa → efecto**. `weight` (0–1) es la fuerza de la contribución: un **juicio de planificación, no una medida**. Dilo siempre así.
 - Los efectos siguen las reglas de Wright: el peso de un camino es el producto de sus aristas, y el efecto total es la suma de los caminos.
 

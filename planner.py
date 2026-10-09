@@ -245,6 +245,24 @@ ENTITY_NODE = {"fundacion_dl": "e_fund", "asoc_local": "e_asoc", "semf_asoc": "e
                "branchout_sl": "e_bo", "partner_csic": "x_csic", "partner_uned": "x_uned", "partner_research": "x_idiphisa"}
 FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
 NODE_STATUSES = ("exists", "planned", "proposed", "external", "factor")
+WORLD_KINDS = ("sphere", "funder")          # the outside world: no face of ours
+OUR_KINDS = ("entity", "face", "product", "factor", "milestone", "partner")
+
+
+def funder_edges(strategy):
+    """World surface: sphere -> funder (channels) and funder -> call (convenes)."""
+    nodes, edges = [], []
+    for f in strategy.get("funders", []):
+        nid = f.get("node") or f["id"]
+        if not f.get("node"):
+            spheres = ", ".join(k.replace("s_", "").capitalize() for k in f.get("spheres", {}))
+            nodes.append({"id": nid, "label": f["label"], "type": "funder", "kind": "funder", "status": "external",
+                          "face": None, "detail": f"Financiador · esfera: {spheres} · convoca {len(f.get('calls', []))} convocatorias del radar"})
+        for sph, w in f.get("spheres", {}).items():
+            edges.append({"from": sph, "to": nid, "label": "canaliza", "status": "exists", "weight": w})
+        for c in f.get("calls", []):
+            edges.append({"from": nid, "to": "c_" + c, "label": "convoca", "status": "exists", "weight": 1.0})
+    return nodes, edges
 
 
 def _call_edges(oid, st, applicant, pending_ms=None, applicant_status="exists"):
@@ -276,6 +294,9 @@ def ecosystem(strategy, plans, ranking, milestones, opps):
     names = {o["id"]: o for o in opps}
     nodes = [dict(n, kind=n["type"]) for n in g.get("nodes", [])]
     edges = [dict(e) for e in g.get("edges", [])]
+    fn, fe = funder_edges(strategy)
+    nodes += fn
+    edges += fe
     used_ms = set()
     for oid in ranking:
         p = plans[oid]
@@ -299,9 +320,12 @@ def ecosystem(strategy, plans, ranking, milestones, opps):
                           "detail": f"{m['detail']} (~{m['weeks']} semanas)"})
     ids = {n["id"] for n in nodes}
     edges = [e for e in edges if e["from"] in ids and e["to"] in ids]
-    linked = {x for e in edges if e["status"] == "exists" for x in (e["from"], e["to"])}
+    # A partner is "pending" (shaded) until it has a real relationship with OUR side of the graph.
+    kind = {n["id"]: n["kind"] for n in nodes}
+    linked = {x for e in edges if e["status"] == "exists" and kind[e["from"]] in OUR_KINDS and kind[e["to"]] in OUR_KINDS
+              for x in (e["from"], e["to"])}
     for n in nodes:
-        n["pending"] = n["status"] == "external" and n["id"] not in linked
+        n["pending"] = n["kind"] == "partner" and n["id"] not in linked
     return {"columns": g.get("columns", []), "nodes": nodes, "edges": edges}
 
 
@@ -406,8 +430,12 @@ def causal_summary(eco):
     order, cyc = topo_order(eco)
     f = flows(eco, calls)
     top = max(f.values() or [1]) or 1
+    _, pa = _links(eco)
+    # A mediator sits between causes and calls: sources (no parents, e.g. the world spheres) are causes, not mediators.
+    inner = {n: v for n, v in f.items() if n not in calls and kind[n] != "milestone" and v > 0 and pa.get(n)}
+    top = max(inner.values() or [1]) or 1
     mediators = [{"id": n, "label": label[n], "kind": kind[n], "flow": round(v / top, 3)}
-                 for n, v in sorted(f.items(), key=lambda kv: -kv[1]) if n not in calls and kind[n] != "milestone" and v > 0][:10]
+                 for n, v in sorted(inner.items(), key=lambda kv: -kv[1])][:10]
     ch, _ = _links(eco)
     conf = []
     for n in order:
@@ -415,9 +443,10 @@ def causal_summary(eco):
         if len(kids) < 2:
             continue
         reach_calls = sorted(c for c in _reach(ch, n) if c in calls)
-        if len(reach_calls) >= 2 and kind[n] in ("factor", "partner", "entity"):
+        if len(reach_calls) >= 2 and kind[n] in ("factor", "sphere", "partner", "entity"):
             conf.append({"id": n, "label": label[n], "kind": kind[n], "calls": len(reach_calls), "children": len(kids)})
-    conf.sort(key=lambda c: (c["kind"] != "factor", -c["calls"]))
+    rank = {"factor": 0, "sphere": 1, "partner": 2, "entity": 3}
+    conf.sort(key=lambda c: (rank[c["kind"]], -c["calls"]))
     return {"dag": not cyc, "cycle": cyc, "mediators": mediators, "confounders": conf[:8]}
 
 
@@ -494,7 +523,7 @@ def graph_export(plan, opps=None):
     faces = plan["faces"]
     st_es = {"exists": "existe", "planned": "por crear", "proposed": "propuesta", "external": "socio externo", "factor": "factor de contexto"}
     kind_es = {"entity": "figura legal", "face": "cara", "product": "producto", "partner": "socio", "factor": "factor",
-               "milestone": "hito", "call": "convocatoria"}
+               "milestone": "hito", "call": "convocatoria", "sphere": "esfera", "funder": "financiador"}
     nodes = []
     for n in eco["nodes"]:
         st = st_es.get(n["status"], n["status"])
@@ -508,7 +537,8 @@ def graph_export(plan, opps=None):
             label = n["label"]
         else:
             label = n["label"] + ("" if n["status"] in ("exists", "external", "factor") else f" ({st})")
-        group = faces[n["face"]]["name"] if n.get("face") in faces else "Hitos"
+        group = (faces[n["face"]]["name"] if n.get("face") in faces else
+                 {"sphere": "Esferas", "funder": "Financiadores"}.get(n["kind"], "Hitos"))
         nodes.append({"id": n["id"], "label": ascii_text(label), "source_file": ascii_text(f"{group}/{kind_es[n['kind']]}"),
                       "source_location": ascii_text(kind_es[n["kind"]]), "community_name": ascii_text(st)})
     links = [{"source": e["from"], "target": e["to"], "weight": e.get("weight", 0.5),
@@ -586,7 +616,7 @@ def check(strategy, opp_ids):
     for n in g.get("nodes", []):
         if n.get("status") not in NODE_STATUSES:
             problems.append(f"graph node {n['id']}: bad status {n.get('status')}")
-        if n.get("face") not in faces:
+        if n.get("face") not in faces and not (n.get("type") in WORLD_KINDS and n.get("face") is None):
             problems.append(f"graph node {n['id']}: unknown face {n.get('face')}")
     for e in g.get("edges", []):
         if e["from"] not in nodes or (e["to"] not in nodes and e["to"] not in calls):
@@ -595,6 +625,17 @@ def check(strategy, opp_ids):
             problems.append(f"graph edge {e['from']}->{e['to']}: status must be exists|planned")
         if not 0 <= e.get("weight", 0.5) <= 1:
             problems.append(f"graph edge {e['from']}->{e['to']}: weight must be 0..1")
+    for f in strategy.get("funders", []):
+        for sph, w in f.get("spheres", {}).items():
+            if sph not in nodes:
+                problems.append(f"funder {f['id']}: unknown sphere {sph}")
+            if not 0 <= w <= 1:
+                problems.append(f"funder {f['id']}: weight must be 0..1")
+        for c in f.get("calls", []):
+            if c not in opp_ids:
+                problems.append(f"funder {f['id']}: unknown call {c}")
+        if f.get("node") and f["node"] not in nodes:
+            problems.append(f"funder {f['id']}: node {f['node']} missing in graph")
     for oid, st in strategy["opportunities"].items():
         for pr in st.get("products", []):
             if pr not in nodes:
@@ -603,7 +644,9 @@ def check(strategy, opp_ids):
         if v not in nodes:
             problems.append(f"planner mapping {k}: graph node {v} missing")
     # The ecosystem must stay a DAG (causal analysis needs it): static edges + every call's relations.
-    eco = {"nodes": [{"id": n} for n in nodes | calls | {"m_" + m for m in ms}], "edges": list(g.get("edges", []))}
+    fn, fe = funder_edges(strategy)
+    eco = {"nodes": [{"id": n} for n in nodes | calls | {"m_" + m for m in ms} | {x["id"] for x in fn}],
+           "edges": list(g.get("edges", [])) + fe}
     for oid, st in strategy["opportunities"].items():
         for a in st.get("applicant", [])[:1]:
             eco["edges"] += _call_edges(oid, st, a)

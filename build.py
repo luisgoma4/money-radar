@@ -665,13 +665,13 @@ def _brief(o):
     return {k: o[k] for k in ("id", "name", "lines", "amount_text", "deadline", "url", "action")}
 
 
-def render(opps, changes, lessons, plan):
+def render(opps, changes, lessons, plan, template="dashboard_template.html"):
     data = json.dumps(
         {"today": TODAY.isoformat(), "lines": LINES, "opportunities": opps,
          "changes": changes, "lessons": lessons, "plan": plan},
         ensure_ascii=False,
     ).replace("</", "<\\/")
-    template = (HERE / "dashboard_template.html").read_text(encoding="utf-8")
+    template = (HERE / template).read_text(encoding="utf-8")
     return (template
             .replace("/*__DATA__*/null", data)
             .replace("__GENERATED__", html.escape(TODAY.strftime("%d %b %Y"))))
@@ -703,8 +703,9 @@ def main():
     out.mkdir(exist_ok=True)
     (out / "graph.json").write_text(json.dumps(planner.graph_export(plan), ensure_ascii=False, indent=1) + "\n",
                                     encoding="utf-8")
-    plan["has_3d"] = (out / "graph3d.html").exists()
+    plan["has_3d"] = True  # the 3D view is espacio.html (built below), no longer the external graphify viewer
     DASHBOARD.write_text(render(opps, changes, read_lessons(), plan), encoding="utf-8")
+    (HERE / "espacio.html").write_text(render(opps, changes, read_lessons(), plan, "espacio_template.html"), encoding="utf-8")
     report = alerts(opps, changes)
     ALERTS.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 

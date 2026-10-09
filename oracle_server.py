@@ -47,8 +47,10 @@ SCHEMA = json.dumps({
     "properties": {
         "say": {"type": "string"},
         "view": {"type": "object", "properties": {
+            "page": {"type": "string", "enum": ["dashboard", "espacio"]},
             "tab": {"type": "string", "enum": ["radar", "strategy", "calendar", "graph", "oracle", "west"]},
-            "mode": {"type": "string"},
+            "mode": {"type": "string"}, "camera": {"type": "string", "enum": ["in", "out", "spin", "stop"]},
+            "path": {"type": "array", "items": {"type": "string"}},
             "focus": {"type": "object", "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}}}},
         "options": {"type": "array", "items": {"type": "object", "required": ["label"], "properties": {
             "label": {"type": "string"}, "utterance": {"type": "string"},
@@ -61,7 +63,8 @@ def ask_claude(text, ctx):
         return {"say": "No encuentro Claude Code en este equipo; solo entiendo órdenes conocidas.", "options": []}
     st = actions.state()
     o = st["plan"]["oracle"]
-    brief = {"pestaña_actual": ctx.get("tab"), "foco": ctx.get("focus"), "ceremonia": ctx.get("ceremony"),
+    brief = {"pagina": ctx.get("page"), "pestaña_actual": ctx.get("tab"), "foco": ctx.get("focus"), "ruta": ctx.get("path"),
+             "ceremonia": ctx.get("ceremony"),
              "dictamen": o["verdict"], "nave": (o.get("ship") or {}).get("name"),
              "ranking": [st["plan"]["plans"][i]["name"] + f" ({st['plan']['plans'][i]['grade']})" for i in st["plan"]["ranking"][:6]]}
     prompt = f"Contexto de la web (JSON): {json.dumps(brief, ensure_ascii=False)}\n\nEl usuario dice: «{text}»"

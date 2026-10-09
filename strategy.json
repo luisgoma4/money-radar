@@ -1000,6 +1000,14 @@
         "name": "Caras (proyectos)"
       },
       {
+        "id": "sphere",
+        "name": "Esferas del mundo"
+      },
+      {
+        "id": "funder",
+        "name": "Financiadores"
+      },
+      {
         "id": "product",
         "name": "Productos y espacios"
       },
@@ -1236,6 +1244,30 @@
         "status": "factor",
         "face": "branchout",
         "detail": "Capital y caja: limitan préstamos (ENISA exige fondos propios ≥ préstamo) y la dotación de la fundación."
+      },
+      {
+        "id": "s_politica",
+        "label": "Política",
+        "type": "sphere",
+        "status": "external",
+        "face": null,
+        "detail": "Administraciones públicas: UE, ministerios, Comunidad de Madrid y ayuntamientos. Convocan la mayoría de las ayudas, ceden espacios y firman convenios."
+      },
+      {
+        "id": "s_bancos",
+        "label": "Bancos",
+        "type": "sphere",
+        "status": "external",
+        "face": null,
+        "detail": "Banca, obra social bancaria, crédito público e inversores: préstamos, mecenazgo y capital."
+      },
+      {
+        "id": "s_arte",
+        "label": "Arte",
+        "type": "sphere",
+        "status": "external",
+        "face": null,
+        "detail": "Mundo cultural y artístico: fundaciones culturales, políticas culturales, edición y la confluencia arte-ciencia."
       }
     ],
     "edges": [
@@ -1609,6 +1641,90 @@
         "label": "consorcio",
         "status": "exists",
         "weight": 0.6
+      },
+      {
+        "from": "s_politica",
+        "to": "s_bancos",
+        "label": "banca pública y regulación",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "s_politica",
+        "to": "s_arte",
+        "label": "política cultural",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_bancos",
+        "to": "s_arte",
+        "label": "mecenazgo",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_politica",
+        "to": "e_fund",
+        "label": "protectorado y convenios",
+        "status": "planned",
+        "weight": 0.7
+      },
+      {
+        "from": "s_bancos",
+        "to": "e_fund",
+        "label": "patronos y mecenazgo",
+        "status": "planned",
+        "weight": 0.5
+      },
+      {
+        "from": "s_arte",
+        "to": "e_fund",
+        "label": "programa cultural",
+        "status": "planned",
+        "weight": 0.5
+      },
+      {
+        "from": "s_arte",
+        "to": "f_semf",
+        "label": "confluencia arte-ciencia",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_arte",
+        "to": "f_cloudy",
+        "label": "ilustración y edición",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_bancos",
+        "to": "f_bo",
+        "label": "inversión y crédito",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "s_politica",
+        "to": "x_lr",
+        "label": "gobierno local",
+        "status": "exists",
+        "weight": 0.8
+      },
+      {
+        "from": "s_politica",
+        "to": "x_csic",
+        "label": "investigación pública",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "s_politica",
+        "to": "x_uned",
+        "label": "universidad pública",
+        "status": "exists",
+        "weight": 0.3
       }
     ]
   },
@@ -1652,5 +1768,174 @@
         "detail": "oraculo.py registrar guarda decisiones y compromisos; se fija la próxima ceremonia."
       }
     ]
-  }
+  },
+  "funders": [
+    {
+      "id": "u_ce",
+      "label": "Comisión Europea",
+      "spheres": {
+        "s_politica": 0.9
+      },
+      "calls": [
+        "eic-accelerator-2026-11",
+        "horizon-hlth-2027-01-02",
+        "horizon-neb-2026",
+        "startup-europe-2027",
+        "erasmus-ka210-2027",
+        "neb-connect-cocreate-2027"
+      ]
+    },
+    {
+      "id": "u_cost",
+      "label": "COST Association",
+      "spheres": {
+        "s_politica": 0.8
+      },
+      "calls": [
+        "cost-oc-2026-1"
+      ]
+    },
+    {
+      "id": "u_nlnet",
+      "label": "NLnet (fondos UE)",
+      "spheres": {
+        "s_politica": 0.6
+      },
+      "calls": [
+        "nlnet-2026-11"
+      ]
+    },
+    {
+      "id": "u_fecyt",
+      "label": "FECYT",
+      "spheres": {
+        "s_politica": 0.9
+      },
+      "calls": [
+        "fecyt-fcc-2026"
+      ]
+    },
+    {
+      "id": "u_cdti",
+      "label": "CDTI",
+      "spheres": {
+        "s_politica": 0.8,
+        "s_bancos": 0.3
+      },
+      "calls": [
+        "cdti-neotec-2026"
+      ]
+    },
+    {
+      "id": "u_enisa",
+      "label": "ENISA",
+      "spheres": {
+        "s_bancos": 0.7,
+        "s_politica": 0.6
+      },
+      "calls": [
+        "enisa-prestamo-participativo"
+      ]
+    },
+    {
+      "id": "u_vivienda",
+      "label": "Ministerio de Vivienda",
+      "spheres": {
+        "s_politica": 0.9
+      },
+      "calls": [
+        "plan-vivienda-2026-coliving"
+      ]
+    },
+    {
+      "id": "u_cam",
+      "label": "Comunidad de Madrid",
+      "spheres": {
+        "s_politica": 0.9
+      },
+      "calls": [
+        "madrid-cheque-innovacion",
+        "madrid-sello-excelencia",
+        "madrid-cesion-centros-educativos"
+      ]
+    },
+    {
+      "id": "u_madrimasd",
+      "label": "Fundación madri+d",
+      "spheres": {
+        "s_politica": 0.7
+      },
+      "calls": [
+        "healthstart-madrimasd"
+      ]
+    },
+    {
+      "id": "x_lr",
+      "node": "x_lr",
+      "label": "Ayto. Las Rozas · Las Rozas Innova",
+      "spheres": {
+        "s_arte": 0.4
+      },
+      "calls": [
+        "lasrozas-convenios-entidades",
+        "lasrozas-cesion-espacios-cultura",
+        "lasrozas-cultura-asociaciones-2026",
+        "lasrozas-innova-foro"
+      ]
+    },
+    {
+      "id": "u_pozuelo",
+      "label": "Ayto. Pozuelo de Alarcón",
+      "spheres": {
+        "s_politica": 0.8,
+        "s_arte": 0.4
+      },
+      "calls": [
+        "pozuelo-subv-cultura-2026",
+        "pozuelo-innpar-vivero"
+      ]
+    },
+    {
+      "id": "u_majadahonda",
+      "label": "Ayto. Majadahonda",
+      "spheres": {
+        "s_politica": 0.8
+      },
+      "calls": [
+        "majadahonda-emprende-2026"
+      ]
+    },
+    {
+      "id": "u_lacaixa",
+      "label": "Fundación «la Caixa»",
+      "spheres": {
+        "s_bancos": 0.9,
+        "s_arte": 0.3
+      },
+      "calls": [
+        "caixaresearch-health-next"
+      ]
+    },
+    {
+      "id": "u_carasso",
+      "label": "Fundación Carasso",
+      "spheres": {
+        "s_arte": 0.9
+      },
+      "calls": [
+        "carasso-componer-saberes"
+      ]
+    },
+    {
+      "id": "u_inversores",
+      "label": "Inversores (business angels)",
+      "spheres": {
+        "s_bancos": 0.8
+      },
+      "calls": [
+        "lasrozas-innova-foro"
+      ]
+    }
+  ],
+  "_funders_doc": "Financiadores: nodos del mundo exterior. spheres = esfera(s) que los canalizan con su peso; calls = convocatorias que convocan. node reutiliza un nodo existente del grafo (x_lr)."
 }

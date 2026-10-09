@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Espacio · Money Radar</title>
+<meta name="description" content="Grafo 3D navegable del Ecosistema Delfina León: el diamante Fundación · Arte · Bancos · Política, nuestras caras, productos, financiadores y convocatorias. Generado __GENERATED__.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f3f2ee;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781; --grid: #e1e0d9; --axis: #c3c2b7;
+  --border: rgba(11,11,11,0.10); --accent: #2a78d6; --critical: #d03b3b; --warning: #fab219; --good-ink: #006300;
+  --line-cloudy: #2a78d6; --line-semf: #eb6834; --line-causality: #1baf7a; --line-branchout: #eda100; --line-delfina: #e87ba4;
+  --world-sphere: #4a3aa7; --world-funder: #008300; --edge: rgba(11,11,11,0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --accent: #3987e5; --good-ink: #0ca30c;
+    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181;
+    --world-sphere: #9085e9; --world-funder: #0ca30c; --edge: rgba(255,255,255,0.16);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --accent: #3987e5; --good-ink: #0ca30c;
+  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181;
+  --world-sphere: #9085e9; --world-funder: #0ca30c; --edge: rgba(255,255,255,0.16);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page); color: var(--ink);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+#stage { position: fixed; inset: 0; display: block; touch-action: none; cursor: grab; }
+#stage:active { cursor: grabbing; }
+.panel { position: fixed; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px);
+  border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.10); }
+#head { top: 16px; left: 16px; width: 300px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+#head h1 { margin: 0; font-size: 17px; }
+#head .sub { margin: 0; font-size: 12px; color: var(--ink-2); }
+#head input { width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font: inherit; }
+#legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; color: var(--ink-2); }
+#legend span { display: inline-flex; align-items: center; gap: 5px; }
+#legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+#legend i.dia { border-radius: 2px; transform: rotate(45deg); width: 9px; height: 9px; }
+#legend i.sq { border-radius: 2px; }
+#legend i.hol { background: none !important; border: 1.5px dashed var(--ink-2); }
+.links { display: flex; gap: 8px; font-size: 12px; }
+.links a, .links button { color: var(--accent); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: underline; }
+#card { top: 16px; right: 16px; width: 330px; max-height: calc(100vh - 360px); overflow-y: auto; padding: 14px; display: none; }
+#card.open { display: block; }
+#card .kind { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+#card h2 { font-size: 17px; margin: 2px 0 6px; }
+#card .detail { font-size: 13px; color: var(--ink-2); margin: 0 0 8px; }
+#card h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin: 10px 0 4px; }
+.rel { display: grid; grid-template-columns: 16px minmax(0,1fr) 40px; gap: 6px; align-items: center; width: 100%; text-align: left;
+  font: inherit; font-size: 13px; padding: 4px 6px; border-radius: 7px; border: 0; background: none; color: var(--ink); cursor: pointer; }
+.rel:hover, .rel:focus-visible { background: var(--surface-2); outline: none; }
+.rel .w { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; text-align: right; }
+.rel .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rel .lab small { color: var(--muted); }
+.rel.planned .lab { font-style: italic; }
+.pill { display: inline-block; font-size: 11px; font-weight: 600; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--ink-2); margin-right: 4px; }
+.pill.no { border-style: dashed; }
+#trail { left: 16px; bottom: 16px; max-width: calc(100vw - 480px); padding: 8px 12px; font-size: 12.5px; display: none; flex-wrap: wrap; gap: 4px; align-items: center; }
+#trail.open { display: flex; }
+#trail button { font: inherit; border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0 2px; }
+#banner { top: 16px; left: 50%; transform: translateX(-50%); padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--accent); display: none; }
+#banner.open { display: block; }
+#tip { position: fixed; pointer-events: none; padding: 6px 9px; font-size: 12.5px; display: none; max-width: 280px; z-index: 40; }
+.embed #head, .embed #trail, .embed #banner { display: none !important; }
+.embed #card { max-height: calc(100vh - 32px); }
+@media (max-width: 760px) { #card { top: auto; bottom: 16px; left: 16px; right: 16px; width: auto; max-height: 40vh; } #head { width: calc(100vw - 32px); } }
+</style>
+<link rel="stylesheet" href="oracle_dock.css">
+</head>
+<body>
+<canvas id="stage" aria-label="Grafo 3D del ecosistema. Arrastra para rotar, rueda para acercar, clic para enfocar un nodo."></canvas>
+<section class="panel" id="head">
+  <h1>El Espacio</h1>
+  <p class="sub">Ecosistema Delfina León · el diamante Fundación · Arte · Bancos · Política · __GENERATED__</p>
+  <input id="find" type="search" placeholder="Buscar un nodo…" aria-label="Buscar un nodo" list="nodes-list">
+  <datalist id="nodes-list"></datalist>
+  <div id="legend"></div>
+  <div class="links"><button type="button" id="to-core">◇ Volver al diamante</button><button type="button" id="spin">⟳ Girar</button><a href="dashboard.html">← Dashboard</a></div>
+</section>
+<section class="panel" id="card" aria-live="polite"></section>
+<nav class="panel" id="trail" aria-label="Ruta recorrida"></nav>
+<div class="panel" id="banner"></div>
+<div class="panel" id="tip"></div>
+
+<script src="oracle_dock.js"></script>
+<script id="data" type="application/json">/*__DATA__*/null</script>
+<script>
+(function () {
+  "use strict";
+  const DATA = JSON.parse(document.getElementById("data").textContent);
+  const EMBED = new URLSearchParams(location.search).has("embed");
+  if (EMBED) document.body.classList.add("embed");
+  const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund" };
+  const CORE = ["e_fund", "s_politica", "s_bancos", "s_arte"];
+  const KIND_ES = { entity: "figura legal", face: "cara", product: "producto", partner: "socio", factor: "factor de contexto",
+    milestone: "hito", call: "convocatoria", sphere: "esfera del mundo", funder: "financiador" };
+  let CS = getComputedStyle(document.documentElement);
+  const css = (v) => CS.getPropertyValue(v).trim();  // CS is refreshed once per frame (theme changes)
+  const $ = (id) => document.getElementById(id);
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") n.className = v; else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid);
+    return n;
+  }
+
+  // ------------------------------------------------------------------ graph model
+  let G, byId, out, inn;
+  function load() {
+    G = DATA.plan.ecosystem;
+    byId = {}; out = {}; inn = {};
+    G.nodes.forEach((n) => { byId[n.id] = n; out[n.id] = []; inn[n.id] = []; });
+    G.edges.forEach((e) => { if (byId[e.from] && byId[e.to]) { out[e.from].push(e); inn[e.to].push(e); } });
+    layout();
+    $("nodes-list").replaceChildren(...G.nodes.map((n) => el("option", { value: n.label })));
+  }
+  const existsNode = (n) => !(n.status === "planned" || n.status === "proposed");
+  function colorOf(n) {
+    if (n.kind === "sphere") return css("--world-sphere");
+    if (n.kind === "funder") return css("--world-funder");
+    if (n.kind === "milestone" || !n.face) return css("--muted");
+    return css("--line-" + n.face);
+  }
+  function radiusOf(n) {
+    return { sphere: 15, entity: n.id === "e_fund" ? 15 : 9, face: 10, funder: 7, product: 6.5, partner: 7, factor: 7, milestone: 4.5, call: 6 }[n.kind] || 6;
+  }
+
+  // ------------------------------------------------------------------ deterministic 3D layout
+  function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function layout() {
+    const R = 135, rand = rng(7);
+    // The diamond: a regular tetrahedron, Fundación on top, the three spheres as the base.
+    const fixed = { e_fund: [0, -R, 0] };
+    ["s_politica", "s_bancos", "s_arte"].forEach((id, i) => {
+      const a = (i / 3) * Math.PI * 2 - Math.PI / 2, r = R * Math.sqrt(8) / 3;
+      fixed[id] = [r * Math.cos(a), R / 3, r * Math.sin(a)];
+    });
+    const shell = { entity: 150, face: 175, product: 220, partner: 200, factor: 190, funder: 250, milestone: 280, call: 330 };
+    G.nodes.forEach((n) => {
+      if (fixed[n.id]) { [n.x, n.y, n.z] = fixed[n.id]; n.fixed = true; return; }
+      n.fixed = false;
+      let anchor = [0, 0, 0];
+      if (n.kind === "funder") { const s = (inn[n.id].find((e) => byId[e.from] && byId[e.from].kind === "sphere") || {}).from; if (s) anchor = fixed[s].map((v) => v * 1.9); }
+      const u = rand() * 2 - 1, th = rand() * Math.PI * 2, r = (shell[n.kind] || 180) * (0.85 + rand() * 0.3), s = Math.sqrt(1 - u * u);
+      n.x = anchor[0] * 0.6 + r * s * Math.cos(th); n.y = anchor[1] * 0.6 + r * u; n.z = anchor[2] * 0.6 + r * s * Math.sin(th);
+    });
+    const N = G.nodes, E = G.edges.filter((e) => byId[e.from] && byId[e.to]);
+    for (let it = 0; it < 260; it++) {
+      const cool = 1 - it / 260;
+      N.forEach((n) => { n.vx = 0; n.vy = 0; n.vz = 0; });
+      for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
+        const a = N[i], b = N[j];
+        let dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z, d2 = dx * dx + dy * dy + dz * dz + 0.01;
+        if (d2 > 160000) continue;
+        const f = 2600 / d2, d = Math.sqrt(d2);
+        dx /= d; dy /= d; dz /= d;
+        a.vx += dx * f; a.vy += dy * f; a.vz += dz * f; b.vx -= dx * f; b.vy -= dy * f; b.vz -= dz * f;
+      }
+      E.forEach((e) => {
+        const a = byId[e.from], b = byId[e.to];
+        const rest = (a.kind === "call" || b.kind === "call") ? 95 : 70;
+        let dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z; const d = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.01;
+        const f = (d - rest) * 0.012 * (0.4 + (e.weight ?? 0.5));
+        dx /= d; dy /= d; dz /= d;
+        a.vx += dx * f; a.vy += dy * f; a.vz += dz * f; b.vx -= dx * f; b.vy -= dy * f; b.vz -= dz * f;
+      });
+      N.forEach((n) => {
+        if (n.fixed) return;
+        const sh = shell[n.kind] || 180, d = Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + 0.01, pull = (d - sh) * 0.02;
+        n.vx -= n.x / d * pull; n.vy -= n.y / d * pull; n.vz -= n.z / d * pull;
+        const cap = 12 * cool + 1;
+        n.x += Math.max(-cap, Math.min(cap, n.vx)); n.y += Math.max(-cap, Math.min(cap, n.vy)); n.z += Math.max(-cap, Math.min(cap, n.vz));
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------ camera and rendering
+  const canvas = $("stage"), ctx = canvas.getContext("2d");
+  let W, H, DPR;
+  function resize() { DPR = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = W + "px"; canvas.style.height = H + "px"; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  addEventListener("resize", resize); resize();
+  const cam = { yaw: 0.5, pitch: -0.25, dist: 620, tx: 0, ty: 0, tz: 0, goal: { x: 0, y: -20, z: 0, dist: 520 }, spin: !EMBED };
+  const focal = 700;
+  let focusId = null, hoverId = null, path = [], pathT = 0, trail = [];
+  function project(n) {
+    const x = n.x - cam.tx, y = n.y - cam.ty, z = n.z - cam.tz;
+    const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+    const x1 = x * cy - z * sy, z1 = x * sy + z * cy, y1 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+    const zc = Math.max(8, z2 + cam.dist), s = focal / zc;
+    return { sx: W / 2 + x1 * s, sy: H / 2 + y1 * s, s, z: zc };
+  }
+  const neighborsOf = (id) => new Set([...(out[id] || []).map((e) => e.to), ...(inn[id] || []).map((e) => e.from)]);
+  function shape(n, p, r, fill, stroke, hollow, dashed) {
+    ctx.beginPath();
+    if (n.kind === "sphere") { ctx.moveTo(p.sx, p.sy - r * 1.25); ctx.lineTo(p.sx + r, p.sy); ctx.lineTo(p.sx, p.sy + r * 1.25); ctx.lineTo(p.sx - r, p.sy); ctx.closePath(); }
+    else if (n.kind === "funder") { ctx.rect(p.sx - r, p.sy - r, 2 * r, 2 * r); }
+    else ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
+    if (hollow) { ctx.fillStyle = css("--surface"); ctx.fill(); ctx.setLineDash(dashed); ctx.strokeStyle = stroke; ctx.lineWidth = 1.8; ctx.stroke(); ctx.setLineDash([]); }
+    else { ctx.fillStyle = fill; ctx.fill(); if (n.kind === "factor") { ctx.strokeStyle = css("--surface"); ctx.lineWidth = 1.5; ctx.stroke(); } }
+  }
+  function render(t) {
+    CS = getComputedStyle(document.documentElement);
+    cam.tx += (cam.goal.x - cam.tx) * 0.08; cam.ty += (cam.goal.y - cam.ty) * 0.08; cam.tz += (cam.goal.z - cam.tz) * 0.08;
+    cam.dist += (cam.goal.dist - cam.dist) * 0.08;
+    if (cam.spin && !drag) cam.yaw += 0.0012;
+    ctx.clearRect(0, 0, W, H);
+    const P = {}; G.nodes.forEach((n) => { P[n.id] = project(n); });
+    const nb = focusId ? neighborsOf(focusId) : null;
+    const onPath = new Set(); for (let i = 0; i + 1 < path.length; i++) onPath.add(path[i] + ">" + path[i + 1]);
+    const ink = css("--ink"), accent = css("--accent"), edge = css("--edge");
+    // edges
+    G.edges.forEach((e) => {
+      const a = P[e.from], b = P[e.to]; if (!a || !b) return;
+      const isPath = onPath.has(e.from + ">" + e.to) || onPath.has(e.to + ">" + e.from);
+      const isFocus = focusId && (e.from === focusId || e.to === focusId);
+      const dim = (focusId || path.length) && !isPath && !isFocus;
+      const s = Math.min(1.6, (a.s + b.s) / 2);
+      ctx.globalAlpha = dim ? 0.18 : 1;
+      ctx.strokeStyle = isPath ? accent : isFocus ? colorOf(byId[e.from === focusId ? e.to : e.from]) : edge;
+      ctx.lineWidth = (0.5 + 2.4 * (e.weight ?? 0.5)) * s * (isPath ? 1.6 : 1);
+      ctx.setLineDash(e.status === "planned" ? [5 * s, 4 * s] : []);
+      ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke();
+      ctx.setLineDash([]);
+      if (isFocus || isPath) {  // direction arrow (cause -> effect)
+        const mx = a.sx + (b.sx - a.sx) * 0.62, my = a.sy + (b.sy - a.sy) * 0.62, ang = Math.atan2(b.sy - a.sy, b.sx - a.sx), L = 7 * s;
+        ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.moveTo(mx + Math.cos(ang) * L, my + Math.sin(ang) * L);
+        ctx.lineTo(mx + Math.cos(ang + 2.5) * L, my + Math.sin(ang + 2.5) * L); ctx.lineTo(mx + Math.cos(ang - 2.5) * L, my + Math.sin(ang - 2.5) * L); ctx.fill();
+      }
+    });
+    // the diamond (Fundación + the three spheres): always visible, drawn over the other edges
+    const coreSet = new Set(CORE), sph = css("--world-sphere");
+    G.edges.forEach((e) => {
+      if (!coreSet.has(e.from) || !coreSet.has(e.to)) return;
+      const a = P[e.from], b = P[e.to];
+      ctx.globalAlpha = 0.85; ctx.strokeStyle = sph; ctx.lineWidth = 2.6 * Math.min(1.6, (a.s + b.s) / 2);
+      ctx.setLineDash(e.status === "planned" ? [7, 5] : []);
+      ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); ctx.setLineDash([]);
+    });
+    // travelling pulse along the path
+    if (path.length > 1) {
+      pathT = (pathT + 0.012) % (path.length - 1);
+      const i = Math.floor(pathT), f = pathT - i, a = P[path[i]], b = P[path[i + 1]];
+      if (a && b) { ctx.globalAlpha = 1; ctx.fillStyle = accent; ctx.beginPath(); ctx.arc(a.sx + (b.sx - a.sx) * f, a.sy + (b.sy - a.sy) * f, 5, 0, Math.PI * 2); ctx.fill(); }
+    }
+    // nodes, far to near
+    const order = G.nodes.slice().sort((a, b) => P[b.id].z - P[a.id].z);
+    const pathSet = new Set(path);
+    const labels = [];
+    order.forEach((n) => {
+      const p = P[n.id], r = radiusOf(n) * Math.min(2.2, p.s / 1.2);
+      const lit = n.id === focusId || (nb && nb.has(n.id)) || pathSet.has(n.id) || CORE.includes(n.id) || n.id === hoverId;
+      ctx.globalAlpha = (focusId || path.length) && !lit ? 0.22 : Math.max(0.55, Math.min(1, p.s));
+      const c = colorOf(n);
+      const hollow = !existsNode(n) || n.pending;
+      shape(n, p, r, c, c, hollow, n.pending ? [1.5, 3] : [4, 3]);
+      if (n.id === focusId) { ctx.globalAlpha = 1; ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.sx, p.sy, r + 6, 0, Math.PI * 2); ctx.stroke(); }
+      if (lit && (CORE.includes(n.id) || n.id === focusId || n.id === hoverId || pathSet.has(n.id) || (nb && nb.has(n.id)))) {
+        const txt = (n.kind === "call" ? `[${n.grade}] ` : "") + (n.label.length > 42 ? n.label.slice(0, 41) + "…" : n.label);
+        labels.push([txt, p.sx + r + 5, p.sy + 4, CORE.includes(n.id), n.id === focusId]);
+      }
+    });
+    // labels last, over every node (halo keeps them legible on top of edges)
+    const page = css("--page");
+    labels.forEach(([txt, x, y, isCore, isFocus]) => {
+      ctx.globalAlpha = 1;
+      ctx.font = `${isCore || isFocus ? 700 : 500} ${isCore ? 14 : 12}px system-ui, -apple-system, sans-serif`;
+      ctx.lineWidth = 4; ctx.strokeStyle = page; ctx.strokeText(txt, x, y);
+      ctx.fillStyle = ink; ctx.fillText(txt, x, y);
+    });
+    ctx.globalAlpha = 1;
+    LAST = P;
+    requestAnimationFrame(render);
+  }
+  let LAST = {};
+
+  // ------------------------------------------------------------------ interaction
+  let drag = false, lx = 0, ly = 0, moved = false;
+  canvas.addEventListener("pointerdown", (e) => { drag = true; moved = false; lx = e.clientX; ly = e.clientY; cam.spin = false; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!drag) { hover(e); return; }
+    const dx = e.clientX - lx, dy = e.clientY - ly; if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+    cam.yaw += dx * 0.006; cam.pitch = Math.max(-1.4, Math.min(1.4, cam.pitch + dy * 0.006)); lx = e.clientX; ly = e.clientY;
+  });
+  addEventListener("pointerup", (e) => { if (drag && !moved) { const id = pick(e.clientX, e.clientY); if (id) focus(id); } drag = false; });
+  canvas.addEventListener("wheel", (e) => { e.preventDefault(); cam.goal.dist = Math.max(80, Math.min(1600, cam.goal.dist * Math.pow(1.0012, e.deltaY))); }, { passive: false });
+  function pick(x, y) {
+    let best = null, bd = 18 * 18;
+    for (const id in LAST) { const p = LAST[id], dx = p.sx - x, dy = p.sy - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = id; } }
+    return best;
+  }
+  function hover(e) {
+    const id = pick(e.clientX, e.clientY); hoverId = id;
+    const tip = $("tip");
+    if (!id) { tip.style.display = "none"; canvas.style.cursor = "grab"; return; }
+    const n = byId[id]; canvas.style.cursor = "pointer";
+    tip.replaceChildren(el("b", {}, n.label), el("div", { style: "color:var(--ink-2)" }, KIND_ES[n.kind] + " · " + statusText(n)));
+    tip.style.display = "block"; tip.style.left = Math.min(e.clientX + 14, W - 290) + "px"; tip.style.top = (e.clientY + 14) + "px";
+  }
+  function statusText(n) {
+    if (n.kind === "call") return `grado ${n.grade}` + (n.status === "planned" ? " · próxima edición" : "");
+    if (n.kind === "milestone") return n.status === "exists" ? "hecho" : "pendiente";
+    if (n.pending) return "socio · relación por crear";
+    return { exists: "existe", planned: "por crear", proposed: "propuesta", external: "mundo exterior", factor: "factor" }[n.status] || n.status;
+  }
+
+  // ------------------------------------------------------------------ navigation API (also used by the oracle)
+  function flyTo(n, dist) { cam.goal = { x: n.x, y: n.y, z: n.z, dist: dist || 260 }; cam.spin = false; }
+  function focus(id, opts = {}) {
+    const n = byId[id]; if (!n) return false;
+    focusId = id; if (!opts.keepPath) path = [];
+    flyTo(n);
+    if (trail[trail.length - 1] !== id) { trail.push(id); trail = trail.slice(-10); }
+    renderCard(); renderTrail();
+    return true;
+  }
+  function core() { focusId = null; path = []; cam.goal = { x: 0, y: -20, z: 0, dist: 470 }; $("card").classList.remove("open"); renderTrail(); }
+  function showPath(ids) {
+    ids = ids.filter((i) => byId[i]); if (!ids.length) return;
+    path = ids; pathT = 0; focusId = ids[ids.length - 1];
+    const cx = ids.reduce((s, i) => s + byId[i].x, 0) / ids.length, cy = ids.reduce((s, i) => s + byId[i].y, 0) / ids.length, cz = ids.reduce((s, i) => s + byId[i].z, 0) / ids.length;
+    const spread = Math.max(...ids.map((i) => Math.hypot(byId[i].x - cx, byId[i].y - cy, byId[i].z - cz)));
+    cam.goal = { x: cx, y: cy, z: cz, dist: Math.max(260, spread * 3.2) }; cam.spin = false;
+    ids.forEach((i) => { if (trail[trail.length - 1] !== i) trail.push(i); }); trail = trail.slice(-10);
+    renderCard(); renderTrail();
+  }
+  function renderCard() {
+    const card = $("card"), n = byId[focusId];
+    if (!n) { card.classList.remove("open"); return; }
+    const rel = (e, dir) => {
+      const other = byId[dir === "out" ? e.to : e.from];
+      return el("button", { type: "button", class: "rel" + (e.status === "planned" ? " planned" : ""), onclick: () => focus(other.id),
+        title: `${dir === "out" ? "→" : "←"} ${other.label} · ${e.label} · peso ${(e.weight ?? 0.5).toFixed(2)}${e.status === "planned" ? " (por crear)" : ""}` },
+        el("span", { "aria-hidden": "true" }, dir === "out" ? "→" : "←"),
+        el("span", { class: "lab" }, other.label, " ", el("small", {}, "· " + e.label)),
+        el("span", { class: "w" }, (e.weight ?? 0.5).toFixed(2)));
+    };
+    const ins = inn[n.id].slice().sort((a, b) => (b.weight ?? .5) - (a.weight ?? .5));
+    const outs = out[n.id].slice().sort((a, b) => (b.weight ?? .5) - (a.weight ?? .5));
+    card.replaceChildren(
+      el("div", { class: "kind", style: `color:${colorOf(n)}` }, KIND_ES[n.kind] || n.kind),
+      el("h2", {}, (n.kind === "call" ? `[${n.grade}] ` : "") + n.label),
+      el("div", {}, el("span", { class: "pill" + (existsNode(n) && !n.pending ? "" : " no") }, statusText(n)),
+        n.kind === "call" ? el("a", { class: "pill", href: "dashboard.html#call:" + encodeURIComponent(n.id.slice(2)), target: EMBED ? "_top" : "dashboard" }, "Ficha en el dashboard ↗") : null),
+      n.detail ? el("p", { class: "detail" }, n.detail) : null,
+      ins.length ? el("h3", {}, `Causas (${ins.length})`) : null, ...ins.map((e) => rel(e, "in")),
+      outs.length ? el("h3", {}, `Efectos (${outs.length})`) : null, ...outs.map((e) => rel(e, "out")));
+    card.classList.add("open");
+  }
+  function renderTrail() {
+    const t = $("trail");
+    t.classList.toggle("open", trail.length > 0);
+    t.replaceChildren(el("span", { style: "color:var(--muted)" }, "Ruta:"), ...trail.flatMap((id, i) => [i ? el("span", { "aria-hidden": "true", style: "color:var(--muted)" }, "›") : null,
+      el("button", { type: "button", onclick: () => focus(id) }, byId[id] ? byId[id].label : id)]).filter(Boolean));
+  }
+  function banner(text) { const b = $("banner"); b.textContent = text || ""; b.classList.toggle("open", !!text); }
+
+  // ------------------------------------------------------------------ chrome
+  function legend() {
+    const L = [["--line-cloudy", "Cloudy"], ["--line-semf", "SEMF"], ["--line-causality", "Causality"], ["--line-branchout", "BranchOut"], ["--line-delfina", "Fundación"]];
+    $("legend").replaceChildren(...L.map(([v, t]) => el("span", {}, el("i", { style: `background:var(${v})` }), t)),
+      el("span", {}, el("i", { class: "dia", style: "background:var(--world-sphere)" }), "esfera"),
+      el("span", {}, el("i", { class: "sq", style: "background:var(--world-funder)" }), "financiador"),
+      el("span", {}, el("i", { style: "background:var(--muted)" }), "hito"),
+      el("span", {}, el("i", { class: "hol" }), "aún no existe"));
+  }
+  $("find").addEventListener("change", (e) => { const q = e.target.value.toLowerCase(); const n = G.nodes.find((x) => x.label.toLowerCase() === q) || G.nodes.find((x) => x.label.toLowerCase().includes(q)); if (n) focus(n.id); e.target.value = ""; });
+  $("to-core").addEventListener("click", core);
+  $("spin").addEventListener("click", () => { cam.spin = !cam.spin; });
+  addEventListener("keydown", (e) => { if (e.key === "Escape") core(); });
+
+  load(); legend(); requestAnimationFrame(render);
+  if (location.hash.length > 1) {
+    const [kind, id] = decodeURIComponent(location.hash.slice(1)).split(":");
+    const nid = kind === "call" ? "c_" + id : kind === "milestone" ? "m_" + id : kind === "face" ? (FACE_NODE[id] || id) : id;
+    if (kind === "core") core(); else setTimeout(() => focus(nid), 300);
+  }
+
+  // ------------------------------------------------------------------ oracle host adapter
+  function directView(v) {
+    if (!v) return;
+    if (v.camera === "in") { cam.goal.dist = Math.max(80, cam.goal.dist * 0.6); return; }
+    if (v.camera === "out") { cam.goal.dist = Math.min(1600, cam.goal.dist * 1.6); return; }
+    if (v.camera === "spin") { cam.spin = true; return; }
+    if (v.camera === "stop") { cam.spin = false; return; }
+    if (v.path && v.path.length) return showPath(v.path);
+    const f = v.focus;
+    if (!f) return v.tab && v.tab !== "graph" ? banner("Eso se ve mejor en el dashboard") : core();
+    if (f.kind === "core") return core();
+    if (f.kind === "phase") { const ph = (DATA.plan.oracle.phases || []).find((p) => p.id === f.id); banner(ph ? "Ceremonia · " + ph.name : ""); if (!focusId) core(); return; }
+    if (f.kind === "now" || f.kind === "gantt") { banner(f.kind === "now" ? "Qué hacer ahora" : "Calendario"); return core(); }
+    const id = f.kind === "call" ? "c_" + f.id : f.kind === "milestone" ? "m_" + f.id : f.kind === "face" ? (FACE_NODE[f.id] || f.id) : f.id;
+    focus(id);
+  }
+  async function refresh() {
+    const fresh = await (await fetch("/api/state")).json();
+    Object.keys(DATA).forEach((k) => delete DATA[k]); Object.assign(DATA, fresh);
+    const keep = focusId; load(); if (keep && byId[keep]) focus(keep); else renderCard();
+  }
+  if (!EMBED && window.OracleDock) OracleDock.init({
+    page: "espacio",
+    plan: () => DATA.plan,
+    view: () => ({ tab: "espacio", focus: focusId ? { kind: "node", id: focusId } : null, path }),
+    directView, refresh,
+    onPhase: (id) => { const ph = id && (DATA.plan.oracle.phases || []).find((p) => p.id === id); banner(ph ? "Ceremonia · " + ph.name : ""); },
+  });
+  // Theme sync when embedded in the dashboard (the parent sets data-theme on this document).
+  window.addEventListener("message", (e) => { if (e.origin === location.origin && e.data && e.data.theme) document.documentElement.dataset.theme = e.data.theme; });
+})();
+</script>
+</body>
+</html>
