@@ -245,6 +245,38 @@ table.plan td.offer { min-width: 260px; color: var(--ink-2); }
 .hbar .bar { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
 .hbar .bar span { display: block; height: 100%; background: var(--accent); }
 .due { color: var(--critical); font-weight: 600; }
+.oracle-dock { position: fixed; right: 16px; bottom: 16px; width: min(420px, calc(100vw - 32px)); z-index: 50;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,.18); }
+.oracle-dock[hidden] { display: none; }
+.od-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--grid); }
+.od-title { font: inherit; font-weight: 700; background: none; border: 0; cursor: pointer; color: var(--ink); padding: 2px 4px; }
+.od-phase { flex: 1; font-size: 12px; color: var(--accent); font-weight: 600; }
+.od-icon { padding: 2px 8px; }
+.od-body[hidden] { display: none; }
+.od-log { max-height: 34vh; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.od-msg { padding: 7px 10px; border-radius: 10px; max-width: 92%; line-height: 1.4; }
+.od-msg.me { align-self: flex-end; background: var(--surface-2); }
+.od-msg.or { align-self: flex-start; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.od-msg.sys { align-self: center; font-size: 12px; color: var(--muted); background: none; }
+.od-msg .src { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.od-options { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 10px 8px; }
+.od-options button { font: inherit; font-size: 13px; border: 1px solid var(--accent); color: var(--accent); background: var(--surface); border-radius: 999px; padding: 4px 10px; cursor: pointer; text-align: left; }
+.od-options button .n { font-weight: 700; margin-right: 4px; }
+.od-options button.act { border-style: dashed; }
+.od-confirm { margin: 0 10px 8px; padding: 10px; border: 1.5px solid var(--warning); border-radius: 10px; background: color-mix(in srgb, var(--warning) 12%, var(--surface)); font-size: 14px; }
+.od-row { display: flex; gap: 8px; margin-top: 8px; }
+.od-yes { border-color: var(--good-ink); color: var(--good-ink); font-weight: 600; }
+.od-interim { min-height: 0; padding: 0 12px; font-size: 13px; color: var(--muted); font-style: italic; }
+.od-input { display: flex; gap: 6px; padding: 8px 10px 10px; border-top: 1px solid var(--grid); }
+.od-input input { flex: 1; min-width: 0; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+.od-mic { width: 40px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 18px; }
+.od-mic.on { background: var(--critical); border-color: var(--critical); animation: odpulse 1s infinite; }
+@keyframes odpulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--critical) 25%, transparent); } }
+.od-thinking::after { content: " …"; animation: odblink 1s infinite; } @keyframes odblink { 50% { opacity: .2; } }
+.od-focus { outline: 3px solid var(--accent) !important; outline-offset: 3px; border-radius: 8px; }
+.gt-row.od-focus .gt-band { fill: color-mix(in srgb, var(--accent) 18%, transparent); }
+.phases li.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+tr.od-focus td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .gantt-wrap svg { display: block; width: 100%; min-width: 900px; height: auto; }
 .gt-grid { stroke: var(--grid); } .gt-month { fill: var(--muted); font-size: 11px; }
 .gt-group { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
@@ -456,6 +488,28 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 
   <footer>Entries are never deleted: closed or dropped calls move to the Archive with a reason and a review date, to recover them or guide future applications. Amounts and dates come only from the source cited on each card; “Unverified” means no official page has confirmed them yet. Always check the official page before applying.</footer>
 </div>
+
+<aside class="oracle-dock" id="oracle-dock" hidden aria-label="Oráculo por voz">
+  <header class="od-head">
+    <button type="button" class="od-title" id="od-toggle" aria-expanded="true">◉ Oráculo</button>
+    <span class="od-phase" id="od-phase"></span>
+    <button type="button" class="btn od-icon" id="od-mute" title="Silenciar la voz" aria-pressed="false">🔊</button>
+  </header>
+  <div class="od-body" id="od-body">
+    <div class="od-log" id="od-log" aria-live="polite"></div>
+    <div class="od-confirm" id="od-confirm" hidden>
+      <div id="od-confirm-text"></div>
+      <div class="od-row"><button type="button" class="btn od-yes" id="od-yes">Sí, confirmar</button><button type="button" class="btn" id="od-no">No</button></div>
+    </div>
+    <div class="od-options" id="od-options"></div>
+    <div class="od-interim" id="od-interim"></div>
+    <form class="od-input" id="od-form">
+      <button type="button" class="od-mic" id="od-mic" title="Mantén pulsado (o la barra espaciadora) y habla">🎙</button>
+      <input id="od-text" type="text" placeholder="Habla o escribe… («qué hago ahora», «empieza la ceremonia»)" autocomplete="off" aria-label="Mensaje al oráculo">
+      <button type="submit" class="btn">↵</button>
+    </form>
+  </div>
+</aside>
 
 <script id="data" type="application/json">/*__DATA__*/null</script>
 <script>
@@ -844,7 +898,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     }));
     const max = Math.max(1, ...PLAN.milestones.map((m) => m.unlocks));
     document.getElementById("milestones").replaceChildren(...PLAN.milestones.map((m) =>
-      el("div", { class: "ms" + (m.status === "done" ? " done" : "") },
+      el("div", { class: "ms" + (m.status === "done" ? " done" : ""), "data-id": m.id },
         el("div", {}, el("div", { class: "name" }, (m.status === "done" ? "✓ " : m.status === "doing" ? "◐ " : "") + m.name),
           el("div", { class: "small" }, `${m.detail} · ~${m.weeks} semanas · bloquea ${m.blocked.length} convocatorias (${m.grades.join(" ") || "—"})`)),
         el("div", {}, el("div", { class: "bar", title: `${m.unlocks} puntos de valor` }, el("span", { style: `width:${100 * m.unlocks / max}%` })),
@@ -854,7 +908,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     const rows = PLAN.ranking.map((id) => PLAN.plans[id]).filter((p) => !(p.archived && !p.target_estimated));
     document.getElementById("plan-table").replaceChildren(el("table", { class: "plan" },
       el("thead", {}, el("tr", {}, head.map((h) => el("th", { scope: "col" }, h)))),
-      el("tbody", {}, rows.map((p) => el("tr", {},
+      el("tbody", {}, rows.map((p) => el("tr", { "data-id": p.id },
         el("td", {}, gradeEl(p), el("div", { class: "num small" }, String(p.score))),
         el("td", {}, el("a", { href: "#", onclick: (e) => { e.preventDefault(); showTab("radar"); focusCard(p.id); } }, p.name),
           p.target ? el("div", { class: "small" }, (p.target_estimated ? "próxima edición ≈ " : "plazo ") + fmtDate(p.target)) : null),
@@ -979,6 +1033,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       svg.append(s("text", { class: "gt-group", x: 8, y: y + 14 }, gname)); y += 22;
       list.forEach((r) => {
         const g = s("g", { class: "gt-row", tabindex: 0 });
+        GANTT_ROWS[r.id] = g;
         g.append(s("rect", { class: "gt-band", x: 0, y, width: W, height: rowH }));
         const label = (r.late ? "▲ " : "") + (r.kind === "call" ? `[${r.grade}] ` : "") + (r.name.length > 35 ? r.name.slice(0, 34) + "…" : r.name);
         g.append(s("text", { class: "gt-label" + (r.late ? " late" : ""), x: 8, y: y + 17 }, label));
@@ -1070,6 +1125,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   }
 
   // ---- ecosystem graph ----
+  const NODE_FX = {}, GANTT_ROWS = {};
   function renderGraph() {
     const g = PLAN.ecosystem; if (!g || !g.nodes) return;
     const NS = "http://www.w3.org/2000/svg";
@@ -1138,6 +1194,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       };
       const off = () => { svg.classList.remove("dim"); svg.querySelectorAll(".hl").forEach((q) => q.classList.remove("hl")); tip.hidden = true; };
       grp.dataset.id = n.id;
+      NODE_FX[n.id] = { on, off, grp };
       grp.addEventListener("mouseenter", on); grp.addEventListener("focus", on);
       grp.addEventListener("mouseleave", off); grp.addEventListener("blur", off);
       if (n.kind === "call") { grp.style.cursor = "pointer"; grp.addEventListener("click", () => { showTab("radar"); focusCard(n.id.slice(2)); }); }
@@ -1166,7 +1223,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     const o = PLAN.oracle; if (!o) return;
     document.getElementById("or-next").replaceChildren(el("span", { class: o.due ? "due" : "small" },
       (o.due ? "▲ Toca ceremonia: " : "Próxima ceremonia: ") + fmtDate(o.next_on)));
-    document.getElementById("or-phases").replaceChildren(...o.phases.map((ph) => el("li", {}, el("b", {}, ph.name), ph.detail)));
+    document.getElementById("or-phases").replaceChildren(...o.phases.map((ph) => el("li", { "data-id": ph.id }, el("b", {}, ph.name), ph.detail)));
     const card = (title, big, ...rest) => el("div", { class: "panel or-card" }, el("h3", {}, title), el("div", { class: "big" }, big), ...rest);
     const cards = [];
     if (o.ship) cards.push(card("Nave en el horizonte", el("span", {}, gradeEl({ grade: o.ship.grade, score: "" }), " ", o.ship.name),
@@ -1230,8 +1287,271 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   }
   document.getElementById("tab-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.v); });
 
-  renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph(); renderOracle();
+  function renderAll() {
+    renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph(); renderOracle();
+  }
+  renderAll();
   const savedTab = store.get("tab"); if (savedTab && savedTab !== "radar") showTab(savedTab);
+
+  // =====================================================================
+  // Oráculo por voz (solo con oracle_server.py en local; en Pages no hay API y el panel no aparece)
+  // =====================================================================
+  const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund" };
+  const OD = { session: null, options: [], pending: null, lastSay: "", muted: !!store.get("od-muted"), listening: false,
+    focus: null, cer: null, busy: false };
+  const $ = (id) => document.getElementById(id);
+  const currentTab = () => (["radar", "strategy", "calendar", "graph", "oracle", "west"].find((v) => !$("view-" + v).hidden)) || "radar";
+
+  async function api(path, body) {
+    const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+    return r.json();
+  }
+  function norm(s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?¡!.,]/g, "").trim(); }
+
+  // ---- log, speech output ----
+  function say(text, who = "or", src) {
+    if (!text) return;
+    const m = el("div", { class: "od-msg " + who }, text, src ? el("span", { class: "src" }, src) : null);
+    $("od-log").append(m); $("od-log").scrollTop = $("od-log").scrollHeight;
+    if (who !== "or") return;
+    OD.lastSay = text;
+    if (OD.muted || !("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/[«»]/g, ""));
+    u.lang = "es-ES";
+    const v = speechSynthesis.getVoices().find((x) => x.lang === "es-ES") || speechSynthesis.getVoices().find((x) => x.lang.startsWith("es"));
+    if (v) u.voice = v;
+    u.rate = 1.05;
+    if (OD.listening) stopListening();
+    speechSynthesis.speak(u);
+  }
+  function setOptions(opts) {
+    OD.options = opts || [];
+    $("od-options").replaceChildren(...OD.options.map((o, i) => el("button", { type: "button", class: o.action ? "act" : "",
+      title: o.action ? "Cambia el estado: pedirá confirmación" : "", onclick: () => choose(i) }, el("span", { class: "n" }, `${i + 1}.`), o.label)));
+  }
+  function thinking(on) { OD.busy = on; $("od-phase").classList.toggle("od-thinking", on); if (on) $("od-phase").textContent = "pensando"; else renderPhase(); }
+  function renderPhase() {
+    const p = OD.cer ? PLAN.oracle.phases[OD.cer.phase] : null;
+    $("od-phase").textContent = p ? `Ceremonia · ${OD.cer.phase + 1}/${PLAN.oracle.phases.length} ${p.name}` : "";
+    document.querySelectorAll("#or-phases li").forEach((li) => li.classList.toggle("active", !!p && li.dataset.id === p.id));
+  }
+
+  // ---- directed view ----
+  function clearFocus() {
+    document.querySelectorAll(".od-focus").forEach((x) => x.classList.remove("od-focus"));
+    if (OD.focus && NODE_FX[OD.focus]) NODE_FX[OD.focus].off();
+    OD.focus = null;
+  }
+  function mark(elm) { if (!elm) return; elm.classList.add("od-focus"); elm.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); }
+  function highlightNode(id) {
+    setGraphMode("2d");
+    const fx = NODE_FX[id]; if (!fx) return false;
+    fx.on(); OD.focus = id; fx.grp.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); return true;
+  }
+  function directView(v) {
+    if (!v || !v.tab) return;
+    clearFocus();
+    showTab(v.tab);
+    if (v.tab === "graph" && v.mode) setGraphMode(v.mode);
+    const f = v.focus; if (!f) { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    requestAnimationFrame(() => {
+      const id = f.id;
+      if (f.kind === "now") return mark(document.querySelector("#view-strategy .now"));
+      if (f.kind === "gantt") return mark($("gantt"));
+      if (f.kind === "phase") { const li = document.querySelector(`#or-phases li[data-id="${id}"]`); return mark(li); }
+      if (f.kind === "face") return v.tab === "graph" ? highlightNode(FACE_NODE[id] || id) : mark($("faces"));
+      if (f.kind === "node") return highlightNode(id);
+      if (f.kind === "milestone") {
+        if (v.tab === "graph") return highlightNode("m_" + id);
+        if (v.tab === "calendar") return mark(GANTT_ROWS[id]);
+        return mark(document.querySelector(`#milestones [data-id="${id}"]`));
+      }
+      if (f.kind === "call") {
+        if (v.tab === "graph") return highlightNode("c_" + id);
+        if (v.tab === "calendar") return mark(GANTT_ROWS[id]);
+        if (v.tab === "strategy") return mark(document.querySelector(`#plan-table tr[data-id="${id}"]`));
+        focusCard(id); return mark($("opp-" + id));
+      }
+    });
+  }
+
+  // ---- state refresh after an action ----
+  async function refresh() {
+    const fresh = await api("/api/state");
+    Object.keys(DATA).forEach((k) => { if (k !== "plan") delete DATA[k]; });
+    Object.assign(DATA, { ...fresh, plan: undefined });
+    Object.keys(PLAN).forEach((k) => delete PLAN[k]); Object.assign(PLAN, fresh.plan); DATA.plan = PLAN;
+    const tab = currentTab(); renderAll(); showTab(tab); renderPhase();
+  }
+
+  // ---- actions with confirmation ----
+  async function propose(action) {
+    const r = await api("/api/action", action);
+    if (r.error) { say(r.error); return; }
+    OD.pending = r.token;
+    $("od-confirm-text").textContent = r.summary;
+    $("od-confirm").hidden = false;
+    say(r.summary + " ¿Confirmas?");
+  }
+  async function confirm(yes) {
+    const token = OD.pending; OD.pending = null; $("od-confirm").hidden = true;
+    if (!yes) { say("Cancelado. No he cambiado nada."); OD.cer && OD.cer.after && OD.cer.after(false); return; }
+    thinking(true);
+    const r = await api("/api/action/confirm", { token });
+    thinking(false);
+    say(r.message || r.error || "Hecho.");
+    if (r.ok) await refresh();
+    if (OD.cer && OD.cer.after) { const f = OD.cer.after; OD.cer.after = null; f(!!r.ok); }
+  }
+
+  // ---- options ----
+  function choose(i) {
+    const o = OD.options[i]; if (!o) return;
+    say(o.label, "me");
+    if (o.ceremony) return ceremony(o.ceremony);
+    if (o.run) return o.run();
+    if (o.action) return propose(o.action);
+    if (o.utterance) return converse(o.utterance, true);
+  }
+  const NUMS = { uno: 1, una: 1, primera: 1, primero: 1, dos: 2, segunda: 2, segundo: 2, tres: 3, tercera: 3, tercero: 3, cuatro: 4, cuarta: 4, cinco: 5, seis: 6 };
+
+  // ---- main entry for anything the user says or types ----
+  async function handle(text) {
+    text = text.trim(); if (!text) return;
+    const t = norm(text);
+    if (OD.pending) {
+      if (/^(si|sí|confirmo|confirmar|adelante|vale|de acuerdo|hazlo|ok|correcto)\b/.test(t)) { say(text, "me"); return confirm(true); }
+      if (/^(no|cancela|cancelar|mejor no|para|detente)\b/.test(t)) { say(text, "me"); return confirm(false); }
+    }
+    let m = t.match(/^(?:opcion|la|el)\s+(\d+|uno|una|dos|tres|cuatro|cinco|seis|primera|primero|segunda|segundo|tercera|tercero|cuarta)$/) || t.match(/^(\d)$/);
+    if (m && OD.options.length) { const n = /\d/.test(m[1]) ? +m[1] : NUMS[m[1]]; if (n) return choose(n - 1); }
+    const byLabel = OD.options.findIndex((o) => norm(o.label) === t);
+    if (byLabel >= 0) return choose(byLabel);
+    if (/^(repite|repitelo|otra vez)$/.test(t)) { say(OD.lastSay); return; }
+    if (/^(silencio|callate|calla|silencia)$/.test(t)) { toggleMute(true); return; }
+    if (OD.cer && OD.cer.capture && OD.cer.capture !== "commitment") { say(text, "me"); const f = OD.cer.onCapture; OD.cer.capture = null; return f(text); }
+    say(text, "me");
+    return converse(text, false);
+  }
+  async function converse(text, echoed) {
+    thinking(true);
+    let r;
+    try {
+      r = await api("/api/converse", { text, context: { tab: currentTab(), focus: OD.focus, session: OD.session,
+        ceremony: OD.cer ? { phase: PLAN.oracle.phases[OD.cer.phase]?.id, capture: OD.cer.capture } : null } });
+    } catch (e) { r = { say: "No puedo hablar con el servidor del oráculo." }; }
+    thinking(false);
+    if (r.session) OD.session = r.session;
+    if (r.commitment && OD.cer) { OD.cer.commitments.push(r.commitment); }
+    say(r.say, "or", r.source === "claude" ? "Claude" : null);
+    if (r.view) directView(r.view);
+    setOptions(r.options);
+    if (r.ceremony) ceremony(r.ceremony);
+    if (r.action) propose(r.action);
+  }
+
+  // ---- ceremony (client state machine over PLAN.oracle.phases) ----
+  function ceremony(cmd) {
+    if (cmd === "start") { OD.cer = { phase: -1, face: 0, decisions: [], commitments: [], notes: [], changes: 0 }; }
+    if (!OD.cer) return;
+    if (cmd === "start" || cmd === "next") { OD.cer.phase++; OD.cer.capture = null; }
+    if (cmd === "stop") { OD.cer = null; renderPhase(); say("Ceremonia interrumpida. Nada se ha registrado."); return; }
+    renderPhase();
+    const o = PLAN.oracle, c = OD.cer, ph = o.phases[c.phase];
+    const next = { label: "Siguiente fase", ceremony: "next" };
+    if (!ph) { OD.cer = null; renderPhase(); return; }
+    if (ph.id === "apertura") {
+      directView({ tab: "oracle", focus: { kind: "phase", id: "apertura" } });
+      const late = o.late.length ? ` Hay ${o.late.length} atrasos.` : "";
+      say(`Abro la ceremonia. La nave en el horizonte es ${o.ship ? o.ship.name + ", grado " + o.ship.grade : "ninguna"}. El hito que más puertas abre es ${o.milestone ? o.milestone.name : "ninguno"}.${late} ¿Pasamos a leer el grafo?`);
+      setOptions([next, o.ship ? { label: "Ver la nave", run: () => directView({ tab: "radar", focus: { kind: "call", id: o.ship.id } }) } : null,
+        { label: "Ver el Gantt", run: () => directView({ tab: "calendar", focus: { kind: "gantt" } }) }, { label: "Terminar ceremonia", ceremony: "stop" }].filter(Boolean));
+    } else if (ph.id === "lectura") {
+      directView({ tab: "graph", focus: { kind: "node", id: o.mediator ? o.mediator.id : "f_cg" } });
+      say(`Por ${o.mediator ? o.mediator.label : "—"} pasa el mayor flujo de valor hacia las convocatorias. El confusor a vigilar es ${o.confounder ? o.confounder.label : "—"}, causa común de ${o.confounder ? o.confounder.calls : 0} convocatorias. ¿Profundizamos o seguimos?`);
+      setOptions([next, o.confounder ? { label: "Ver el confusor", run: () => directView({ tab: "graph", focus: { kind: "node", id: o.confounder.id } }) } : null,
+        { label: "Profundizar con el arquitecto causal", utterance: "Como arquitecto causal, analiza los mediadores y confusores clave del ecosistema y propón como máximo dos cambios de peso o relación, cada uno como opción con su acción." }].filter(Boolean));
+    } else if (ph.id === "ronda") {
+      const q = o.questions[c.face];
+      if (!q) { c.face = 0; return ceremony("next"); }
+      directView({ tab: "graph", focus: { kind: "face", id: q.face } });
+      say(`${q.name}: ${q.question}`);
+      const advance = () => { c.face++; ceremony("same"); };
+      setOptions([{ label: `Lo asume ${q.name}`, run: () => { c.notes.push(`${q.name} asume: ${q.question}`); say("Anotado."); advance(); } },
+        { label: "Dictar respuesta", run: () => { c.capture = "answer"; c.onCapture = (txt) => { c.notes.push(`${q.name}: ${txt}`); say("Anotado."); advance(); }; say("Te escucho."); } },
+        { label: "Pasar", run: advance }]);
+    } else if (ph.id === "deliberacion") {
+      directView({ tab: "graph" });
+      say("¿Cambiamos algún peso o relación? Como máximo dos. Di, por ejemplo: pon el peso de sede a convenios en 0,8. O pide propuestas al arquitecto causal.");
+      setOptions([{ label: "Pedir propuestas", utterance: "Como arquitecto causal, propón como máximo dos cambios de peso o relación justificados, cada uno como opción con su acción peso o relacion." }, { label: "Sin cambios", ceremony: "next" }]);
+    } else if (ph.id === "dictamen") {
+      directView({ tab: "oracle", focus: { kind: "phase", id: "dictamen" } });
+      say(`Propongo este dictamen: ${o.verdict} ¿Lo aceptáis?`);
+      setOptions([{ label: "Aceptar dictamen", run: () => { c.decisions.push(o.verdict); say("Dictamen aceptado."); ceremony("next"); } },
+        { label: "Dictar otra decisión", run: () => { c.capture = "decision"; c.onCapture = (txt) => { c.decisions.push(txt); say("Decisión anotada. ¿Alguna más?"); setOptions([{ label: "Dictar otra decisión", run: OD.options[1].run }, next]); }; say("Dime la decisión."); } },
+        next]);
+    } else if (ph.id === "compromisos") {
+      directView({ tab: "oracle", focus: { kind: "phase", id: "compromisos" } });
+      c.capture = "commitment";
+      say("Dime los compromisos: rol, tarea y fecha. Por ejemplo: Fundación, pedir cita con Cultura, 30 de octubre. Cuando acabes, di siguiente.");
+      setOptions([{ label: "Terminar compromisos", run: () => { c.capture = null; ceremony("next"); } }]);
+    } else if (ph.id === "cierre") {
+      c.capture = null;
+      directView({ tab: "oracle", focus: { kind: "phase", id: "cierre" } });
+      if (!c.decisions.length) c.decisions.push(o.verdict);
+      c.after = (ok) => {
+        if (ok) { say("Ceremonia registrada. Hasta la próxima."); OD.cer = null; renderPhase(); return; }
+        setOptions([{ label: "Registrar la ceremonia", run: () => ceremony("same") }, { label: "Terminar sin registrar", ceremony: "stop" }]);
+      };
+      propose({ id: "registrar_ceremonia", args: { resumen: ["Ceremonia por voz", ...c.notes].join(" · ").slice(0, 400), decisiones: c.decisions, compromisos: c.commitments } });
+      setOptions([]);
+    } else { ceremony("next"); }
+  }
+
+  // ---- speech input (Web Speech API, es-ES, push-to-talk) ----
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  function startListening() {
+    if (!SR) { say("Este navegador no reconoce voz; usa Chrome o Safari, o escribe.", "sys"); return; }
+    if (OD.listening) return;
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    rec = new SR(); rec.lang = "es-ES"; rec.interimResults = true; rec.continuous = false;
+    let final = "";
+    rec.onresult = (e) => { let interim = ""; for (const r of e.results) { if (r.isFinal) final = r[0].transcript; else interim += r[0].transcript; } $("od-interim").textContent = interim; };
+    rec.onend = () => { OD.listening = false; $("od-mic").classList.remove("on"); $("od-interim").textContent = ""; if (final) handle(final); };
+    rec.onerror = (e) => { if (e.error !== "no-speech" && e.error !== "aborted") say("Micrófono: " + e.error, "sys"); };
+    OD.listening = true; $("od-mic").classList.add("on"); rec.start();
+  }
+  function stopListening() { if (rec && OD.listening) rec.stop(); }
+  function toggleMute(force) {
+    OD.muted = force ?? !OD.muted; store.set("od-muted", OD.muted);
+    if (OD.muted && "speechSynthesis" in window) speechSynthesis.cancel();
+    $("od-mute").textContent = OD.muted ? "🔇" : "🔊"; $("od-mute").setAttribute("aria-pressed", String(OD.muted));
+  }
+
+  async function initOracle() {
+    let h;
+    try { h = await api("/api/health"); } catch (e) { return; }  // static hosting: no oracle
+    if (!h || !h.local) return;
+    $("oracle-dock").hidden = false;
+    toggleMute(OD.muted);
+    const mic = $("od-mic");
+    mic.addEventListener("pointerdown", (e) => { e.preventDefault(); startListening(); });
+    mic.addEventListener("pointerup", stopListening); mic.addEventListener("pointerleave", stopListening);
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && !e.repeat && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); startListening(); }
+    });
+    document.addEventListener("keyup", (e) => { if (e.code === "Space" && OD.listening) stopListening(); });
+    $("od-form").addEventListener("submit", (e) => { e.preventDefault(); const v = $("od-text").value; $("od-text").value = ""; handle(v); });
+    $("od-yes").addEventListener("click", () => confirm(true)); $("od-no").addEventListener("click", () => confirm(false));
+    $("od-mute").addEventListener("click", () => toggleMute());
+    $("od-toggle").addEventListener("click", () => { const b = $("od-body"); b.hidden = !b.hidden; $("od-toggle").setAttribute("aria-expanded", String(!b.hidden)); });
+    say(`Soy el oráculo. ${PLAN.oracle && PLAN.oracle.due ? "Toca ceremonia. " : ""}Pregúntame, pídeme que te lleve a algo o di «empieza la ceremonia».`, "or");
+    setOptions([{ label: "¿Qué hago ahora?", utterance: "qué hago ahora" }, { label: "Empezar la ceremonia", ceremony: "start" },
+      { label: "Lee el dictamen", utterance: "lee el dictamen" }]);
+  }
+  initOracle();
 })();
 </script>
 </body>

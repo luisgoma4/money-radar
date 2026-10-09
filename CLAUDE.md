@@ -57,6 +57,9 @@ Eligibility matters more than topic.
 | `causal.py` | Spanish CLI for causal analysis of the ecosystem graph: summary (mediators, confounders), `nodos`, `relaciones <id>`, `analiza <T> <Y>`. |
 | `oraculo.py` | Spanish CLI for the oracle: its reading, `registrar` (a ceremony's decisions and role-based commitments) and `historial`. |
 | `orchestrator.py` | Spanish CLI that guides applications (see below). |
+| `oracle_server.py` | **Local voice-oracle server** (127.0.0.1 only; stdlib). Serves the dashboard plus `/api/health`, `/api/state`, `/api/converse`, `/api/action` (preview + token) and `/api/action/confirm`. Replaces `python3 -m http.server`. |
+| `oracle_actions.py` | The oracle's action registry (`hito`, `iniciar`, `avanzar`, `registrar_ceremonia`, `peso`, `relacion`, `estado_nodo`, `archivar`) and its local Spanish intents. |
+| `oracle_prompt.md` | System prompt for the headless Claude behind the oracle: role, read-only tools, JSON contract, action catalogue, project rules. |
 | `winners.py` | Past winners of a call from the public BDNS API. |
 | `dashboard_template.html` | Dashboard UI: vanilla JS, no CDN, light/dark mode. `build.py` injects the JSON at `/*__DATA__*/null` and the date at `__GENERATED__`. |
 | `dashboard.html`, `index.html` | `dashboard.html` is generated (never hand-edit); `index.html` redirects to it. Both are committed for GitHub Pages. |
@@ -82,6 +85,7 @@ python3 -I orchestrator.py grafo3d [--abrir]   # regenerate the 3D viewer (local
 python3 -I causal.py [nodos|relaciones <id>|analiza <T> <Y>]   # causal analysis of the ecosystem graph
 python3 -I oraculo.py [registrar ...|historial] # the oracle's reading and the ceremony record
 python3 -I winners.py <BDNS number>             # past winners; --find "<title words>" to locate call numbers
+python3 -I oracle_server.py [--port 8000]       # local dashboard + voice oracle → http://127.0.0.1:8000/dashboard.html
 ```
 
 `-I` (isolated mode) drops user site-packages **and the script's own directory** from `sys.path`. So:
@@ -150,6 +154,27 @@ Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causal
   - Commitments are recorded as **role | task | date**, never with names, in the `ceremonies` table.
   - The dashboard's Oráculo tab shows all of it.
 - **3D graph text must be plain ASCII.** No accents, ñ, ·, →, «» or €: they break in the viewer. `planner.ascii_text()` folds every exported label, group and relation, and the orchestrator adds `<meta charset="utf-8">` to the viewer. The 2D dashboard keeps normal Spanish text.
+
+## Voice oracle (local only)
+
+`python3 -I oracle_server.py` serves the dashboard with an **Oráculo** panel. The panel appears only when the API answers, so it never shows on GitHub Pages.
+
+- **Voice:** Web Speech API in es-ES (Chrome or Safari; Chrome processes audio on Google's servers). Hold the 🎙 button or the space bar to talk, or type. The oracle answers aloud with `speechSynthesis`; 🔊 mutes it. You can also say "opción N", "sí"/"no", "repite" or "silencio".
+- **Hybrid brain:** `/api/converse` first tries the local intents in `oracle_actions.intent`, which are instant:
+  - navigation;
+  - "qué hago ahora";
+  - the verdict;
+  - marking milestones, starting or advancing applications, changing weights, archiving;
+  - "analiza A sobre B";
+  - ceremony control and commitment dictation.
+- **Free questions** go to **Claude Code headless**: `claude -p` with `--json-schema`, model `ORACLE_MODEL` (default `sonnet`), `--resume` per conversation, read-only tools only, and `oracle_prompt.md` as the system prompt. It runs without `ANTHROPIC_API_KEY` so it uses your Claude Code session, and retries with the key if that fails. A tool-using answer takes about 5–20 s.
+- **Directed view:** every answer can carry `view {tab, focus{kind:call|milestone|node|face|phase|now|gantt, id}, mode}`. The page switches tab, scrolls and highlights: the card, the plan row, the Gantt row, the graph node (with its relations) or the ceremony phase.
+- **Every state change needs confirmation.**
+  - `/api/action` returns a spoken summary and a single-use token valid for 2 minutes. Only `/api/action/confirm` executes, so neither Claude nor a mis-click can skip the confirmation.
+  - Edits to `build.py` and `strategy.json` are transactional: back up, apply, run `monitor.py` + `build.py`, and restore on failure (e.g. a cycle in the DAG).
+  - There is no submit, git or delete action.
+- **Voice ceremony:** "empieza la ceremonia" walks the 7 phases of `PLAN.oracle.phases`. Each phase moves the view (Oráculo tab, the graph with the key mediator, each face's node) and offers options; commitments are dictated as "rol, tarea, fecha". It closes with the `registrar_ceremonia` action, after confirmation.
+- **Security:** binds to 127.0.0.1 only. The API rejects any `Host`/`Origin` other than localhost, and `/solicitudes`, `/.git` and `/.claude` are not served.
 
 ## Archive rule: nothing is ever deleted
 
