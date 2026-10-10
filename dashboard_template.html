@@ -323,6 +323,43 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 .rp-find a { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
 @media (max-width: 860px) { .rp-lower { grid-template-columns: 1fr; } }
 
+
+/* Red: Obsidian-style live graph (grafo_red.js on vendor/force-graph) */
+.net { position: relative; margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, var(--surface) 0%, var(--page) 100%); }
+.net.full { border: 0; border-radius: 0; background: var(--page); }
+.net-stage { width: 100%; cursor: grab; }
+.net-stage:active { cursor: grabbing; }
+.net-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; align-items: center; }
+.net-search { width: 180px; font: inherit; font-size: 13px; padding: 5px 9px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
+.net-btn { width: 32px; height: 30px; font-size: 16px; line-height: 1; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+.net-btn:hover, .net-chip:hover { border-color: var(--accent); }
+.net-btn:focus-visible, .net-chip:focus-visible, .net-search:focus-visible, .net-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.net-legend { position: absolute; left: 10px; bottom: 10px; right: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; pointer-events: none; }
+.net-legend > * { pointer-events: auto; }
+.net-chip, .net-key { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--ink-2); }
+.net-chip { cursor: pointer; font: inherit; font-size: 12px; }
+.net-chip[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.net-key { border-style: dashed; }
+.net-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+.net-dot.dia { border-radius: 1px; transform: rotate(45deg) scale(.85); }
+.net-dot.sq { border-radius: 1px; }
+.net-dot.hol { border: 1.5px dashed var(--muted); background: transparent; }
+.net-card { position: absolute; top: 50px; right: 10px; width: min(320px, calc(100% - 20px)); max-height: calc(100% - 100px); overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; box-shadow: 0 6px 24px rgba(0,0,0,.12); font-size: 13px; }
+.net-card h3 { margin: 4px 0 6px; font-size: 16px; padding-right: 20px; }
+.net-card h4 { margin: 10px 0 4px; font-size: 12px; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+.net-card p { margin: 0 0 6px; color: var(--ink-2); }
+.net-card ul { margin: 0; padding-left: 16px; }
+.net-card li { margin: 2px 0; }
+.net-kind { font-size: 12px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.net-link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-align: left; text-decoration: underline; }
+.net-w { color: var(--muted); font-size: 12px; }
+.net-x { position: absolute; top: 6px; right: 8px; background: none; border: 0; font-size: 18px; color: var(--ink-2); cursor: pointer; }
+.net-open { margin: 4px 0 2px; font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--accent); background: none; color: var(--accent); cursor: pointer; }
+@media (max-width: 600px) { .net-search { width: 120px; } .net-card { top: auto; bottom: 46px; max-height: 55%; } }
+
 @media (max-width: 860px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lower { grid-template-columns: 1fr; }
@@ -452,15 +489,17 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 
   <div class="view" id="view-graph" hidden>
     <section class="panel section-gap"><h2>Grafo del ecosistema</h2>
-      <p class="small">Un solo grafo para 2D y 3D: factores de contexto, socios, figuras legales, caras, el mundo exterior (las esferas Arte · Bancos · Política, que con la Fundación forman el diamante, y los financiadores), productos, hitos y convocatorias (ships). Las flechas van de causa a efecto y el grosor es el peso (0–1, juicio de planificación). Línea continua = existe; discontinua = por crear. Pasa el ratón sobre un nodo para ver sus relaciones; pulsa una convocatoria para abrir su ficha.</p>
+      <p class="small">Un solo grafo en tres vistas (Red, Columnas y 3D): factores de contexto, socios, figuras legales, caras, el mundo exterior (las esferas Arte · Bancos · Política, que con la Fundación forman el diamante, y los financiadores), productos, hitos y convocatorias (ships). Las flechas van de causa a efecto y el grosor es el peso (0–1, juicio de planificación). Línea continua = existe; discontinua = por crear. En la Red: arrastra nodos, haz zoom con la rueda o pellizcando, pasa el ratón para iluminar sus vecinos y pulsa un nodo para ver su ficha; ⛶ la abre a pantalla completa.</p>
       <div class="cal-head"><div class="seg" id="gmode-seg" role="group" aria-label="Vista del grafo">
-        <button type="button" data-v="2d" aria-pressed="true">2D</button>
+        <button type="button" data-v="net" aria-pressed="true">Red</button>
+        <button type="button" data-v="2d" aria-pressed="false">Columnas</button>
         <button type="button" data-v="3d" aria-pressed="false">3D</button></div>
         <div class="seg" id="gworld-seg" role="group" aria-label="Mundo exterior en el grafo">
         <button type="button" data-v="1" aria-pressed="true">◇ Con diamante y financiadores</button>
         <button type="button" data-v="0" aria-pressed="false">Sin diamante</button></div>
         <span class="small" id="graph-3d"></span></div>
-      <div id="graph-2d">
+      <div id="graph-net"></div>
+      <div id="graph-2d" hidden>
       <div class="chipline" id="graph-legend"></div>
       <div class="graph-wrap" id="graph"></div>
       </div>
@@ -508,6 +547,8 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 </div>
 
 
+<script src="vendor/force-graph.min.js"></script>
+<script src="grafo_red.js"></script>
 <script src="oracle_dock.js"></script>
 <script id="data" type="application/json">/*__DATA__*/null</script>
 <script>
@@ -1231,7 +1272,8 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
         el("td", {}, name(e.from), el("div", { class: "small" }, k(e.from))), el("td", {}, e.label),
         el("td", {}, name(e.to), el("div", { class: "small" }, k(e.to))),
         el("td", { class: "num" }, (e.weight ?? 0.5).toFixed(2)), el("td", {}, e.status === "exists" ? "existe" : "por crear"))))));
-    setGraphMode(store.get("gmode") || "2d");
+    if (NET) NET.setData(g);
+    setGraphMode(store.get("gmode") || "net");
   }
 
   // ---- oracle tab ----
@@ -1273,25 +1315,34 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     try { const d = f.contentDocument; if (d && d.documentElement) {
       const th = document.documentElement.dataset.theme; if (th) d.documentElement.dataset.theme = th; else delete d.documentElement.dataset.theme; } } catch (e) {}
   }
+  // Red (Obsidian-style, grafo_red.js) is the default; Columnas is the causal column layout; 3D embeds the Espacio.
+  let NET = null, GMODE = "net";
+  function netView() {
+    if (!NET && window.GrafoRed && window.ForceGraph) {
+      NET = GrafoRed.mount(document.getElementById("graph-net"), { faces: PLAN.faces,
+        onOpenCall: (id) => { showTab("radar"); focusCard(id); } });
+      NET.setData(graphOf());
+    }
+    return NET;
+  }
   function setGraphMode(m) {
-    if (m === "3d" && !PLAN.has_3d) m = "2d";
+    if (!["net", "2d", "3d"].includes(m)) m = "net";
+    if (m === "3d" && !PLAN.has_3d) m = "net";
+    if (m === "net" && !window.ForceGraph) m = "2d";  // library missing: fall back to the columns
+    GMODE = m;
+    document.getElementById("graph-net").hidden = m !== "net";
     document.getElementById("graph-2d").hidden = m !== "2d";
-    document.getElementById("graph-rel").hidden = m !== "2d";
+    document.getElementById("graph-rel").hidden = m === "3d";
     document.getElementById("graph-3d-wrap").hidden = m !== "3d";
     document.querySelectorAll("#gmode-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === m)));
     const note = document.getElementById("graph-3d");
-    if (!PLAN.has_3d) {
-      document.querySelector('#gmode-seg button[data-v="3d"]').disabled = true;
-      note.replaceChildren("Vista 3D no generada: ", el("code", {}, "python3 -I orchestrator.py grafo3d"));
-    } else if (m === "3d") {
+    if (m === "net") { netView(); NET && NET.resize(); note.textContent = ""; }
+    else if (m === "3d") {
       const f = document.getElementById("graph3d-frame");
       if (!f.getAttribute("src")) { f.addEventListener("load", syncFrameTheme); f.setAttribute("src", "espacio.html?embed=1" + (WORLD ? "" : "&world=0")); }
-      note.replaceChildren(WORLD ? "El mismo grafo en 3D: el diamante Fundación · Arte · Bancos · Política en el centro. Clic en un nodo para ver su ficha. "
-        : "El mismo grafo en 3D, sin el diamante ni los financiadores. Clic en un nodo para ver su ficha. ",
-        el("a", { href: "espacio.html" + (WORLD ? "" : "?world=0"), target: "espacio" }, "Abrir El Espacio (pantalla completa, con el oráculo) ↗"));
-    } else {
-      note.textContent = "Arrastra en 3D para rotar; en 2D pasa el ratón por un nodo para ver sus relaciones.";
-    }
+      note.textContent = WORLD ? "El mismo grafo en 3D, con el diamante en el centro. Arrastra para rotar; clic en un nodo para ver su ficha."
+        : "El mismo grafo en 3D, sin el diamante ni los financiadores. Arrastra para rotar; clic en un nodo para ver su ficha.";
+    } else note.textContent = "Columnas de causa a efecto; pasa el ratón por un nodo para ver sus relaciones.";
     store.set("gmode", m);
   }
   document.getElementById("gmode-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && !b.disabled) setGraphMode(b.dataset.v); });
@@ -1381,6 +1432,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   function mark(elm) { if (!elm) return; elm.classList.add("od-focus"); elm.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); }
   function highlightNode(id) {
     if (!NODE_FX[id] && !WORLD && PLAN.ecosystem.nodes.some((n) => n.id === id)) setWorld(true);  // a sphere or funder: show the world
+    if (GMODE !== "2d") { setGraphMode("net"); if (NET) { FOCUS = null; return NET.focus(id); } }
     setGraphMode("2d");
     const fx = NODE_FX[id]; if (!fx) return false;
     fx.on(); FOCUS = id; fx.grp.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); return true;

@@ -693,7 +693,7 @@ REPO_LAYERS = [
     ("core", "Núcleo", lambda p: p in ("planner.py", "build.py", "monitor.py")),
     ("cli", "Herramientas", lambda p: p in ("orchestrator.py", "causal.py", "oraculo.py", "winners.py")),
     ("oracle", "Oráculo local", lambda p: p.startswith("oracle_") and not p.startswith("oracle_dock")),
-    ("front", "Plantillas y front", lambda p: p.endswith("_template.html") or p.startswith("oracle_dock")),
+    ("front", "Plantillas y front", lambda p: p.endswith("_template.html") or p.startswith(("oracle_dock", "grafo_red", "vendor/"))),
     ("out", "Publicado", lambda p: p in ("dashboard.html", "espacio.html", "index.html") or p.startswith("graphify-out/")),
     ("agents", "Docs y agentes", lambda p: p.endswith(".md")),
 ]
@@ -718,7 +718,7 @@ def _repo_roles():
         cells = [c.strip().replace("\\|", "|") for c in re.split(r"(?<!\\)\|", line)]
         if len(cells) < 4 or not cells[1].startswith("`"):
             continue
-        role = re.sub(r"\*\*|`", "", cells[2])
+        role = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", re.sub(r"\*\*|`", "", cells[2]))  # plain text, links keep their words
         sentences, role = re.split(r"(?<=\.) ", role), ""
         while sentences and len(role) < 50:  # first sentences, enough to say something
             role = (role + " " + sentences.pop(0)).strip()
@@ -753,7 +753,7 @@ def repo_map():
             node["lines"] = f.read_text(encoding="utf-8", errors="replace").count("\n")
         nodes.append(node)
         # References only from source code (generated pages and docs mention everything).
-        if layer in ("out", "agents", "data") or not f.exists():
+        if layer in ("out", "agents", "data") or p.startswith("vendor/") or not f.exists():  # vendor: third-party, minified
             continue
         src = f.read_text(encoding="utf-8", errors="replace")
         src = re.sub(r"# repo-map: config.*?# repo-map: end", "", src, flags=re.S)
