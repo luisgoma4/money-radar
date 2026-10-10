@@ -27,7 +27,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PY = [sys.executable, "-I"]
 TABS = {"radar": "radar", "estrategia": "strategy", "calendario": "calendar", "gantt": "calendar",
-        "grafo": "graph", "oraculo": "oracle", "madrid oeste": "west", "municipios": "west"}
+        "grafo": "graph", "oraculo": "oracle", "madrid oeste": "west", "municipios": "west",
+        # The Espacio tab (the repo map). Plain "espacio" stays with the 3D page.
+        "repo": "repo", "repositorio": "repo", "codigo": "repo", "revisiones": "repo"}
 FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
 MONTHS = {m: i for i, m in enumerate(["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
                                       "septiembre", "octubre", "noviembre", "diciembre"], 1)}
@@ -96,11 +98,12 @@ def find(text, st, kinds=None):
     return best if score >= 0.55 else None
 
 
-def find_node(text, st, among=None):
-    """Best fuzzy match among ecosystem nodes (calls are c_<id>, milestones m_<ID>). Returns node dict or None."""
+def find_node(text, st, among=None, scored=False):
+    """Best fuzzy match among ecosystem nodes (calls are c_<id>, milestones m_<ID>).
+    Returns node dict or None; with scored=True, (node or None, score)."""
     q = [w for w in norm(text).split() if w not in STOP]
     if not q:
-        return None
+        return (None, 0.0) if scored else None
     best, score = None, 0.0
     for n in st["plan"]["ecosystem"]["nodes"]:
         if among is not None and n["id"] not in among:
@@ -112,7 +115,8 @@ def find_node(text, st, among=None):
         sc = overlap / len(q) + 0.5 * sim + bonus
         if sc > score:
             best, score = n, sc
-    return best if score >= 0.55 else None
+    best = best if score >= 0.55 else None
+    return (best, score) if scored else best
 
 
 def _eco_maps(st):
@@ -422,7 +426,7 @@ def intent(text, ctx, st):
         return _reply("Siguiente fase.", ceremony="next")
 
     # Navigation
-    if m := re.search(r"\b(abre|ve a|vamos a|ir a|ensename|muestrame|llevame a|pestana)\b.*\b(radar|estrategia|calendario|gantt|grafo|oraculo|madrid oeste|municipios)\b", t):
+    if m := re.search(r"\b(abre|ve a|vamos a|ir a|ensename|muestrame|llevame a|pestana)\b.*\b(radar|estrategia|calendario|gantt|grafo|oraculo|madrid oeste|municipios|repo|repositorio|codigo|revisiones)\b", t):
         tab = TABS[m.group(2)]
         view = {"tab": tab}
         if m.group(2) == "gantt":
@@ -448,16 +452,25 @@ def intent(text, ctx, st):
         return _reply({"in": "Me acerco.", "out": "Me alejo.", "spin": "Giro.", "stop": "Quieto."}[cam[t]], view={"camera": cam[t]})
     if m := re.search(r"\b(?:quien|quienes) (?:financia|financian|convoca|paga)\b (?:a |el |la |los )?(.+)", t):
         calls = {x["id"] for x in st["plan"]["ecosystem"]["nodes"] if x["kind"] == "call"}
-        n = find_node(m.group(1), st, among=calls) or find_node(m.group(1), st)
+        # Prefer a call only when it matches clearly better than any node ("la fundacion" is the node, not Fundacion Carasso).
+        c, cs = find_node(m.group(1), st, among=calls, scored=True)
+        n, ns = find_node(m.group(1), st, scored=True)
+        n = c if c and cs >= ns - 0.05 else n or c
         if n:
             _, by, out, inn = _eco_maps(st)
             if n["kind"] == "funder":
                 sph = [e for e in inn.get(n["id"], []) if by[e["from"]]["kind"] == "sphere"]
                 sph.sort(key=lambda e: -e["weight"])
-                return _reply(f"{n['label']} es un financiador; lo canaliza " + " y ".join(f"{by[e['from']]['label']} ({e['weight']:.1f})" for e in sph) + ".",
+                conv = [by[e["to"]]["label"] for e in out.get(n["id"], []) if by[e["to"]]["kind"] == "call"]
+                return _reply(f"{n['label']} es un financiador; lo canaliza " + " y ".join(f"{by[e['from']]['label']} ({e['weight']:.1f})" for e in sph) + "."
+                              + (f" Convoca: {', '.join(conv)}." if conv else ""),
                               view={"path": [sph[0]["from"], n["id"]]} if sph else {"focus": {"kind": "node", "id": n["id"]}},
                               options=neighbor_options(st, n["id"]))
             funders = [e["from"] for e in inn.get(n["id"], []) if by[e["from"]]["kind"] == "funder" or e["label"] == "convoca"]
+            world = sorted((e for e in inn.get(n["id"], []) if by[e["from"]]["kind"] == "sphere"), key=lambda e: -e["weight"])
+            if not funders and world:  # not a call: the world spheres that feed it (e.g. the Fundacion, the diamond's apex)
+                return _reply(f"A {n['label']} la alimentan " + " y ".join(f"{by[e['from']]['label']} ({e['weight']:.1f})" for e in world) + ".",
+                              view={"path": [world[0]["from"], n["id"]]}, options=neighbor_options(st, n["id"]))
             if not funders:
                 return _reply(f"{n['label']} no tiene financiador en el grafo.", view={"focus": {"kind": "node", "id": n["id"]}}, options=neighbor_options(st, n["id"]))
             f = funders[0]

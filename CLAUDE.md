@@ -73,7 +73,9 @@ Eligibility matters more than topic.
 | `.claude/skills/becas/` | The `/becas` skill: Claude guides applications on top of the orchestrator. It includes the 3D-graph specialization. |
 | `.claude/skills/ceremonia/` | The `/ceremonia` skill: Claude acts as the **oracle** and runs the 7-phase ceremony (opening, graph reading, round of faces, deliberation, verdict, commitments, record). |
 | `.claude/agents/arquitecto-causal.md` | The **arquitecto-causal** subagent, for discussing and proposing nodes, relations, mediators, confounders and weights. The oracle consults it in the graph-reading phase. |
+| `reviews.json` | Code reviews of this repo: one entry per review, each finding with file, severity and status (`arreglado \| abierto \| descartado`). Shown in the dashboard's Espacio tab. Files and findings only, never names. |
 | `LESSONS.md` | One bullet per run: useful or noisy sources, broken queries, gaps to search next. The last 10 are shown on the dashboard. |
+| `CLAUDE.md` | This guide: what the project is, its files, rules and daily workflow. The Espacio tab reads each file's role from this table. |
 | `routine.json` | The scheduled-routine definition. Keep it in sync with this file. |
 
 ## Commands
@@ -98,7 +100,7 @@ python3 -I oracle_server.py [--port 8000]       # local dashboard + voice oracle
 
 ## Dashboard
 
-Six tabs. The selected tab and the filters are remembered per viewer. Filters remember which faces you *hid*, so a newly added face always starts visible.
+Seven tabs. The selected tab and the filters are remembered per viewer. Filters remember which faces you *hid*, so a newly added face always starts visible.
 
 1. **Radar**: KPIs, filters (face, status including **Archive**, scope including Madrid West, verified only, search, sort), deadline timeline, and calls as cards or a table. Each card shows its plan grade, applicant and past winners.
 2. **Estrategia**:
@@ -120,6 +122,10 @@ Six tabs. The selected tab and the filters are remembered per viewer. Filters re
    - 3D: `espacio.html?embed=1`, built from the same graph. "Abrir El Espacio" opens the full-screen version with the oracle.
 5. **Oráculo**: the 7 ceremony phases; the oracle's reading (next ship and its strongest causal path, the milestone that opens most doors, the key mediator, the confounder to watch, delays); one question per face; the proposed verdict; mediator and confounder bars; the ceremony record.
 6. **Madrid Oeste**: the three-municipality comparison.
+7. **Espacio** (tab id `repo`; not the 3D El Espacio): the repo from inside, built by `build.repo_map()` on every build.
+   - every file in layers (data → core → tools → local oracle → templates/front → published → docs), with its role read from the Files table above, its size and its last commit;
+   - references between files, detected from quoted file names in the code (the layer config in `build.py` sits between `# repo-map:` markers so it is not scanned); hover or click a file to light up what it uses and what uses it;
+   - the last 12 commits, and the code reviews from `reviews.json` with each finding's status. Add a review there after each one; keep findings open until fixed.
 
 Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causality aqua, BranchOut yellow, Fundación pink, milestones grey. Status always comes with an icon and a label, never colour alone.
 
@@ -152,7 +158,7 @@ Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causal
 - **Funders** (`strategy.json` → `funders`, `type: funder`): one node per real funder in the radar.
   - Each has sphere → funder edges ("canaliza", with a weight) and funder → call edges ("convoca").
   - `node` reuses an existing node (the Las Rozas council is `x_lr`).
-  - **Every new call must be attached to its funder** (add it to `calls`, or create the funder). `monitor.py` validates spheres, calls and weights.
+  - **Every new call must be attached to its funder** (add it to `calls`, or create the funder). `monitor.py` validates that spheres are sphere nodes, calls exist, weights are 0..1, and that every call in `opportunities` has a funder.
 - **Shading of partners:** a partner counts as "pending" (shaded) until it has a real relationship with **our** side of the graph. Edges to spheres or calls don't count.
 - **Causal reading:** sources (the spheres) are causes, not mediators. The spheres appear as common causes (confounders) after the factors, because Política reaches every call.
 

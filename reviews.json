@@ -1,0 +1,34 @@
+{
+ "about": "Code reviews of this repo, shown in the dashboard's Espacio tab. One entry per review; findings keep their status (arreglado | abierto | descartado). No names: files and findings only.",
+ "reviews": [
+  {
+   "date": "2026-10-10",
+   "commit": "275bda4",
+   "title": "El Espacio 3D, diamante del mundo y financiadores",
+   "summary": "monitor.py pasa, el grafo sigue siendo un DAG y graph.json es ASCII. Todas las convocatorias tienen financiador y los intents de navegación responden bien. Un fallo y cuatro detalles, arreglados el mismo día.",
+   "findings": [
+    {"file": "oracle_actions.py", "severity": "fallo", "status": "arreglado",
+     "summary": "«quién financia la fundación» respondía con la convocatoria de la Fundación Carasso: se buscaba primero entre convocatorias.",
+     "fix": "Se compara la puntuación de la convocatoria con la del mejor nodo; si no es una convocatoria ni un financiador, se nombran las esferas que la alimentan. Un financiador lista además lo que convoca."},
+    {"file": "planner.py", "severity": "menor", "status": "arreglado",
+     "summary": "El detalle de cada financiador decía «Politica» sin tilde y «1 convocatorias».",
+     "fix": "Usa la etiqueta de la esfera y el singular."},
+    {"file": "planner.py", "severity": "menor", "status": "arreglado",
+     "summary": "monitor.py no comprobaba que cada convocatoria tuviera financiador, aunque CLAUDE.md lo exige.",
+     "fix": "planner.check falla si una convocatoria de strategy.json -> opportunities no aparece en ningún financiador."},
+    {"file": "planner.py", "severity": "menor", "status": "arreglado",
+     "summary": "planner.check aceptaba cualquier nodo como esfera de un financiador.",
+     "fix": "Exige que sea un nodo de tipo sphere."},
+    {"file": "planner.py", "severity": "menor", "status": "arreglado",
+     "summary": "Línea sobrante en causal_summary: top se calculaba dos veces.",
+     "fix": "Eliminada."},
+    {"file": "dashboard_template.html", "severity": "menor", "status": "arreglado",
+     "summary": "El modo oscuro elegido a mano no definía los colores de esferas y financiadores (y --line-delfina estaba repetido en el automático).",
+     "fix": "Añadidos al tema oscuro manual; quitado el duplicado."},
+    {"file": "oracle_actions.py", "severity": "menor", "status": "abierto",
+     "summary": "«camino de A a B» parte la frase por « a », « con » o « hacia »: un nombre que contenga esas palabras se corta mal.",
+     "fix": "Ningún nombre actual lo provoca. Si aparece, probar todas las particiones y quedarse con la de mejor puntuación."}
+   ]
+  }
+ ]
+}

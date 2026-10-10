@@ -38,7 +38,7 @@
     --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
     --accent: #3987e5;
-    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --world-sphere: #9085e9; --world-funder: #0ca30c; --line-delfina: #d55181;
+    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --world-sphere: #9085e9; --world-funder: #0ca30c;
     --good-ink: #0ca30c; --shadow: none;
   }
 }
@@ -48,7 +48,8 @@
   --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
   --accent: #3987e5;
-  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500;
+  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181;
+  --world-sphere: #9085e9; --world-funder: #0ca30c;
   --good-ink: #0ca30c; --shadow: none;
 }
 
@@ -297,6 +298,31 @@ tr.od-focus td { background: color-mix(in srgb, var(--accent) 12%, transparent);
 .g-edge.hl { stroke: var(--accent); stroke-width: 2.5; }
 svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) { opacity: .35; }
 
+
+/* Espacio tab: map of the repo */
+.rp-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.rp-col h3 { font-size: 13px; font-weight: 650; color: var(--ink-2); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+.rp-file { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; transition: opacity .15s; }
+.rp-file code { font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+.rp-file .rp-role { font-size: 12px; color: var(--ink-2); margin: 3px 0; }
+.rp-file .rp-meta { font-size: 11.5px; color: var(--muted); }
+.rp-file .rp-open { color: var(--critical); font-weight: 650; }
+.rp-map.dim .rp-file:not(.on):not(.uses):not(.usedby) { opacity: .3; }
+.rp-file.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.rp-file.uses { border-color: var(--accent); border-style: solid; }
+.rp-file.usedby { border-color: var(--ink-2); border-style: dashed; }
+.rp-detail { min-height: 44px; }
+.rp-lower { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 12px; }
+.rp-commit { display: grid; grid-template-columns: 62px 84px minmax(0, 1fr); gap: 8px; font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--grid); }
+.rp-commit code { color: var(--accent); }
+.rp-find { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 8px; padding: 8px 0; border-top: 1px solid var(--grid); font-size: 13px; }
+.rp-st { font-size: 12px; font-weight: 650; display: flex; flex-wrap: wrap; gap: 0 5px; align-items: baseline; }
+.rp-st .rp-sev { flex-basis: 100%; font-weight: 400; color: var(--ink-2); }
+.rp-st.arreglado { color: var(--good-ink); } .rp-st.abierto { color: var(--critical); } .rp-st.descartado { color: var(--muted); }
+.rp-find a { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+@media (max-width: 860px) { .rp-lower { grid-template-columns: 1fr; } }
+
 @media (max-width: 860px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lower { grid-template-columns: 1fr; }
@@ -329,6 +355,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     <button type="button" data-v="graph" aria-pressed="false">Grafo</button>
     <button type="button" data-v="oracle" aria-pressed="false">Oráculo</button>
     <button type="button" data-v="west" aria-pressed="false">Madrid Oeste</button>
+    <button type="button" data-v="repo" aria-pressed="false">Espacio</button>
   </div></nav>
 
   <div class="view" id="view-radar">
@@ -461,6 +488,17 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       <p class="small">Puntuación 1–3 por dimensión, con datos de la BDNS 2024–2026 y bases oficiales (octubre 2026). No incluye el coste de locales y vivienda.</p>
       <div id="west-table"></div></section>
     <section class="section-gap"><div class="grid-3" id="west-cards"></div></section>
+  </div>
+
+  <div class="view" id="view-repo" hidden>
+    <section class="panel section-gap"><h2>Espacio · el repo por dentro</h2>
+      <p class="small">Cada archivo del repo, ordenado de los datos a lo publicado. Pasa el ratón o pulsa un archivo para ver qué usa (borde azul) y quién lo usa (borde discontinuo). Las relaciones se detectan en cada build buscando nombres de archivo en el código; el papel de cada archivo sale de la tabla de CLAUDE.md. No es El Espacio 3D: eso es el grafo del ecosistema.</p>
+      <div class="rp-map" id="rp-map"></div>
+      <p class="small rp-detail" id="rp-detail" aria-live="polite"></p></section>
+    <div class="rp-lower section-gap">
+      <section class="panel"><h2>Últimos cambios</h2><div id="rp-commits"></div></section>
+      <section class="panel"><h2>Revisiones de código</h2><p class="small">Desde <code>reviews.json</code>. Estado siempre con icono y texto.</p><div id="rp-reviews"></div></section>
+    </div>
   </div>
 
   <footer>Entries are never deleted: closed or dropped calls move to the Archive with a reason and a review date, to recover them or guide future applications. Amounts and dates come only from the source cited on each card; “Unverified” means no official page has confirmed them yet. Always check the official page before applying.</footer>
@@ -1241,8 +1279,63 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   }
   document.getElementById("gmode-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && !b.disabled) setGraphMode(b.dataset.v); });
 
+  // ---- Espacio: the repo map, latest commits and code reviews ----
+  const RP_ST = { arreglado: ["✓", "Arreglado"], abierto: ["●", "Abierto"], descartado: ["–", "Descartado"] };
+  const REPO_CARDS = {};
+  function renderRepo() {
+    const R = PLAN.repo; if (!R) return;
+    const uses = {}, usedBy = {};
+    R.edges.forEach((e) => { (uses[e.from] = uses[e.from] || []).push(e.to); (usedBy[e.to] = usedBy[e.to] || []).push(e.from); });
+    const open = {}, total = {};
+    R.reviews.forEach((rv) => rv.findings.forEach((f) => { total[f.file] = (total[f.file] || 0) + 1; if (f.status === "abierto") open[f.file] = (open[f.file] || 0) + 1; }));
+    const map = document.getElementById("rp-map"), detail = document.getElementById("rp-detail");
+    let pinned = null;
+    function light(id) {
+      map.classList.toggle("dim", !!id);
+      Object.entries(REPO_CARDS).forEach(([k, c]) => {
+        c.classList.toggle("on", k === id);
+        c.classList.toggle("uses", !!id && (uses[id] || []).includes(k));
+        c.classList.toggle("usedby", !!id && (usedBy[id] || []).includes(k));
+      });
+      if (!id) { detail.textContent = ""; return; }
+      const n = R.nodes.find((x) => x.id === id);
+      detail.replaceChildren(el("strong", {}, id), n.role ? ` — ${n.role} ` : " ",
+        (uses[id] || []).length ? `Usa: ${uses[id].join(", ")}. ` : "", (usedBy[id] || []).length ? `Lo usan: ${usedBy[id].join(", ")}. ` : "",
+        n.last ? `Último cambio ${fmtDate(n.last.date)} (${n.last.commit}): ${n.last.subject}` : "");
+    }
+    map.replaceChildren(...R.layers.map((L) => el("div", { class: "rp-col" }, el("h3", {}, L.name),
+      R.nodes.filter((n) => n.layer === L.id).map((n) => {
+        const meta = [n.lines != null ? `${n.lines} líneas` : n.size, n.last ? `cambiado ${fmtDate(n.last.date)}` : null].filter(Boolean).join(" · ");
+        const c = el("button", { type: "button", class: "rp-file", "data-id": n.id, "aria-pressed": "false",
+            onmouseenter: () => { if (!pinned) light(n.id); }, onmouseleave: () => { if (!pinned) light(null); },
+            onfocus: () => { if (!pinned) light(n.id); },
+            onclick: () => { pinned = pinned === n.id ? null : n.id; Object.values(REPO_CARDS).forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.id === pinned))); light(pinned || n.id); } },
+          el("code", {}, n.id), n.role ? el("div", { class: "rp-role" }, n.role.length > 110 ? n.role.slice(0, 108) + "…" : n.role) : null,
+          el("div", { class: "rp-meta" }, meta, total[n.id] ? el("span", { class: open[n.id] ? "rp-open" : "" }, ` · ${total[n.id]} hallazgo${total[n.id] > 1 ? "s" : ""}${open[n.id] ? `, ${open[n.id]} abierto${open[n.id] > 1 ? "s" : ""}` : ""}`) : null));
+        REPO_CARDS[n.id] = c; return c;
+      }))));
+    document.getElementById("rp-commits").replaceChildren(...(R.commits.length ? R.commits.map((c) => el("div", { class: "rp-commit" },
+      el("code", {}, c.commit), el("span", { class: "small", style: "margin:0" }, fmtDate(c.date)),
+      el("span", {}, c.subject, c.files ? el("span", { class: "small", style: "margin:0" }, ` · ${c.files} archivos`) : null)))
+      : [el("p", { class: "small" }, "Sin historial de git en este build.")]));
+    document.getElementById("rp-reviews").replaceChildren(...(R.reviews.length ? R.reviews.slice().reverse().map((rv) => el("div", { class: "section-gap" },
+      el("h3", { style: "margin:0 0 4px;font-size:15px" }, rv.title),
+      el("div", { class: "meta" }, `${fmtDate(rv.date)} · commit ${rv.commit} · ` + ((k) => `${k} ${k === 1 ? "abierto" : "abiertos"} de ${rv.findings.length}`)(rv.findings.filter((f) => f.status === "abierto").length)),
+      el("p", { class: "small" }, rv.summary),
+      rv.findings.map((f) => el("div", { class: "rp-find" },
+        el("span", { class: "rp-st " + f.status }, el("span", { "aria-hidden": "true" }, (RP_ST[f.status] || ["?"])[0]), (RP_ST[f.status] || [, f.status])[1],
+          el("span", { class: "rp-sev" }, f.severity)),
+        el("div", {}, el("a", { href: "#", onclick: (ev) => { ev.preventDefault(); focusRepoFile(f.file); } }, f.file), " ", f.summary,
+          f.fix ? el("div", { class: "small" }, (f.status === "abierto" ? "Propuesta: " : "Arreglo: ") + f.fix) : null)))))
+      : [el("p", { class: "small" }, "Todavía no hay revisiones.")]));
+  }
+  function focusRepoFile(id) {
+    const c = REPO_CARDS[id]; if (!c) return;
+    c.focus({ preventScroll: true }); c.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+  }
+
   function showTab(t) {
-    ["radar", "strategy", "calendar", "graph", "oracle", "west"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
+    ["radar", "strategy", "calendar", "graph", "oracle", "west", "repo"].forEach((v) => { document.getElementById("view-" + v).hidden = v !== t; });
     document.querySelectorAll("#tab-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === t)));
     store.set("tab", t);
     if (t === "radar") renderTimeline(sorted(DATA.opportunities.filter(matches)));
@@ -1250,7 +1343,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   document.getElementById("tab-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showTab(b.dataset.v); });
 
   function renderAll() {
-    renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph(); renderOracle();
+    renderKpis(); renderLog(); update(); renderStrategy(); renderWest(); renderCalendar(); renderGantt(); renderFlow(); renderGraph(); renderOracle(); renderRepo();
   }
   renderAll();
   const savedTab = store.get("tab"); if (savedTab && savedTab !== "radar") showTab(savedTab);
@@ -1261,7 +1354,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   // =====================================================================
   const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund" };
   const $ = (id) => document.getElementById(id);
-  const currentTab = () => (["radar", "strategy", "calendar", "graph", "oracle", "west"].find((v) => !$("view-" + v).hidden)) || "radar";
+  const currentTab = () => (["radar", "strategy", "calendar", "graph", "oracle", "west", "repo"].find((v) => !$("view-" + v).hidden)) || "radar";
   let FOCUS = null;
   function clearFocus() {
     document.querySelectorAll(".od-focus").forEach((x) => x.classList.remove("od-focus"));
@@ -1276,7 +1369,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   }
   function directView(v) {
     if (!v) return;
-    if (!v.tab) v = Object.assign({}, v, { tab: v.focus && v.focus.kind === "call" ? "radar" : "graph" });
+    if (!v.tab) v = Object.assign({}, v, { tab: v.focus && v.focus.kind === "call" ? "radar" : v.focus && v.focus.kind === "file" ? "repo" : "graph" });
     clearFocus();
     showTab(v.tab);
     if (v.tab === "graph" && v.mode) setGraphMode(v.mode);
@@ -1285,6 +1378,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     if (!f) { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     requestAnimationFrame(() => {
       const id = f.id;
+      if (f.kind === "file") { focusRepoFile(id); return mark(REPO_CARDS[id]); }
       if (f.kind === "now") return mark(document.querySelector("#view-strategy .now"));
       if (f.kind === "gantt") return mark($("gantt"));
       if (f.kind === "core") return highlightNode("e_fund");

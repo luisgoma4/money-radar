@@ -685,6 +685,101 @@ def read_lessons():
             if line.startswith("- ")][-10:]
 
 
+# ---- the Espacio tab: a map of this repo, its latest commits and the code reviews ----
+# Layers, left to right: what feeds what. A file falls in the first layer whose test matches.
+# repo-map: config (file names quoted here are not references, so the scan below skips this block)
+REPO_LAYERS = [
+    ("data", "Datos", lambda p: p in ("strategy.json", "money.db", "LESSONS.md", "reviews.json", "routine.json")),
+    ("core", "Núcleo", lambda p: p in ("planner.py", "build.py", "monitor.py")),
+    ("cli", "Herramientas", lambda p: p in ("orchestrator.py", "causal.py", "oraculo.py", "winners.py")),
+    ("oracle", "Oráculo local", lambda p: p.startswith("oracle_") and not p.startswith("oracle_dock")),
+    ("front", "Plantillas y front", lambda p: p.endswith("_template.html") or p.startswith("oracle_dock")),
+    ("out", "Publicado", lambda p: p in ("dashboard.html", "espacio.html", "index.html") or p.startswith("graphify-out/")),
+    ("agents", "Docs y agentes", lambda p: p.endswith(".md")),
+]
+REPO_SKIP = (".gitignore", ".nojekyll")
+REPO_API = ("/api/", "oracle_server.py")  # code that calls the local API depends on the server
+# repo-map: end
+
+
+def _git(*args):
+    import subprocess
+    try:
+        return subprocess.run(["git", *args], cwd=HERE, capture_output=True, text=True, timeout=20, check=True).stdout
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def _repo_roles():
+    """One-line role per file, read from the Files table in CLAUDE.md (the single source of truth)."""
+    import re
+    roles = {}
+    for line in (HERE / "CLAUDE.md").read_text(encoding="utf-8").splitlines():
+        cells = [c.strip().replace("\\|", "|") for c in re.split(r"(?<!\\)\|", line)]
+        if len(cells) < 4 or not cells[1].startswith("`"):
+            continue
+        role = re.sub(r"\*\*|`", "", cells[2])
+        sentences, role = re.split(r"(?<=\.) ", role), ""
+        while sentences and len(role) < 50:  # first sentences, enough to say something
+            role = (role + " " + sentences.pop(0)).strip()
+        for name in re.findall(r"`([^`]+)`", cells[1]):
+            roles.setdefault(name.rstrip("/"), role)
+    return roles
+
+
+def repo_map():
+    """Files, layers, references between files (quoted file names in code), recent commits and reviews."""
+    import re
+    files = [p for p in _git("ls-files", "--cached", "--others", "--exclude-standard").splitlines() if p and not p.startswith("solicitudes/") and p not in REPO_SKIP]
+    if not files:  # no git (should not happen in the routine): fall back to what CLAUDE.md lists
+        files = [p for p in _repo_roles() if (HERE / p).is_file()]
+    roles = _repo_roles()
+    last = {}
+    for block in _git("log", "-n", "300", "--format=@%h|%cs|%s", "--name-only").split("@")[1:]:
+        head, *names = block.strip().splitlines()
+        h, d, s = head.split("|", 2)
+        for n in names:
+            last.setdefault(n.strip(), {"commit": h, "date": d, "subject": s})
+    by_base = {Path(p).name: p for p in files}
+    nodes, edges = [], []
+    for p in files:
+        layer = next((k for k, _, test in REPO_LAYERS if test(p)), "other")
+        role = roles.get(p) or roles.get(Path(p).name) or roles.get(str(Path(p).parent)) or ""
+        f = HERE / p
+        node = {"id": p, "layer": layer, "role": role, "last": last.get(p)}
+        if f.suffix in (".db",):
+            node["size"] = f"{f.stat().st_size // 1024} KB" if f.exists() else ""
+        elif f.exists():
+            node["lines"] = f.read_text(encoding="utf-8", errors="replace").count("\n")
+        nodes.append(node)
+        # References only from source code (generated pages and docs mention everything).
+        if layer in ("out", "agents", "data") or not f.exists():
+            continue
+        src = f.read_text(encoding="utf-8", errors="replace")
+        src = re.sub(r"# repo-map: config.*?# repo-map: end", "", src, flags=re.S)
+        refs = set(re.findall(r"""["'/]([\w.-]+\.(?:py|json|md|html|db|js|css))["'?#]""", src))
+        refs |= {m + ".py" for m in re.findall(r"""_load\(["'](\w+)["']\)""", src)}
+        if REPO_API[0] in src and p != REPO_API[1]:
+            refs.add(REPO_API[1])
+        for r in sorted(refs):
+            t = by_base.get(r)
+            if t and t != p:
+                edges.append({"from": p, "to": t})
+    commits = []
+    for line in _git("log", "-n", "12", "--format=%h|%cs|%s", "--shortstat").split("\n"):
+        if line.count("|") >= 2 and not line.startswith(" "):
+            h, d, s = line.split("|", 2)
+            commits.append({"commit": h, "date": d, "subject": s, "files": 0})
+        elif "changed" in line and commits:
+            commits[-1]["files"] = int(line.split()[0])
+    rpath = HERE / "reviews.json"
+    reviews = json.loads(rpath.read_text(encoding="utf-8"))["reviews"] if rpath.exists() else []
+    layers = [{"id": k, "name": n} for k, n, _ in REPO_LAYERS]
+    if any(n["layer"] == "other" for n in nodes):
+        layers.append({"id": "other", "name": "Otros"})
+    return {"layers": layers, "nodes": nodes, "edges": edges, "commits": commits, "reviews": reviews}
+
+
 def main():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -704,6 +799,7 @@ def main():
     (out / "graph.json").write_text(json.dumps(planner.graph_export(plan), ensure_ascii=False, indent=1) + "\n",
                                     encoding="utf-8")
     plan["has_3d"] = True  # the 3D view is espacio.html (built below), no longer the external graphify viewer
+    plan["repo"] = repo_map()
     DASHBOARD.write_text(render(opps, changes, read_lessons(), plan), encoding="utf-8")
     (HERE / "espacio.html").write_text(render(opps, changes, read_lessons(), plan, "espacio_template.html"), encoding="utf-8")
     report = alerts(opps, changes)

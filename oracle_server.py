@@ -48,7 +48,7 @@ SCHEMA = json.dumps({
         "say": {"type": "string"},
         "view": {"type": "object", "properties": {
             "page": {"type": "string", "enum": ["dashboard", "espacio"]},
-            "tab": {"type": "string", "enum": ["radar", "strategy", "calendar", "graph", "oracle", "west"]},
+            "tab": {"type": "string", "enum": ["radar", "strategy", "calendar", "graph", "oracle", "west", "repo"]},
             "mode": {"type": "string"}, "camera": {"type": "string", "enum": ["in", "out", "spin", "stop"]},
             "path": {"type": "array", "items": {"type": "string"}},
             "focus": {"type": "object", "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}}}},

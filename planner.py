@@ -252,12 +252,15 @@ OUR_KINDS = ("entity", "face", "product", "factor", "milestone", "partner")
 def funder_edges(strategy):
     """World surface: sphere -> funder (channels) and funder -> call (convenes)."""
     nodes, edges = [], []
+    sphere_label = {n["id"]: n["label"] for n in strategy.get("graph", {}).get("nodes", []) if n.get("type") == "sphere"}
     for f in strategy.get("funders", []):
         nid = f.get("node") or f["id"]
         if not f.get("node"):
-            spheres = ", ".join(k.replace("s_", "").capitalize() for k in f.get("spheres", {}))
+            spheres = ", ".join(sphere_label.get(k, k) for k in f.get("spheres", {}))
+            nc = len(f.get("calls", []))
             nodes.append({"id": nid, "label": f["label"], "type": "funder", "kind": "funder", "status": "external",
-                          "face": None, "detail": f"Financiador · esfera: {spheres} · convoca {len(f.get('calls', []))} convocatorias del radar"})
+                          "face": None, "detail": f"Financiador · esfera: {spheres} · convoca {nc} "
+                                                  + ("convocatoria" if nc == 1 else "convocatorias") + " del radar"})
         for sph, w in f.get("spheres", {}).items():
             edges.append({"from": sph, "to": nid, "label": "canaliza", "status": "exists", "weight": w})
         for c in f.get("calls", []):
@@ -429,7 +432,6 @@ def causal_summary(eco):
     kind = {n["id"]: n["kind"] for n in eco["nodes"]}
     order, cyc = topo_order(eco)
     f = flows(eco, calls)
-    top = max(f.values() or [1]) or 1
     _, pa = _links(eco)
     # A mediator sits between causes and calls: sources (no parents, e.g. the world spheres) are causes, not mediators.
     inner = {n: v for n, v in f.items() if n not in calls and kind[n] != "milestone" and v > 0 and pa.get(n)}
@@ -625,10 +627,13 @@ def check(strategy, opp_ids):
             problems.append(f"graph edge {e['from']}->{e['to']}: status must be exists|planned")
         if not 0 <= e.get("weight", 0.5) <= 1:
             problems.append(f"graph edge {e['from']}->{e['to']}: weight must be 0..1")
+    sphere_ids = {n["id"] for n in g.get("nodes", []) if n.get("type") == "sphere"}
+    funded = set()
     for f in strategy.get("funders", []):
+        funded.update(f.get("calls", []))
         for sph, w in f.get("spheres", {}).items():
-            if sph not in nodes:
-                problems.append(f"funder {f['id']}: unknown sphere {sph}")
+            if sph not in sphere_ids:
+                problems.append(f"funder {f['id']}: {sph} is not a sphere node")
             if not 0 <= w <= 1:
                 problems.append(f"funder {f['id']}: weight must be 0..1")
         for c in f.get("calls", []):
@@ -636,6 +641,10 @@ def check(strategy, opp_ids):
                 problems.append(f"funder {f['id']}: unknown call {c}")
         if f.get("node") and f["node"] not in nodes:
             problems.append(f"funder {f['id']}: node {f['node']} missing in graph")
+    # Every call worth pursuing must hang from its funder (the world surface of the graph).
+    for oid in strategy["opportunities"]:
+        if oid not in funded:
+            problems.append(f"strategy {oid}: no funder (add it to a strategy.json -> funders entry's calls)")
     for oid, st in strategy["opportunities"].items():
         for pr in st.get("products", []):
             if pr not in nodes:
