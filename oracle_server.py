@@ -42,18 +42,24 @@ READ_TOOLS = ",".join([
     "Bash(python3 -I causal.py:*)", "Bash(python3 -I orchestrator.py estado:*)", "Bash(python3 -I orchestrator.py plan:*)",
     "Bash(python3 -I oraculo.py lectura:*)", "Bash(python3 -I oraculo.py historial:*)", "Bash(python3 -I oraculo.py)",
     "Bash(python3 -I orchestrator.py)"])
+VIEW = {"type": "object", "properties": {
+    "page": {"type": "string", "enum": ["dashboard", "espacio"]},
+    "tab": {"type": "string", "enum": ["radar", "strategy", "calendar", "graph", "oracle", "west", "repo"]},
+    "mode": {"type": "string", "enum": ["net", "2d", "3d"]},
+    "world": {"type": "boolean"}, "fit": {"type": "boolean"}, "fullscreen": {"type": "boolean"},
+    "filter": {"type": ["string", "object"], "properties": {
+        "only": {"type": "array", "items": {"type": "string"}}, "hide": {"type": "array", "items": {"type": "string"}},
+        "show": {"type": "array", "items": {"type": "string"}}}},
+    "camera": {"type": "string", "enum": ["in", "out", "spin", "stop"]},
+    "path": {"type": "array", "items": {"type": "string"}},
+    "focus": {"type": "object", "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}}}}
 SCHEMA = json.dumps({
     "type": "object", "required": ["say"],
     "properties": {
         "say": {"type": "string"},
-        "view": {"type": "object", "properties": {
-            "page": {"type": "string", "enum": ["dashboard", "espacio"]},
-            "tab": {"type": "string", "enum": ["radar", "strategy", "calendar", "graph", "oracle", "west", "repo"]},
-            "mode": {"type": "string"}, "camera": {"type": "string", "enum": ["in", "out", "spin", "stop"]},
-            "path": {"type": "array", "items": {"type": "string"}},
-            "focus": {"type": "object", "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}}}},
+        "view": VIEW,
         "options": {"type": "array", "items": {"type": "object", "required": ["label"], "properties": {
-            "label": {"type": "string"}, "utterance": {"type": "string"},
+            "label": {"type": "string"}, "utterance": {"type": "string"}, "view": VIEW,
             "action": {"type": "object", "properties": {"id": {"type": "string"}, "args": {"type": "object"}}}}}},
         "action": {"type": "object", "properties": {"id": {"type": "string"}, "args": {"type": "object"}}}}})
 
@@ -63,7 +69,7 @@ def ask_claude(text, ctx):
         return {"say": "No encuentro Claude Code en este equipo; solo entiendo órdenes conocidas.", "options": []}
     st = actions.state()
     o = st["plan"]["oracle"]
-    brief = {"pagina": ctx.get("page"), "pestaña_actual": ctx.get("tab"), "foco": ctx.get("focus"), "ruta": ctx.get("path"),
+    brief = {"pagina": ctx.get("page"), "pestaña_actual": ctx.get("tab"), "foco": ctx.get("focus"), "ruta": ctx.get("path"), "grafo": ctx.get("graph"),
              "ceremonia": ctx.get("ceremony"),
              "dictamen": o["verdict"], "nave": (o.get("ship") or {}).get("name"),
              "ranking": [st["plan"]["plans"][i]["name"] + f" ({st['plan']['plans'][i]['grade']})" for i in st["plan"]["ranking"][:6]]}

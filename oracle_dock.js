@@ -4,8 +4,9 @@
  * en GitHub Pages no hace nada. El host (cada página) aporta:
  *   host.page                 "dashboard" | "espacio"
  *   host.plan()               el plan actual (DATA.plan)
- *   host.view()               {tab?, focus?, path?}: lo que se está viendo ahora
- *   host.directView(view)     dirige la vista: {page?, tab?, mode?, focus:{kind,id}?, path?:[ids]}
+ *   host.view()               {tab?, focus?, path?, graph?:{mode, world, hidden, full}}: lo que se está viendo ahora
+ *   host.directView(view)     dirige la vista: {page?, tab?, mode?: net|2d|3d, world?, filter?, fit?, fullscreen?,
+ *                             camera?, focus:{kind,id}?, path?:[ids]}
  *   host.refresh()            recarga /api/state y repinta (tras una acción confirmada)
  *   host.onPhase(phaseId|null) opcional: resaltar la fase de la ceremonia
  * Voz: Web Speech API es-ES (Safari y Chrome). Toque = escucha hasta silencio; pulsación larga = pulsar para hablar.
@@ -171,7 +172,7 @@
     let r;
     const v = H.view() || {};
     try {
-      r = await api("/api/converse", { text, context: { page: H.page, tab: v.tab, focus: v.focus, path: v.path, session: OD.session,
+      r = await api("/api/converse", { text, context: { page: H.page, tab: v.tab, focus: v.focus, path: v.path, graph: v.graph, session: OD.session,
         ceremony: OD.cer ? { phase: P().oracle.phases[OD.cer.phase]?.id, capture: OD.cer.capture } : null } });
     } catch (e) { r = { say: "No puedo hablar con el servidor del oráculo." }; }
     thinking(false);
@@ -201,9 +202,12 @@
       setOptions([next, o.ship ? { label: "Ver la nave", view: { tab: "radar", focus: { kind: "call", id: o.ship.id } } } : null,
         { label: "Ver el Gantt", view: { tab: "calendar", focus: { kind: "gantt" } } }, { label: "Terminar ceremonia", ceremony: "stop" }]);
     } else if (ph.id === "lectura") {
-      direct({ tab: "graph", focus: { kind: "node", id: o.mediator ? o.mediator.id : "e_fund" } });
-      say(`Por ${o.mediator ? o.mediator.label : "—"} pasa el mayor flujo de valor hacia las convocatorias. El confusor a vigilar es ${o.confounder ? o.confounder.label : "—"}, causa común de ${o.confounder ? o.confounder.calls : 0} convocatorias. ¿Profundizamos o seguimos?`);
-      setOptions([next, o.confounder ? { label: "Ver el confusor", view: { tab: "graph", focus: { kind: "node", id: o.confounder.id } } } : null,
+      // In the Red: light the ship's strongest causal path first, then the mediator and the confounder on request.
+      const shipPath = o.ship && o.ship.path_ids && o.ship.path_ids.length > 1 ? o.ship.path_ids : null;
+      direct(shipPath ? { tab: "graph", path: shipPath } : { tab: "graph", focus: { kind: "node", id: o.mediator ? o.mediator.id : "e_fund" } });
+      say(`${shipPath ? `El camino más fuerte hacia la nave es ${o.ship.path.join(", ")}. ` : ""}Por ${o.mediator ? o.mediator.label : "—"} pasa el mayor flujo de valor hacia las convocatorias. El confusor a vigilar es ${o.confounder ? o.confounder.label : "—"}, causa común de ${o.confounder ? o.confounder.calls : 0} convocatorias. ¿Profundizamos o seguimos?`);
+      setOptions([next, o.mediator ? { label: "Ver el mediador", view: { tab: "graph", focus: { kind: "node", id: o.mediator.id } } } : null,
+        o.confounder ? { label: "Ver el confusor", view: { tab: "graph", focus: { kind: "node", id: o.confounder.id } } } : null,
         { label: "Profundizar con el arquitecto causal", utterance: "Como arquitecto causal, analiza los mediadores y confusores clave del ecosistema y propón como máximo dos cambios de peso o relación, cada uno como opción con su acción." }]);
     } else if (ph.id === "ronda") {
       const q = o.questions[c.face];
@@ -215,7 +219,7 @@
         { label: "Dictar respuesta", run: () => { c.capture = "answer"; c.onCapture = (txt) => { c.notes.push(`${q.name}: ${txt}`); say("Anotado."); advance(); }; say("Te escucho."); } },
         { label: "Pasar", run: advance }]);
     } else if (ph.id === "deliberacion") {
-      direct({ tab: "graph", focus: { kind: "core" } });
+      direct({ tab: "graph", world: true, focus: { kind: "core" } });
       say("¿Cambiamos algún peso o relación? Como máximo dos. Di, por ejemplo: pon el peso de sede a convenios en 0,8. O pide propuestas al arquitecto causal.");
       setOptions([{ label: "Pedir propuestas", utterance: "Como arquitecto causal, propón como máximo dos cambios de peso o relación justificados, cada uno como opción con su acción peso o relacion." }, { label: "Sin cambios", ceremony: "next" }]);
     } else if (ph.id === "dictamen") {

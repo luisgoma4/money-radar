@@ -489,7 +489,7 @@ def oracle(plan, eco, causal, strategy, ceremonies, today):
     if rec:
         path = best_path_into(eco, "c_" + rec["id"])
         ship = {"id": rec["id"], "name": rec["name"], "grade": rec["grade"], "when": rec["when"],
-                "path": [label.get(n, n) for n in path], "pending": rec["pending"]}
+                "path": [label.get(n, n) for n in path], "path_ids": list(path), "pending": rec["pending"]}
     ms = next((m for m in plan["milestones"] if m["status"] != "done"), None)
     med = causal["mediators"][0] if causal["mediators"] else None
     conf = causal["confounders"][0] if causal["confounders"] else None

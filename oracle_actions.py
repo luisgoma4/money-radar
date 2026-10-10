@@ -63,6 +63,8 @@ def state():
             for r in conn.execute("SELECT * FROM ceremonies ORDER BY held_on DESC, id DESC")]
     conn.close()
     plan = planner.make_plan(opps, planner.load_strategy(), apps, dt.date.today(), cers)
+    plan["has_3d"] = True
+    plan["repo"] = build.repo_map()  # the Espacio tab (files, references, commits, reviews), same as the build
     return {"today": dt.date.today().isoformat(), "lines": build.LINES, "opportunities": opps,
             "changes": changes, "lessons": build.read_lessons(), "plan": plan}
 
@@ -153,6 +155,44 @@ def _bfs(st, a, b):
                 prev[o] = n
                 todo.append(o)
     return None
+
+
+# ---------------------------------------------------------------- graph view and repo helpers
+FACE_WORDS = {"cloudy": "cloudy", "semf": "semf", "causality": "causality", "causalidad": "causality", "causal": "causality",
+              "branchout": "branchout", "branch": "branchout", "fundacion": "delfina", "delfina": "delfina"}
+FACE_ES = {"cloudy": "Cloudy", "semf": "SEMF", "causality": "Causality Graphs", "branchout": "BranchOut", "delfina": "la Fundación"}
+WORLD_WORDS = r"(diamante|mundo|esferas|financiadores|mundo exterior)"
+
+
+def faces_in(t):
+    """Face keys named in a normalized text, in order and without repeats."""
+    out = []
+    for w in t.split():
+        f = FACE_WORDS.get(w)
+        if f and f not in out:
+            out.append(f)
+    return out
+
+
+def _say_list(xs):
+    xs = list(xs)
+    return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " y " + xs[-1] if xs else ""
+
+
+def find_file(text, repo):
+    """A repo file by voice: 'planner', 'planner punto py', 'el dashboard template', 'grafo red'."""
+    q = norm(text).replace(" punto ", ".").replace(" guion bajo ", "_")
+    q = re.sub(r"^(el|la|los|las|archivo|fichero|modulo)\s+", "", q).strip(" .")
+    best, score = None, 0.0
+    for n in repo["nodes"]:
+        name = n["id"].lower()
+        stem = name.rsplit("/", 1)[-1].rsplit(".", 1)[0].replace("_", " ").replace("-", " ")
+        sc = 1.0 if q in (name, name.rsplit("/", 1)[-1]) else 0.9 if q.replace("_", " ") == stem else \
+            difflib.SequenceMatcher(None, q.replace("_", " "), stem).ratio()
+        if sc > score:
+            best, score = n, sc
+    return best if score >= 0.72 else None
+
 
 
 def parse_date(text, today=None):
@@ -425,6 +465,80 @@ def intent(text, ctx, st):
     if re.fullmatch(r"(siguiente|siguiente fase|continua|continuar|adelante con la ceremonia)", t):
         return _reply("Siguiente fase.", ceremony="next")
 
+    page = ctx.get("page") or "dashboard"
+    gview = ctx.get("graph") or {}
+
+    # ---- the repo (Espacio tab): who uses what, open findings, latest changes ----
+    if re.search(r"\b(revisiones|hallazgos|fallos|problemas)\b.*\b(abiert\w*|pendiente\w*|sin arreglar)\b|\bque (falta|queda) por arreglar\b", t):
+        repo = plan["repo"]
+        opn = [(r["date"], f) for r in repo["reviews"] for f in r["findings"] if f["status"] == "abierto"]
+        if not opn:
+            return _reply("No hay hallazgos abiertos en las revisiones.", view={"tab": "repo", "focus": {"kind": "reviews"}})
+        first = opn[0][1]
+        return _reply(f"Hay {len(opn)} hallazgo{'s' if len(opn) > 1 else ''} abierto{'s' if len(opn) > 1 else ''}. "
+                      f"El primero, en {first['file']}: {first['summary']}", view={"tab": "repo", "focus": {"kind": "reviews"}},
+                      options=[{"label": f"Ver {f['file']}", "view": {"tab": "repo", "focus": {"kind": "file", "id": f["file"]}}} for _, f in opn[:3]])
+    if re.search(r"\b(ultimos cambios|ultimos commits|que ha cambiado|que se ha cambiado|historial de cambios)\b", t):
+        cs = plan["repo"]["commits"][:3]
+        if not cs:
+            return _reply("No tengo el historial de git.", view={"tab": "repo"})
+        return _reply("Los últimos cambios: " + "; ".join(f"{c['subject']} ({c['date'][8:10]}/{c['date'][5:7]})" for c in cs) + ".",
+                      view={"tab": "repo", "focus": {"kind": "commits"}})
+    if m := re.search(r"\b(?:que usa|de que depende|dependencias de|que necesita|quien usa|quienes usan|quien depende de|que depende de|quien lee|quien carga)\b (.+)", t):
+        repo = plan["repo"]
+        f = find_file(m.group(1), repo)
+        if f:
+            used_by = "quien" in t or "que depende de" in t or "quienes" in t
+            ids = [e["from"] for e in repo["edges"] if e["to"] == f["id"]] if used_by else [e["to"] for e in repo["edges"] if e["from"] == f["id"]]
+            what = ("Lo usan" if used_by else "Usa") + (f" {_say_list(ids)}." if ids else " nada del repo." if not used_by else ": nadie en el código.")
+            return _reply(f"{f['id']}. {what}", view={"tab": "repo", "focus": {"kind": "file", "id": f["id"]}},
+                          options=[{"label": f"Ir a {x}", "view": {"tab": "repo", "focus": {"kind": "file", "id": x}}} for x in ids[:3]])
+
+    # ---- the graph's own controls (Red / Columnas / 3D, with or without the diamond, faces, framing, full screen) ----
+    # Only short commands: a longer sentence ("show me the path to X and leave only Y") goes to Claude, which can combine them.
+    graph_tab = {} if page == "espacio" else {"tab": "graph"}
+    short = len(t.split()) <= 7
+    if short and re.search(r"\b(vista|modo|cambia a|pon|ver|muestra|ensename)\b.*\b(red|obsidian|columnas|en 3d|tres de)$", t) and page != "espacio":
+        mode = "net" if re.search(r"\b(red|obsidian)\b", t) else "2d" if "columnas" in t else "3d"
+        say = {"net": "La Red: arrastra nodos, acerca con la rueda y pulsa uno para ver su ficha.",
+               "2d": "Las columnas, de causa a efecto.", "3d": "El grafo en 3D, con el diamante en el centro."}[mode]
+        return _reply(say, view={"tab": "graph", "mode": mode},
+                      options=[{"label": l, "view": {"tab": "graph", "mode": v}} for l, v in (("Red", "net"), ("Columnas", "2d"), ("3D", "3d")) if v != mode])
+    if short and re.search(r"\b(quita|oculta|esconde|apaga|sin)\b.*\b" + WORLD_WORDS + r"\b", t):
+        return _reply("Quito el diamante y los financiadores: es el grafo de antes, solo con lo nuestro.", view={**graph_tab, "world": False},
+                      options=[{"label": "Volver a ponerlo", "view": {**graph_tab, "world": True}}])
+    if short and re.search(r"\b(muestra|pon|ensename|enciende|activa|con|vuelve a poner|recupera)\b.*\b" + WORLD_WORDS + r"\b", t) and not re.search(r"\b(vuelve|ve|llevame) (al|a el)\b", t):
+        return _reply("Pongo el diamante: Política, Bancos y Arte, con sus financiadores.", view={**graph_tab, "world": True},
+                      options=[{"label": "Ir al diamante", "view": {**graph_tab, "focus": {"kind": "core"}}}, {"label": "Quitarlo", "view": {**graph_tab, "world": False}}])
+    if short and "pantalla completa" in t:
+        if page == "espacio":
+            return _reply("El Espacio ya ocupa toda la ventana.")
+        off = bool(re.search(r"\b(sal|salir|quita|cierra|cerrar)\b", t))
+        v = {"tab": "graph", "fullscreen": not off}
+        return _reply("Salgo de la pantalla completa." if off else "Pongo la Red a pantalla completa. Si el navegador no me deja, pulsa la opción.",
+                      view=v, options=[] if off else [{"label": "Pantalla completa", "view": v}])
+    if re.fullmatch(r"(encaja|encuadra|encaja el grafo|ver todo|ver todo el grafo|vista completa|todo el grafo|centra el grafo|muestra todo el grafo)", t):
+        if page == "espacio":
+            return _reply("Vuelvo al centro.", view={"focus": {"kind": "core"}})
+        return _reply("Todo el grafo a la vista.", view={"tab": "graph", "fit": True})
+    if page != "espacio" and short:
+        if re.search(r"\b(todas las caras|quita (los |el )?filtros?|sin filtros|muestra todo)\b", t):
+            return _reply("Vuelven todas las caras.", view={"tab": "graph", "filter": "all"})
+        fs = faces_in(t)
+        if fs and re.search(r"\b(solo|unicamente)\b", t):
+            return _reply(f"Solo {_say_list(FACE_ES[f] for f in fs)}, con lo que no tiene cara.", view={"tab": "graph", "filter": {"only": fs}},
+                          options=[{"label": "Todas las caras", "view": {"tab": "graph", "filter": "all"}}])
+        if fs and re.match(r"(oculta|quita|esconde|apaga)\b", t):
+            return _reply(f"Oculto {_say_list(FACE_ES[f] for f in fs)}.", view={"tab": "graph", "filter": {"hide": fs}},
+                          options=[{"label": "Todas las caras", "view": {"tab": "graph", "filter": "all"}}])
+        if fs and re.match(r"(vuelve a mostrar|muestra tambien|anade|añade|enciende)\b", t):
+            return _reply(f"Vuelvo a mostrar {_say_list(FACE_ES[f] for f in fs)}.", view={"tab": "graph", "filter": {"show": fs}})
+        if m := re.search(r"^(?:ve a|vete a|llevame a|enfoca|busca|muestrame|ensename)\s+(.+?)\s+en (?:el grafo|la red)$", t):
+            n = find_node(m.group(1), st)
+            if n:
+                return _reply(f"{n['label']}. {(n.get('detail') or '')[:170]}", view={"tab": "graph", "focus": {"kind": "node", "id": n["id"]}},
+                              options=neighbor_options(st, n["id"]))
+
     # Navigation
     if m := re.search(r"\b(abre|ve a|vamos a|ir a|ensename|muestrame|llevame a|pestana)\b.*\b(radar|estrategia|calendario|gantt|grafo|oraculo|madrid oeste|municipios|repo|repositorio|codigo|revisiones)\b", t):
         tab = TABS[m.group(2)]
@@ -433,10 +547,13 @@ def intent(text, ctx, st):
             view["focus"] = {"kind": "gantt"}
         if "3d" in t and tab == "graph":
             view["mode"] = "3d"
-        return _reply(f"Abro {m.group(2)}.", view=view)
+        name = {"repo": "la pestaña Espacio, el repo por dentro"}.get(tab, m.group(2))
+        return _reply(f"Abro {name}.", view=view)
 
     # ---- the Espacio: live navigation through nodes and relations ----
-    page = ctx.get("page") or "dashboard"
+    if page != "espacio" and re.search(r"\b(abre|vamos a|ir a|llevame a|ensename|muestrame|pon)\b.*\b(grafo (en )?3d|3d|tres de)\b", t) and "espacio" not in t:
+        return _reply("El grafo en 3D, con el diamante en el centro. Arrastra para orbitar; di gira, acércate o aléjate.",
+                      view={"tab": "graph", "mode": "3d"}, options=[{"label": "Gira", "utterance": "gira"}, {"label": "Volver a 2D", "view": {"tab": "graph", "mode": "net"}}])
     if re.search(r"\b(abre|vamos a|ir a|llevame a|ensename)\b.*\b(espacio|grafo 3d|3d)\b", t):
         if page == "espacio":
             return _reply("Ya estás en el Espacio. Te llevo al diamante.", view={"focus": {"kind": "core"}})
@@ -487,7 +604,7 @@ def intent(text, ctx, st):
             ps = planner.paths(eco, a["id"], b["id"], limit=200) or planner.paths(eco, b["id"], a["id"], limit=200)
             if ps:
                 path, w = ps[0]
-                kind = f"camino causal más fuerte (peso {w:.2f}, de {len(ps)} caminos)"
+                kind = f"camino causal más fuerte (peso {w:.2f}, de {len(ps)} camino{'s' if len(ps) > 1 else ''})"
             else:
                 path, kind = _bfs(st, a["id"], b["id"]), "conexión más corta, sin dirección causal"
             if path:

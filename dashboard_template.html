@@ -275,8 +275,6 @@ tr.od-focus td { background: color-mix(in srgb, var(--accent) 12%, transparent);
 .fl-edge { stroke: var(--ink-2); stroke-width: 1.5; fill: none; }
 .fl-lab { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
 .graph-wrap { overflow-x: auto; margin-top: 8px; }
-#graph-3d-wrap { margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-#graph3d-frame { display: block; width: 100%; height: min(78vh, 760px); border: 0; background: var(--page); }
 .graph-wrap svg { min-width: 1400px; }
 .g-col { fill: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .g-node rect.box { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
@@ -330,6 +328,10 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 .net.full { border: 0; border-radius: 0; background: var(--page); }
 .net-stage { width: 100%; cursor: grab; }
 .net-stage:active { cursor: grabbing; }
+.net-3d { cursor: grab; }
+.net-labels { position: absolute; left: 0; top: 0; pointer-events: none; }
+.net-note { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); font-size: 13px; color: var(--ink-2); pointer-events: none; }
+.net-dim { width: auto; padding: 0 9px; font-size: 13px; font-weight: 650; }
 .net-tools { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; align-items: center; }
 .net-search { width: 180px; font: inherit; font-size: 13px; padding: 5px 9px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
 .net-btn { width: 32px; height: 30px; font-size: 16px; line-height: 1; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
@@ -489,11 +491,11 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 
   <div class="view" id="view-graph" hidden>
     <section class="panel section-gap"><h2>Grafo del ecosistema</h2>
-      <p class="small">Un solo grafo en tres vistas (Red, Columnas y 3D): factores de contexto, socios, figuras legales, caras, el mundo exterior (las esferas Arte · Bancos · Política, que con la Fundación forman el diamante, y los financiadores), productos, hitos y convocatorias (ships). Las flechas van de causa a efecto y el grosor es el peso (0–1, juicio de planificación). Línea continua = existe; discontinua = por crear. En la Red: arrastra nodos, haz zoom con la rueda o pellizcando, pasa el ratón para iluminar sus vecinos y pulsa un nodo para ver su ficha; ⛶ la abre a pantalla completa.</p>
+      <p class="small">Un solo grafo en tres vistas (Red, 3D y Columnas): factores de contexto, socios, figuras legales, caras, el mundo exterior (las esferas Arte · Bancos · Política, que con la Fundación forman el diamante, y los financiadores), productos, hitos y convocatorias (ships). Las flechas van de causa a efecto y el grosor es el peso (0–1, juicio de planificación). Línea continua = existe; discontinua = por crear. La Red y el 3D son el mismo grafo vivo: arrastra nodos, haz zoom con la rueda o pellizcando, pasa el ratón para iluminar sus vecinos y pulsa un nodo para ver su ficha; el botón 3D/2D cambia de dimensión sin perder la selección, los filtros ni el recorrido, y ⛶ lo abre a pantalla completa. En 3D el diamante queda fijo en el centro.</p>
       <div class="cal-head"><div class="seg" id="gmode-seg" role="group" aria-label="Vista del grafo">
         <button type="button" data-v="net" aria-pressed="true">Red</button>
-        <button type="button" data-v="2d" aria-pressed="false">Columnas</button>
-        <button type="button" data-v="3d" aria-pressed="false">3D</button></div>
+        <button type="button" data-v="3d" aria-pressed="false">3D</button>
+        <button type="button" data-v="2d" aria-pressed="false">Columnas</button></div>
         <div class="seg" id="gworld-seg" role="group" aria-label="Mundo exterior en el grafo">
         <button type="button" data-v="1" aria-pressed="true">◇ Con diamante y financiadores</button>
         <button type="button" data-v="0" aria-pressed="false">Sin diamante</button></div>
@@ -503,7 +505,6 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       <div class="chipline" id="graph-legend"></div>
       <div class="graph-wrap" id="graph"></div>
       </div>
-      <div id="graph-3d-wrap" hidden><iframe id="graph3d-frame" title="Grafo 3D del ecosistema" loading="lazy"></iframe></div>
       <div class="tooltip" id="gtip" role="tooltip" hidden></div>
     </section>
     <section class="panel section-gap table-wrap" id="graph-rel"><h2>Relaciones</h2><div id="graph-table"></div></section>
@@ -601,7 +602,6 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     const next = dark ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     store.set("theme", next);
-    if (typeof syncFrameTheme === "function") syncFrameTheme();
   });
 
   // ---- status presentation: icon + label, never colour alone ----
@@ -1171,8 +1171,6 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   function setWorld(on) {
     WORLD = !!on; store.set("gworld", WORLD);
     document.querySelectorAll("#gworld-seg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === WORLD)));
-    const f = document.getElementById("graph3d-frame");
-    if (f && f.getAttribute("src")) f.setAttribute("src", "espacio.html?embed=1" + (WORLD ? "" : "&world=0"));
     renderGraph();
   }
   document.getElementById("gworld-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setWorld(b.dataset.v === "1"); });
@@ -1309,39 +1307,31 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       [el("p", { class: "small" }, "Aún no hay ceremonias. Empieza con /ceremonia en Claude Code.")]));
   }
 
-  // ---- 2D / 3D switcher for the graph tab ----
-  function syncFrameTheme() {
-    const f = document.getElementById("graph3d-frame");
-    try { const d = f.contentDocument; if (d && d.documentElement) {
-      const th = document.documentElement.dataset.theme; if (th) d.documentElement.dataset.theme = th; else delete d.documentElement.dataset.theme; } } catch (e) {}
-  }
-  // Red (Obsidian-style, grafo_red.js) is the default; Columnas is the causal column layout; 3D embeds the Espacio.
+  // ---- graph views: Red (2D) and 3D are one component (grafo_red.js) sharing selection, route and filters;
+  // Columnas is the causal column layout.
   let NET = null, GMODE = "net";
   function netView() {
     if (!NET && window.GrafoRed && window.ForceGraph) {
       NET = GrafoRed.mount(document.getElementById("graph-net"), { faces: PLAN.faces,
-        onOpenCall: (id) => { showTab("radar"); focusCard(id); } });
+        onOpenCall: (id) => { showTab("radar"); focusCard(id); },
+        onDim: (d) => { if (GMODE !== "2d") { GMODE = d === 3 ? "3d" : "net"; markMode(); store.set("gmode", GMODE); } } });
       NET.setData(graphOf());
     }
     return NET;
   }
+  function markMode() { document.querySelectorAll("#gmode-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === GMODE))); }
   function setGraphMode(m) {
     if (!["net", "2d", "3d"].includes(m)) m = "net";
-    if (m === "3d" && !PLAN.has_3d) m = "net";
-    if (m === "net" && !window.ForceGraph) m = "2d";  // library missing: fall back to the columns
+    if (m !== "2d" && !window.ForceGraph) m = "2d";  // library missing: fall back to the columns
     GMODE = m;
-    document.getElementById("graph-net").hidden = m !== "net";
+    document.getElementById("graph-net").hidden = m === "2d";
     document.getElementById("graph-2d").hidden = m !== "2d";
-    document.getElementById("graph-rel").hidden = m === "3d";
-    document.getElementById("graph-3d-wrap").hidden = m !== "3d";
-    document.querySelectorAll("#gmode-seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === m)));
+    markMode();
     const note = document.getElementById("graph-3d");
-    if (m === "net") { netView(); NET && NET.resize(); note.textContent = ""; }
-    else if (m === "3d") {
-      const f = document.getElementById("graph3d-frame");
-      if (!f.getAttribute("src")) { f.addEventListener("load", syncFrameTheme); f.setAttribute("src", "espacio.html?embed=1" + (WORLD ? "" : "&world=0")); }
-      note.textContent = WORLD ? "El mismo grafo en 3D, con el diamante en el centro. Arrastra para rotar; clic en un nodo para ver su ficha."
-        : "El mismo grafo en 3D, sin el diamante ni los financiadores. Arrastra para rotar; clic en un nodo para ver su ficha.";
+    if (m !== "2d") {
+      netView();
+      if (NET) { NET.dim(m === "3d" ? 3 : 2); NET.resize(); }
+      note.textContent = m === "3d" ? (WORLD ? "En 3D el diamante queda fijo en el centro. Arrastra para orbitar, rueda para acercarte." : "En 3D, sin el diamante. Arrastra para orbitar, rueda para acercarte.") : "";
     } else note.textContent = "Columnas de causa a efecto; pasa el ratón por un nodo para ver sus relaciones.";
     store.set("gmode", m);
   }
@@ -1432,23 +1422,42 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   function mark(elm) { if (!elm) return; elm.classList.add("od-focus"); elm.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); }
   function highlightNode(id) {
     if (!NODE_FX[id] && !WORLD && PLAN.ecosystem.nodes.some((n) => n.id === id)) setWorld(true);  // a sphere or funder: show the world
-    if (GMODE !== "2d") { setGraphMode("net"); if (NET) { FOCUS = null; return NET.focus(id); } }
+    if (GMODE !== "2d") { setGraphMode(GMODE); if (NET) { FOCUS = null; return NET.focus(id); } }
     setGraphMode("2d");
     const fx = NODE_FX[id]; if (!fx) return false;
     fx.on(); FOCUS = id; fx.grp.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); return true;
   }
   function directView(v) {
     if (!v) return;
-    if (!v.tab) v = Object.assign({}, v, { tab: v.focus && v.focus.kind === "call" ? "radar" : v.focus && v.focus.kind === "file" ? "repo" : "graph" });
+    if (!v.tab) v = Object.assign({}, v, { tab: v.focus && v.focus.kind === "call" ? "radar" : v.focus && ["file", "reviews", "commits"].includes(v.focus.kind) ? "repo" : "graph" });
     clearFocus();
     showTab(v.tab);
-    if (v.tab === "graph" && v.mode) setGraphMode(v.mode);
+    if (v.tab === "graph") {
+      // The graph's own controls: which copy (world), which view, face filters, framing, full screen.
+      const ids = (v.path || []).concat(v.focus && v.focus.kind === "node" ? [v.focus.id] : []);
+      if (v.world === true || v.world === false) { if (v.world !== WORLD) setWorld(v.world); }
+      else if (!WORLD && ids.some((i) => !graphOf().nodes.some((n) => n.id === i) && PLAN.ecosystem.nodes.some((n) => n.id === i))) setWorld(true);
+      // Keep the current dimension; leave Columnas only when the Red is needed (filters, framing, full screen, routes, camera).
+      if (v.mode) setGraphMode(v.mode);
+      else if (GMODE === "2d" && v.camera) setGraphMode("3d");
+      else if (GMODE === "2d" && (v.filter || v.fit || v.fullscreen || (v.path && v.path.length))) setGraphMode("net");
+      if (GMODE !== "2d" && NET) {
+        if (v.camera) { if (v.camera === "spin" && GMODE !== "3d") setGraphMode("3d"); NET.camera(v.camera); if (!ids.length && !v.focus) return; }
+        if (v.filter) NET.filter(v.filter);
+        if (v.fullscreen !== undefined) NET.fullscreen(!!v.fullscreen);
+        if (v.path && v.path.length) { NET.path(v.path); return; }
+        if (v.fit && !v.focus) { NET.clear(); NET.fit(); return; }
+      }
+    }
     const f = v.focus;
     if (v.path && v.path.length) { highlightNode(v.path[v.path.length - 1]); return; }
+    if (v.tab === "graph" && !f) return;
     if (!f) { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     requestAnimationFrame(() => {
       const id = f.id;
       if (f.kind === "file") { focusRepoFile(id); return mark(REPO_CARDS[id]); }
+      if (f.kind === "reviews") return mark(document.getElementById("rp-reviews"));
+      if (f.kind === "commits") return mark(document.getElementById("rp-commits"));
       if (f.kind === "now") return mark(document.querySelector("#view-strategy .now"));
       if (f.kind === "gantt") return mark($("gantt"));
       if (f.kind === "core") return highlightNode("e_fund");
@@ -1478,7 +1487,13 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   if (window.OracleDock) OracleDock.init({
     page: "dashboard",
     plan: () => PLAN,
-    view: () => ({ tab: currentTab(), focus: FOCUS }),
+    view: () => {
+      const tab = currentTab();
+      if (tab !== "graph") return { tab, focus: FOCUS };
+      const ns = GMODE !== "2d" && NET ? NET.state() : {};
+      return { tab, focus: ns.selected ? { kind: "node", id: ns.selected } : FOCUS ? { kind: "node", id: FOCUS } : null, path: ns.path,
+        graph: { mode: GMODE, world: WORLD, hidden: ns.hidden || [], full: !!ns.full } };
+    },
     directView, refresh,
     onPhase: (id) => document.querySelectorAll("#or-phases li").forEach((li) => li.classList.toggle("active", li.dataset.id === id)),
   });

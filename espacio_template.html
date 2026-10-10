@@ -405,6 +405,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     if (v.camera === "out") { cam.goal.dist = Math.min(1600, cam.goal.dist * 1.6); return; }
     if (v.camera === "spin") { cam.spin = true; return; }
     if (v.camera === "stop") { cam.spin = false; return; }
+    if ((v.world === true || v.world === false) && v.world !== WORLD) setWorld(v.world);
     const want = (v.path || []).concat(v.focus && v.focus.kind === "node" ? [v.focus.id] : []);
     if (!WORLD && want.some((i) => !byId[i] && DATA.plan.ecosystem.nodes.some((n) => n.id === i))) setWorld(true);  // a sphere or funder: show the world
     if (v.path && v.path.length) return showPath(v.path);
@@ -424,7 +425,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   if (!EMBED && window.OracleDock) OracleDock.init({
     page: "espacio",
     plan: () => DATA.plan,
-    view: () => ({ tab: "espacio", focus: focusId ? { kind: "node", id: focusId } : null, path }),
+    view: () => ({ tab: "espacio", focus: focusId ? { kind: "node", id: focusId } : null, path, graph: { mode: "3d", world: WORLD } }),
     directView, refresh,
     onPhase: (id) => { const ph = id && (DATA.plan.oracle.phases || []).find((p) => p.id === id); banner(ph ? "Ceremonia · " + ph.name : ""); },
   });
