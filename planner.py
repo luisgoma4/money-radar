@@ -137,9 +137,11 @@ def make_plan(opps, strategy, applications=(), today=None, ceremonies=()):
     gantt_rows = gantt(opps, plans, ms, today)
     eco = ecosystem(strategy, plans, [p["id"] for p in ranking], ms, opps)
     causal = causal_summary(eco)
+    # The same graph without the diamond and the funders: the Grafo tab and the Espacio switch between both.
+    eco_base = ecosystem(without_world(strategy), plans, [p["id"] for p in ranking], ms, opps)
     plan = {
         "today": today.isoformat(), "now": now, "calendar": events, "gantt": gantt_rows,
-        "ecosystem": eco, "causal": causal,
+        "ecosystem": eco, "causal": causal, "ecosystem_base": eco_base, "causal_base": causal_summary(eco_base),
         "project": strategy["project"], "faces": strategy["faces"], "entities": strategy["entities"],
         "levels": strategy["levels"], "stages": strategy["stages"],
         "municipalities": strategy["municipalities"],
@@ -266,6 +268,16 @@ def funder_edges(strategy):
         for c in f.get("calls", []):
             edges.append({"from": nid, "to": "c_" + c, "label": "convoca", "status": "exists", "weight": 1.0})
     return nodes, edges
+
+
+def without_world(strategy):
+    """The strategy as it was before the diamond: no world spheres, no funders (and no edges touching them)."""
+    g = strategy.get("graph", {})
+    world = {n["id"] for n in g.get("nodes", []) if n.get("type") in WORLD_KINDS}
+    return dict(strategy, funders=[], graph=dict(
+        g, columns=[c for c in g.get("columns", []) if c["id"] not in WORLD_KINDS],
+        nodes=[n for n in g.get("nodes", []) if n["id"] not in world],
+        edges=[e for e in g.get("edges", []) if e["from"] not in world and e["to"] not in world]))
 
 
 def _call_edges(oid, st, applicant, pending_ms=None, applicant_status="exists"):
@@ -515,13 +527,13 @@ def oracle(plan, eco, causal, strategy, ceremonies, today):
             "next_on": next_on, "due": next_on <= today.isoformat(), "ceremonies": list(ceremonies)[:12]}
 
 
-def graph_export(plan, opps=None):
+def graph_export(plan, opps=None, eco=None):
     """The ecosystem (same nodes and relations as the 2D view) as graphify graph.json for the 3D viewer.
 
     Group (colour) = face name, or "Hitos"; community_name = status; relation carries the weight.
     All text is folded to plain ASCII (accents break in the viewer).
     """
-    eco = plan["ecosystem"]
+    eco = eco or plan["ecosystem"]
     faces = plan["faces"]
     st_es = {"exists": "existe", "planned": "por crear", "proposed": "propuesta", "external": "socio externo", "factor": "factor de contexto"}
     kind_es = {"entity": "figura legal", "face": "cara", "product": "producto", "partner": "socio", "factor": "factor",

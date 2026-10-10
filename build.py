@@ -798,6 +798,8 @@ def main():
     out.mkdir(exist_ok=True)
     (out / "graph.json").write_text(json.dumps(planner.graph_export(plan), ensure_ascii=False, indent=1) + "\n",
                                     encoding="utf-8")
+    (out / "graph_sin_diamante.json").write_text(  # the same graph without the world spheres and funders
+        json.dumps(planner.graph_export(plan, eco=plan["ecosystem_base"]), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     plan["has_3d"] = True  # the 3D view is espacio.html (built below), no longer the external graphify viewer
     plan["repo"] = repo_map()
     DASHBOARD.write_text(render(opps, changes, read_lessons(), plan), encoding="utf-8")

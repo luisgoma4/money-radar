@@ -47,7 +47,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
 #legend i.dia { border-radius: 2px; transform: rotate(45deg); width: 9px; height: 9px; }
 #legend i.sq { border-radius: 2px; }
 #legend i.hol { background: none !important; border: 1.5px dashed var(--ink-2); }
-.links { display: flex; gap: 8px; font-size: 12px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; }
 .links a, .links button { color: var(--accent); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: underline; }
 #card { top: 16px; right: 16px; width: 330px; max-height: calc(100vh - 360px); overflow-y: auto; padding: 14px; display: none; }
 #card.open { display: block; }
@@ -80,11 +80,11 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
 <canvas id="stage" aria-label="Grafo 3D del ecosistema. Arrastra para rotar, rueda para acercar, clic para enfocar un nodo."></canvas>
 <section class="panel" id="head">
   <h1>El Espacio</h1>
-  <p class="sub">Ecosistema Delfina León · el diamante Fundación · Arte · Bancos · Política · __GENERATED__</p>
+  <p class="sub">Ecosistema Delfina León · <span id="sub-world">el diamante Fundación · Arte · Bancos · Política</span> · __GENERATED__</p>
   <input id="find" type="search" placeholder="Buscar un nodo…" aria-label="Buscar un nodo" list="nodes-list">
   <datalist id="nodes-list"></datalist>
   <div id="legend"></div>
-  <div class="links"><button type="button" id="to-core">◇ Volver al diamante</button><button type="button" id="spin">⟳ Girar</button><a href="dashboard.html">← Dashboard</a></div>
+  <div class="links"><button type="button" id="to-core">◇ Volver al centro</button><button type="button" id="spin">⟳ Girar</button><button type="button" id="world" aria-pressed="true">Quitar diamante</button><a href="dashboard.html">← Dashboard</a></div>
 </section>
 <section class="panel" id="card" aria-live="polite"></section>
 <nav class="panel" id="trail" aria-label="Ruta recorrida"></nav>
@@ -98,6 +98,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   "use strict";
   const DATA = JSON.parse(document.getElementById("data").textContent);
   const EMBED = new URLSearchParams(location.search).has("embed");
+  // Two copies of the graph: with the world (diamond + funders) or without it (?world=0), as it was before.
+  let WORLD = new URLSearchParams(location.search).get("world") !== "0";
   if (EMBED) document.body.classList.add("embed");
   const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund" };
   const CORE = ["e_fund", "s_politica", "s_bancos", "s_arte"];
@@ -119,7 +121,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   // ------------------------------------------------------------------ graph model
   let G, byId, out, inn;
   function load() {
-    G = DATA.plan.ecosystem;
+    G = WORLD || !DATA.plan.ecosystem_base ? DATA.plan.ecosystem : DATA.plan.ecosystem_base;
+    $("sub-world").textContent = WORLD ? "el diamante Fundación · Arte · Bancos · Política" : "sin el diamante ni los financiadores";
+    const wb = $("world"); if (wb) { wb.textContent = WORLD ? "Quitar diamante" : "◇ Mostrar diamante"; wb.setAttribute("aria-pressed", String(WORLD)); }
     byId = {}; out = {}; inn = {};
     G.nodes.forEach((n) => { byId[n.id] = n; out[n.id] = []; inn[n.id] = []; });
     G.edges.forEach((e) => { if (byId[e.from] && byId[e.to]) { out[e.from].push(e); inn[e.to].push(e); } });
@@ -142,7 +146,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   function layout() {
     const R = 135, rand = rng(7);
     // The diamond: a regular tetrahedron, Fundación on top, the three spheres as the base.
-    const fixed = { e_fund: [0, -R, 0] };
+    const fixed = { e_fund: WORLD ? [0, -R, 0] : [0, 0, 0] };  // without the world, the Fundación is the centre
     ["s_politica", "s_bancos", "s_arte"].forEach((id, i) => {
       const a = (i / 3) * Math.PI * 2 - Math.PI / 2, r = R * Math.sqrt(8) / 3;
       fixed[id] = [r * Math.cos(a), R / 3, r * Math.sin(a)];
@@ -370,14 +374,21 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   function legend() {
     const L = [["--line-cloudy", "Cloudy"], ["--line-semf", "SEMF"], ["--line-causality", "Causality"], ["--line-branchout", "BranchOut"], ["--line-delfina", "Fundación"]];
     $("legend").replaceChildren(...L.map(([v, t]) => el("span", {}, el("i", { style: `background:var(${v})` }), t)),
-      el("span", {}, el("i", { class: "dia", style: "background:var(--world-sphere)" }), "esfera"),
-      el("span", {}, el("i", { class: "sq", style: "background:var(--world-funder)" }), "financiador"),
+      ...(WORLD ? [el("span", {}, el("i", { class: "dia", style: "background:var(--world-sphere)" }), "esfera"),
+        el("span", {}, el("i", { class: "sq", style: "background:var(--world-funder)" }), "financiador")] : []),
       el("span", {}, el("i", { style: "background:var(--muted)" }), "hito"),
       el("span", {}, el("i", { class: "hol" }), "aún no existe"));
   }
   $("find").addEventListener("change", (e) => { const q = e.target.value.toLowerCase(); const n = G.nodes.find((x) => x.label.toLowerCase() === q) || G.nodes.find((x) => x.label.toLowerCase().includes(q)); if (n) focus(n.id); e.target.value = ""; });
   $("to-core").addEventListener("click", core);
   $("spin").addEventListener("click", () => { cam.spin = !cam.spin; });
+  function setWorld(on) {
+    WORLD = !!on;
+    const u = new URL(location.href); if (WORLD) u.searchParams.delete("world"); else u.searchParams.set("world", "0");
+    history.replaceState(null, "", u);
+    const keep = focusId; load(); legend(); if (keep && byId[keep]) focus(keep); else core();
+  }
+  $("world").addEventListener("click", () => setWorld(!WORLD));
   addEventListener("keydown", (e) => { if (e.key === "Escape") core(); });
 
   load(); legend(); requestAnimationFrame(render);
@@ -394,6 +405,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     if (v.camera === "out") { cam.goal.dist = Math.min(1600, cam.goal.dist * 1.6); return; }
     if (v.camera === "spin") { cam.spin = true; return; }
     if (v.camera === "stop") { cam.spin = false; return; }
+    const want = (v.path || []).concat(v.focus && v.focus.kind === "node" ? [v.focus.id] : []);
+    if (!WORLD && want.some((i) => !byId[i] && DATA.plan.ecosystem.nodes.some((n) => n.id === i))) setWorld(true);  // a sphere or funder: show the world
     if (v.path && v.path.length) return showPath(v.path);
     const f = v.focus;
     if (!f) return v.tab && v.tab !== "graph" ? banner("Eso se ve mejor en el dashboard") : core();

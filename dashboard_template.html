@@ -456,6 +456,9 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       <div class="cal-head"><div class="seg" id="gmode-seg" role="group" aria-label="Vista del grafo">
         <button type="button" data-v="2d" aria-pressed="true">2D</button>
         <button type="button" data-v="3d" aria-pressed="false">3D</button></div>
+        <div class="seg" id="gworld-seg" role="group" aria-label="Mundo exterior en el grafo">
+        <button type="button" data-v="1" aria-pressed="true">◇ Con diamante y financiadores</button>
+        <button type="button" data-v="0" aria-pressed="false">Sin diamante</button></div>
         <span class="small" id="graph-3d"></span></div>
       <div id="graph-2d">
       <div class="chipline" id="graph-legend"></div>
@@ -1121,8 +1124,21 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
 
   // ---- ecosystem graph ----
   const NODE_FX = {}, GANTT_ROWS = {};
+  // Two copies of the graph: with the world (diamond + funders) and without it, as it was before.
+  let WORLD = store.get("gworld") !== false;
+  const graphOf = () => (WORLD || !PLAN.ecosystem_base ? PLAN.ecosystem : PLAN.ecosystem_base);
+  function setWorld(on) {
+    WORLD = !!on; store.set("gworld", WORLD);
+    document.querySelectorAll("#gworld-seg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === WORLD)));
+    const f = document.getElementById("graph3d-frame");
+    if (f && f.getAttribute("src")) f.setAttribute("src", "espacio.html?embed=1" + (WORLD ? "" : "&world=0"));
+    renderGraph();
+  }
+  document.getElementById("gworld-seg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setWorld(b.dataset.v === "1"); });
   function renderGraph() {
-    const g = PLAN.ecosystem; if (!g || !g.nodes) return;
+    const g = graphOf(); if (!g || !g.nodes) return;
+    Object.keys(NODE_FX).forEach((k) => delete NODE_FX[k]);
+    document.querySelectorAll("#gworld-seg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === WORLD)));
     const NS = "http://www.w3.org/2000/svg";
     const s = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
     const faceOrder = Object.keys(PLAN.faces);
@@ -1203,12 +1219,12 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       el("span", { class: "mini" }, "── existe"), el("span", { class: "mini" }, "- - por crear"), el("span", { class: "mini" }, "··· socio externo"),
       el("span", { class: "mini", style: "background:repeating-linear-gradient(45deg,var(--surface-2) 0 4px,var(--grid) 4px 6px)" }, "sombreado = socio por crear"),
       el("span", { class: "mini", style: "border-radius:999px" }, "( ) factor de contexto"), el("span", { class: "mini" }, "grosor = peso"),
-      el("span", { class: "tag" }, el("span", { class: "dot", style: "background:var(--world-sphere)" }), "esfera (Arte · Bancos · Política)"),
-      el("span", { class: "tag" }, el("span", { class: "dot", style: "background:var(--world-funder)" }), "financiador"));
+      ...(WORLD ? [el("span", { class: "tag" }, el("span", { class: "dot", style: "background:var(--world-sphere)" }), "esfera (Arte · Bancos · Política)"),
+        el("span", { class: "tag" }, el("span", { class: "dot", style: "background:var(--world-funder)" }), "financiador")] : []));
     const kindEs = { factor: "factor", partner: "socio", entity: "figura legal", face: "cara", product: "producto", milestone: "hito", call: "convocatoria", sphere: "esfera", funder: "financiador" };
     const k = (id) => kindEs[(g.nodes.find((n) => n.id === id) || {}).kind] || "";
     document.getElementById("graph-table").replaceChildren(
-      el("p", { class: "small" }, `${g.nodes.length} nodos y ${g.edges.length} relaciones: exactamente los mismos en 2D y en 3D.`),
+      el("p", { class: "small" }, `${g.nodes.length} nodos y ${g.edges.length} relaciones: exactamente los mismos en 2D y en 3D` + (WORLD ? ", con el diamante y los financiadores." : ", sin el diamante ni los financiadores (el grafo de antes).")),
       el("table", {},
       el("thead", {}, el("tr", {}, ["Desde (causa)", "Relación", "Hacia (efecto)", "Peso", "Estado"].map((h) => el("th", { scope: "col" }, h)))),
       el("tbody", {}, g.edges.slice().sort((a, b) => (b.weight ?? 0.5) - (a.weight ?? 0.5)).map((e) => el("tr", {},
@@ -1269,9 +1285,10 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       note.replaceChildren("Vista 3D no generada: ", el("code", {}, "python3 -I orchestrator.py grafo3d"));
     } else if (m === "3d") {
       const f = document.getElementById("graph3d-frame");
-      if (!f.getAttribute("src")) { f.addEventListener("load", syncFrameTheme); f.setAttribute("src", "espacio.html?embed=1"); }
-      note.replaceChildren("El mismo grafo en 3D: el diamante Fundación · Arte · Bancos · Política en el centro. Clic en un nodo para ver su ficha. ",
-        el("a", { href: "espacio.html", target: "espacio" }, "Abrir El Espacio (pantalla completa, con el oráculo) ↗"));
+      if (!f.getAttribute("src")) { f.addEventListener("load", syncFrameTheme); f.setAttribute("src", "espacio.html?embed=1" + (WORLD ? "" : "&world=0")); }
+      note.replaceChildren(WORLD ? "El mismo grafo en 3D: el diamante Fundación · Arte · Bancos · Política en el centro. Clic en un nodo para ver su ficha. "
+        : "El mismo grafo en 3D, sin el diamante ni los financiadores. Clic en un nodo para ver su ficha. ",
+        el("a", { href: "espacio.html" + (WORLD ? "" : "?world=0"), target: "espacio" }, "Abrir El Espacio (pantalla completa, con el oráculo) ↗"));
     } else {
       note.textContent = "Arrastra en 3D para rotar; en 2D pasa el ratón por un nodo para ver sus relaciones.";
     }
@@ -1363,6 +1380,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   }
   function mark(elm) { if (!elm) return; elm.classList.add("od-focus"); elm.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); }
   function highlightNode(id) {
+    if (!NODE_FX[id] && !WORLD && PLAN.ecosystem.nodes.some((n) => n.id === id)) setWorld(true);  // a sphere or funder: show the world
     setGraphMode("2d");
     const fx = NODE_FX[id]; if (!fx) return false;
     fx.on(); FOCUS = id; fx.grp.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" }); return true;
