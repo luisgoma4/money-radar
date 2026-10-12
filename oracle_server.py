@@ -113,6 +113,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=str(HERE), **kw)
 
+    def end_headers(self):
+        # Static pages and scripts are rebuilt often: make the browser revalidate, never reuse a stale copy.
+        if not self.path.startswith("/api/"):
+            self.send_header("Cache-Control", "no-cache")
+        super().end_headers()
+
     def log_message(self, fmt, *args):
         if "/api/" in str(args[0] if args else ""):
             sys.stderr.write("oraculo: " + (fmt % args) + "\n")
