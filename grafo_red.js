@@ -17,7 +17,8 @@
  * and its neighbours (particles travel cause -> effect); click pins the selection and opens its card; the card
  * lists causes and effects (click to follow). Faces in the legend filter. The diamond is the world figure
  * (planner.figure): an octahedron whose six vertices are the world spheres, pinned around the Fundacion at the
- * centre (in 2D seen from above: a hexagon). Our ecosystem is kept inside it; funders and calls outside. Its 12
+ * centre (in 2D seen from above: a hexagon). The spheres are the extremes: every other node is kept inside, funders
+ * leaning towards the corner of their strongest sphere. Its 12
  * edges are drawn as frame links: geometry, not causes (no card, no force, no arrow).
  */
 (function () {
@@ -84,7 +85,7 @@
     // ---- shared state ----
     let G = { nodes: [], edges: [] }, meta = {}, nbr = {}, hidden = new Set(), hover = null, sel = null, hl = new Set(), hlLinks = new Set(), route = [];
     let FIG = null;  // the world figure of the current graph, or null (graph without the diamond)
-    const R3 = 200, R2 = 320;  // vertex distance of the figure in 3D and (before projecting to a hexagon) in 2D
+    const R3 = 300, R2 = 460;  // vertex distance of the figure in 3D and (before projecting to a hexagon) in 2D
     let dim = 2, fg2 = null, fg3 = null, d2 = { nodes: [], links: [] }, d3 = { nodes: [], links: [] }, by2 = {}, by3 = {};
     const exists = (n) => !(n.status === "planned" || n.status === "proposed");
     const visible = (n) => !(n && n.face && hidden.has(n.face));
@@ -104,7 +105,7 @@
       }
       paint3();
     }
-    const radius = (n) => (n.kind === "sphere" ? 6 : n.kind === "milestone" ? 2 : 2.6) + Math.sqrt(n.deg || 0) * 1.25;
+    const radius = (n) => (n.kind === "sphere" ? 10 : n.kind === "milestone" ? 2 : 2.6) + Math.sqrt(n.deg || 0) * 1.25;
 
     // ---- 2D engine ----
     fg2 = new ForceGraph(stage2)
@@ -134,8 +135,8 @@
         ctx.globalAlpha = 1;
       })
       .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 2, 0, 2 * Math.PI); ctx.fill(); })
-      .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.2 : 0.55) : hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : alpha(C.axis, 0.7))
-      .linkWidth((l) => l.frame ? 1.1 : (hlLinks.has(key(l)) ? 1.2 : 0.4) + (l.weight ?? 0.5) * (hlLinks.has(key(l)) ? 2.6 : 1.6))
+      .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.3 : 0.85) : hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : alpha(C.axis, 0.7))
+      .linkWidth((l) => l.frame ? 2.4 : (hlLinks.has(key(l)) ? 1.2 : 0.4) + (l.weight ?? 0.5) * (hlLinks.has(key(l)) ? 2.6 : 1.6))
       .linkLineDash((l) => l.frame ? null : l.status === "planned" ? [3, 2] : null)
       .linkDirectionalArrowLength((l) => l.frame ? 0 : hlLinks.has(key(l)) ? 5 : 3).linkDirectionalArrowRelPos(1)
       .linkDirectionalArrowColor((l) => hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : C.axis)
@@ -149,7 +150,7 @@
       .cooldownTicks(260).d3VelocityDecay(0.32);
     forces(fg2, 2);
     let fitted2 = false;
-    fg2.onEngineStop(() => { if (!fitted2) { fitted2 = true; fg2.zoomToFit(500, 40, visible); } });
+    fg2.onEngineStop(() => { if (!fitted2) { fitted2 = true; fg2.zoomToFit(500, FIG ? 70 : 40, visible); } });
 
     function forces(fg, d) {
       fg.d3Force("charge").strength((n) => -40 - n.r * 14).distanceMax(420);
@@ -158,22 +159,41 @@
       fg.d3Force("collide", collide());
       fg.d3Force("figure", containment(d));
     }
-    function containment(d) {  // inside the figure: our ecosystem; outside: funders (by their sphere) and calls
-      let nodes = [];
-      const OUT = { funder: 1.08, call: 1.3 };
+    function containment(d) {  // with the octahedron, its six spheres are the extremes: every other node stays inside
+      let nodes = [], home = {};
       const force = (a) => {
         if (!FIG) return;
-        const vr = d === 3 ? R3 : R2 * Math.sqrt(2 / 3), inner = d === 3 ? R3 / Math.sqrt(3) : vr * Math.sqrt(3) / 2;
+        const R = d === 3 ? R3 : R2, V = Object.entries(FIG.vertices);
+        // 3D: inside the octahedron, |p·a1| + |p·a2| + |p·a3| <= R (a_i its three orthogonal axes).
+        // 2D: inside the hexagon it makes seen from above (apothem along the mid-directions of neighbouring vertices).
+        const axes = (FIG.top || []).map((id) => FIG.vertices[id]);
+        const P = V.map(([, v]) => [v[0] * R, v[2] * R]).sort((p, q) => Math.atan2(p[1], p[0]) - Math.atan2(q[1], q[0]));
+        const sides = P.map((p, i) => { const q = P[(i + 1) % P.length], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], h = Math.hypot(m[0], m[1]) || 1; return [m[0] / h, m[1] / h, h]; });
         for (const n of nodes) {
           if (n.pin || n.x === undefined) continue;
-          const z = d === 3 ? n.z || 0 : 0, r = Math.hypot(n.x, n.y, z) || 1;
-          const lo = OUT[n.kind] ? OUT[n.kind] * vr : 0, hi = OUT[n.kind] ? Infinity : inner * 0.82;
-          const k = r > hi ? hi / r : r < lo ? lo / r : 1;  // hard bound: projected back onto the limit
-          if (k === 1) continue;
-          n.x *= k; n.y *= k; if (d === 3) n.z = z * k;
+          const sph = home[n.id];  // funders lean towards the corner of their strongest sphere
+          if (sph) { const v = FIG.vertices[sph], k = 0.62 * R;
+            const tx = v[0] * k, ty = d === 3 ? v[1] * k : v[2] * k, tz = d === 3 ? v[2] * k : 0;
+            n.vx += (tx - n.x) * a * 0.08; n.vy += (ty - n.y) * a * 0.08; if (d === 3) n.vz += (tz - (n.z || 0)) * a * 0.08; }
+          let k = 1;
+          if (d === 3 && axes.length === 3) {
+            const s = axes.reduce((acc, v) => acc + Math.abs(n.x * v[0] + n.y * v[1] + (n.z || 0) * v[2]), 0);
+            if (s > 0.9 * R) k = 0.9 * R / s;
+          } else if (d === 2) {
+            const s = Math.max(...sides.map(([ux, uy, h]) => (n.x * ux + n.y * uy) / h));
+            if (s > 0.92) k = 0.92 / s;
+          }
+          if (k < 1) { n.x *= k; n.y *= k; if (d === 3) n.z *= k; }
         }
       };
-      force.initialize = (ns) => { nodes = ns; };
+      force.initialize = (ns) => {
+        nodes = ns; home = {};
+        if (!FIG) return;
+        (G.edges || []).forEach((e) => {
+          if (!FIG.vertices[e.from] || !meta[e.to] || meta[e.to].kind !== "funder") return;
+          if (!home[e.to] || (e.weight ?? 0) > home[e.to + "#w"]) { home[e.to] = e.from; home[e.to + "#w"] = e.weight ?? 0; }
+        });
+      };
       return force;
     }
     function collide() {  // tiny collision force (no d3 import): keeps nodes and their labels from piling up
@@ -214,8 +234,8 @@
       if (!fg3) return;
       const lit = (l) => hlLinks.has(key(l));
       fg3.nodeColor((n) => { const c = colorOf(n), base = exists(n) && !n.pending ? 1 : 0.32; return alpha(c, hl.size && !hl.has(n.id) ? base * 0.15 : base); })
-        .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.25 : 0.7) : lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : l.status === "planned" ? 0.35 : 0.7))
-        .linkWidth((l) => l.frame ? 1.2 : lit(l) ? 0.6 + (l.weight ?? 0.5) * 1.6 : 0)
+        .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.35 : 0.9) : lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : l.status === "planned" ? 0.35 : 0.7))
+        .linkWidth((l) => l.frame ? 2.6 : lit(l) ? 0.6 + (l.weight ?? 0.5) * 1.6 : 0)
         .linkDirectionalArrowLength((l) => l.frame ? 0 : lit(l) ? 5 : 2.5)
         .linkDirectionalArrowColor((l) => lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : 0.7))
         .linkDirectionalParticles((l) => lit(l) ? 2 : 0).linkDirectionalParticleColor(() => C.accent)
@@ -270,7 +290,7 @@
       if (dim === 3) { fg2.pauseAnimation(); fg3.resumeAnimation(); paint3(); requestAnimationFrame(drawLabels); }
       else { if (fg3) fg3.pauseAnimation(); fg2.resumeAnimation(); }
       resize();
-      if (route.length) frame(route); else if (sel) fly(sel); else active().zoomToFit(500, 40, visible);
+      if (route.length) frame(route); else if (sel) fly(sel); else active().zoomToFit(500, FIG ? 70 : 40, visible);
       if (opts.onDim) opts.onDim(dim);
       return true;
     }
@@ -296,7 +316,7 @@
     const onFull = () => {
       const on = isFull();
       wrap.classList.toggle("full", on); btnFull.setAttribute("aria-pressed", String(on));
-      btnFull.title = on ? "Salir de pantalla completa" : "Pantalla completa"; setTimeout(() => { resize(); active().zoomToFit(400, 50, visible); }, 120);
+      btnFull.title = on ? "Salir de pantalla completa" : "Pantalla completa"; setTimeout(() => { resize(); active().zoomToFit(400, FIG ? 70 : 50, visible); }, 120);
     };
     document.addEventListener("fullscreenchange", onFull); document.addEventListener("webkitfullscreenchange", onFull);
     btnFull.addEventListener("click", toggleFull);
@@ -316,7 +336,7 @@
       fg3.cameraPosition({ x: n.x * r, y: n.y * r, z: n.z * r }, { x: n.x, y: n.y, z: n.z }, 900);
     }
     function frame(ids) { const set = new Set(ids); active().zoomToFit(700, 80, (n) => set.has(n.id)); }
-    function fit() { if (!route.length) clear(); active().zoomToFit(500, 40, visible); }
+    function fit() { if (!route.length) clear(); active().zoomToFit(500, FIG ? 70 : 40, visible); }
     function camera(c) {
       if (dim === 2) {
         if (c === "in" || c === "out") fg2.zoom(fg2.zoom() * (c === "in" ? 1.6 : 1 / 1.6), 500);
@@ -345,7 +365,7 @@
       else if (f.hide) f.hide.forEach((x) => hidden.add(x));
       if (f && f.show) f.show.forEach((x) => hidden.delete(x));
       if (sel && meta[sel] && !visible(meta[sel])) clear();
-      renderLegend(); applyVisibility(); setTimeout(() => active().zoomToFit(500, 40, visible), 50);
+      renderLegend(); applyVisibility(); setTimeout(() => active().zoomToFit(500, FIG ? 70 : 40, visible), 50);
     }
 
     // ---- selection and card ----

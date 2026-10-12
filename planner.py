@@ -295,7 +295,8 @@ def figure(strategy, ids):
         return None
     keys = list(verts)
     frame = [[a, b] for i, a in enumerate(keys) for b in keys[i + 1:] if opposite.get(a) != b]
-    return {"shape": fig.get("shape", "octaedro"), "centre": fig.get("centre"), "vertices": verts, "frame": frame}
+    return {"shape": fig.get("shape", "octaedro"), "centre": fig.get("centre"), "vertices": verts, "frame": frame,
+            "top": [k for k in top if k in verts]}  # one vertex per axis: the three axes of the octahedron
 
 
 def without_world(strategy):

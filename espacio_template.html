@@ -146,24 +146,32 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   // ------------------------------------------------------------------ deterministic 3D layout
   function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function layout() {
-    // The world figure (planner.figure): an octahedron with the six spheres on its vertices and the Fundación at
-    // the centre. Our ecosystem lives inside it; funders sit just outside their sphere and the calls on the outer shell.
-    const RV = 280, rand = rng(7), fig = G.figure;
+    // With the world, the figure (planner.figure) frames everything: an octahedron whose six vertices (the spheres)
+    // are the extremes of the graph, the Fundación at the centre, every other node inside. Without it, the old shells.
+    const RV = 360, rand = rng(7), fig = G.figure;
     const fixed = { e_fund: [0, 0, 0] };
     if (fig) Object.entries(fig.vertices).forEach(([id, v]) => { fixed[id] = [v[0] * RV, -v[1] * RV, v[2] * RV]; });  // screen y points down
-    const shell = { entity: 50, face: 75, factor: 95, partner: 105, product: 115, milestone: 125, funder: 330, call: 400 };
-    // hard bounds: our nodes inside the sphere inscribed in the octahedron, funders and calls beyond its vertices
-    const inside = fig ? 0.85 * RV / Math.sqrt(3) : Infinity, beyond = { funder: fig ? 1.1 * RV : 0, call: fig ? 1.3 * RV : 0 };
+    const shell = fig ? { entity: 45, face: 70, factor: 90, partner: 100, product: 115, milestone: 130, call: 175 }
+      : { entity: 150, face: 175, product: 220, partner: 200, factor: 190, funder: 250, milestone: 280, call: 330 };
+    // Inside a regular octahedron: |p·a1| + |p·a2| + |p·a3| <= R, with a_i the three (orthogonal) vertex axes.
+    const axes = fig ? fig.top.filter((id) => fixed[id]).map((id) => fixed[id].map((c) => c / RV)) : [];
+    const LIM = 0.9 * RV;
+    const contain = (n) => {
+      if (axes.length !== 3) return;
+      const s = axes.reduce((acc, a) => acc + Math.abs(n.x * a[0] + n.y * a[1] + n.z * a[2]), 0);
+      if (s > LIM) { const k = LIM / s; n.x *= k; n.y *= k; n.z *= k; }
+    };
     G.nodes.forEach((n) => {
       if (fixed[n.id]) { [n.x, n.y, n.z] = fixed[n.id]; n.fixed = true; return; }
-      n.fixed = false;
+      n.fixed = false; n.anchor = null;
       let anchor = [0, 0, 0];
-      if (n.kind === "funder") {  // next to its strongest sphere
+      if (n.kind === "funder") {  // towards its strongest sphere: inside that corner with the octahedron, beyond it without
         const s = inn[n.id].filter((e) => byId[e.from] && byId[e.from].kind === "sphere").sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0))[0];
-        if (s && fixed[s.from]) anchor = fixed[s.from].map((v) => v * 1.3);
+        if (s && fixed[s.from]) { anchor = fixed[s.from].map((v) => v * (fig ? 0.62 : 1.9)); if (fig) n.anchor = anchor; }
       }
-      const u = rand() * 2 - 1, th = rand() * Math.PI * 2, r = (shell[n.kind] || 100) * (0.8 + rand() * 0.25), s = Math.sqrt(1 - u * u);
-      n.x = anchor[0] * 0.6 + r * s * Math.cos(th); n.y = anchor[1] * 0.6 + r * u; n.z = anchor[2] * 0.6 + r * s * Math.sin(th);
+      const u = rand() * 2 - 1, th = rand() * Math.PI * 2, r = (n.anchor ? 40 : shell[n.kind] || 100) * (0.8 + rand() * 0.25), s = Math.sqrt(1 - u * u);
+      const f = n.anchor ? 1 : 0.6;
+      n.x = anchor[0] * f + r * s * Math.cos(th); n.y = anchor[1] * f + r * u; n.z = anchor[2] * f + r * s * Math.sin(th);
     });
     const N = G.nodes, E = G.edges.filter((e) => byId[e.from] && byId[e.to]);
     for (let it = 0; it < 260; it++) {
@@ -188,13 +196,15 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
       });
       N.forEach((n) => {
         if (n.fixed) return;
-        const sh = shell[n.kind] || 100, d = Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + 0.01, pull = (d - sh) * 0.04;
-        n.vx -= n.x / d * pull; n.vy -= n.y / d * pull; n.vz -= n.z / d * pull;
+        if (n.anchor) {  // funders: pulled to their corner
+          n.vx += (n.anchor[0] - n.x) * 0.05; n.vy += (n.anchor[1] - n.y) * 0.05; n.vz += (n.anchor[2] - n.z) * 0.05;
+        } else {
+          const sh = shell[n.kind] || 100, d = Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + 0.01, pull = (d - sh) * (fig ? 0.04 : 0.02);
+          n.vx -= n.x / d * pull; n.vy -= n.y / d * pull; n.vz -= n.z / d * pull;
+        }
         const cap = 12 * cool + 1;
         n.x += Math.max(-cap, Math.min(cap, n.vx)); n.y += Math.max(-cap, Math.min(cap, n.vy)); n.z += Math.max(-cap, Math.min(cap, n.vz));
-        const r = Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + 0.01, lo = beyond[n.kind] || 0, hi = n.kind in beyond ? Infinity : inside;
-        const k = r > hi ? hi / r : r < lo ? lo / r : 1;
-        n.x *= k; n.y *= k; n.z *= k;
+        contain(n);
       });
     }
   }
@@ -204,7 +214,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   let W, H, DPR;
   function resize() { DPR = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = W + "px"; canvas.style.height = H + "px"; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
   addEventListener("resize", resize); resize();
-  const cam = { yaw: 0.5, pitch: -0.25, dist: 800, tx: 0, ty: 0, tz: 0, goal: { x: 0, y: 0, z: 0, dist: 700 }, spin: !EMBED };
+  const cam = { yaw: 0.5, pitch: -0.25, dist: 1000, tx: 0, ty: 0, tz: 0, goal: { x: 0, y: 0, z: 0, dist: WORLD ? 900 : 700 }, spin: !EMBED };
   const focal = 700;
   let focusId = null, hoverId = null, path = [], pathT = 0, trail = [];
   function project(n) {
@@ -257,13 +267,13 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     if (fig) {
       const V = Object.keys(fig.vertices), framed = new Set(fig.frame.map(([a, b]) => a + "|" + b));
       const adj = (a, b) => framed.has(a + "|" + b) || framed.has(b + "|" + a);
-      ctx.fillStyle = sph; ctx.globalAlpha = 0.035;
+      ctx.fillStyle = sph; ctx.globalAlpha = 0.06;
       for (let i = 0; i < V.length; i++) for (let j = i + 1; j < V.length; j++) for (let k = j + 1; k < V.length; k++) {
         if (!adj(V[i], V[j]) || !adj(V[j], V[k]) || !adj(V[i], V[k])) continue;
         const a = P[V[i]], b = P[V[j]], c = P[V[k]]; if (!a || !b || !c) continue;
         ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.lineTo(c.sx, c.sy); ctx.closePath(); ctx.fill();
       }
-      ctx.globalAlpha = 0.45; ctx.strokeStyle = sph; ctx.lineWidth = 1.2;
+      ctx.globalAlpha = 0.8; ctx.strokeStyle = sph; ctx.lineWidth = 2.2;
       fig.frame.forEach(([x, y]) => { const a = P[x], b = P[y]; if (!a || !b) return; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); });
     }
     // causal relations inside the core (sphere -> sphere, sphere -> Fundación): highlighted over the other edges
@@ -352,7 +362,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     renderCard(); renderTrail();
     return true;
   }
-  function core() { focusId = null; path = []; cam.goal = { x: 0, y: 0, z: 0, dist: 700 }; $("card").classList.remove("open"); renderTrail(); }
+  function core() { focusId = null; path = []; cam.goal = { x: 0, y: 0, z: 0, dist: G.figure ? 900 : 700 }; $("card").classList.remove("open"); renderTrail(); }
   function showPath(ids) {
     ids = ids.filter((i) => byId[i]); if (!ids.length) return;
     path = ids; pathT = 0; focusId = ids[ids.length - 1];
