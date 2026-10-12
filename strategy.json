@@ -2247,18 +2247,18 @@
       }
     ],
     "figure": {
-      "_doc": "Figura del mundo: un octaedro regular con las seis esferas por parejas opuestas en los extremos de tres ejes ortogonales del espacio (top[i] y bottom[i] son los dos extremos del eje i: 0 vertical, 1 horizontal, 2 profundidad), lo más separadas posible, con la Fundación en el centro. El ecosistema se dibuja como sin el mundo y el octaedro lo envuelve. Las 12 aristas y los 3 ejes son geometría, no causas: las relaciones causales entre esferas van en edges y forman un DAG.",
+      "_doc": "Figura del mundo: un octaedro regular con las seis esferas por parejas opuestas en los extremos de tres ejes ortogonales (top[i] y bottom[i] son los dos extremos del eje i: 0 vertical, 1 horizontal, 2 profundidad), con la Fundación en el centro. Parejas elegidas por análisis (espectral, perfil causal de Wright y atributos de las convocatorias, 12/10/2026): Tecnología ↔ Sociedad = mercado/lucro ↔ bien común (eje dominante); Bancos ↔ Ciencia = capital retornable ↔ conocimiento; Política ↔ Arte = administración ↔ cultura y filantropía (el más débil: Política es causa común de casi todo). El ecosistema se dibuja como sin el mundo y el octaedro lo envuelve. Las 12 aristas y los 3 ejes son geometría, no causas.",
       "shape": "octaedro",
       "centre": "e_fund",
       "top": [
-        "s_politica",
+        "s_tecnologia",
         "s_bancos",
-        "s_arte"
+        "s_politica"
       ],
       "bottom": [
         "s_sociedad",
         "s_ciencia",
-        "s_tecnologia"
+        "s_arte"
       ]
     }
   },

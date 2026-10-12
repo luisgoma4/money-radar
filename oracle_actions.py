@@ -562,7 +562,7 @@ def intent(text, ctx, st):
         return _reply("Abro el Espacio en 3D.", view={"page": "espacio", "focus": {"kind": "core"}},
                       options=[{"label": "Abrir el Espacio 3D", "view": {"page": "espacio", "focus": {"kind": "core"}}}])
     if re.fullmatch(r"(vuelve|volver|ve|llevame) (al|a el) (diamante|centro|nucleo|principio)|vista general|el diamante", t):
-        return _reply("El diamante: un octaedro con las esferas por parejas en los extremos de tres ejes: Política arriba y Sociedad abajo, Bancos frente a Ciencia, Arte frente a Tecnología. La Fundación en el centro y todo el ecosistema dentro.", view={"focus": {"kind": "core"}},
+        return _reply("El diamante: un octaedro con las esferas por parejas en los extremos de tres ejes: Tecnología arriba y Sociedad abajo, mercado frente a bien común; Bancos frente a Ciencia, capital frente a conocimiento; Política frente a Arte, administración frente a cultura. La Fundación en el centro y todo el ecosistema dentro.", view={"focus": {"kind": "core"}},
                       options=[{"label": "Ir a Política", "utterance": "ve a política"}, {"label": "Ir a Bancos", "utterance": "ve a bancos"},
                                {"label": "Ir a Arte", "utterance": "ve a arte"}, {"label": "Ir a la Fundación", "utterance": "ve a la fundación"}])
     cam = {"acercate": "in", "mas cerca": "in", "zoom": "in", "alejate": "out", "mas lejos": "out", "gira": "spin", "rota": "spin",
