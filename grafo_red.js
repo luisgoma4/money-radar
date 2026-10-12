@@ -16,9 +16,9 @@
  * Interaction: drag nodes, wheel/pinch zoom, drag the background to pan (2D) or orbit (3D). Hover lights a node
  * and its neighbours (particles travel cause -> effect); click pins the selection and opens its card; the card
  * lists causes and effects (click to follow). Faces in the legend filter. The diamond is the world figure
- * (planner.figure): an octahedron whose six vertices are the world spheres, pinned around the Fundacion at the
- * centre (in 2D seen from above: a hexagon). The spheres are the extremes: every other node is kept inside, funders
- * leaning towards the corner of their strongest sphere. Its 12
+ * (planner.figure): a regular octahedron whose six vertices are the world spheres (in 2D seen from above: a
+ * hexagon). Our graph lays out exactly as without the world (world nodes exert no force on it) and the octahedron
+ * is placed around it, sized so that it wraps it; funders sit between the graph and their strongest sphere. Its 12
  * edges are drawn as frame links: geometry, not causes (no card, no force, no arrow).
  */
 (function () {
@@ -85,7 +85,7 @@
     // ---- shared state ----
     let G = { nodes: [], edges: [] }, meta = {}, nbr = {}, hidden = new Set(), hover = null, sel = null, hl = new Set(), hlLinks = new Set(), route = [];
     let FIG = null;  // the world figure of the current graph, or null (graph without the diamond)
-    const R3 = 300, R2 = 460;  // vertex distance of the figure in 3D and (before projecting to a hexagon) in 2D
+    const isWorld = (n) => n.kind === "sphere" || n.kind === "funder";
     let dim = 2, fg2 = null, fg3 = null, d2 = { nodes: [], links: [] }, d3 = { nodes: [], links: [] }, by2 = {}, by3 = {};
     const exists = (n) => !(n.status === "planned" || n.status === "proposed");
     const visible = (n) => !(n && n.face && hidden.has(n.face));
@@ -147,51 +147,83 @@
       .onBackgroundClick(() => clear())
       .onNodeDragEnd((n) => { if (!n.pin) { n.fx = undefined; n.fy = undefined; } })  // released nodes float back, as in Obsidian
       .autoPauseRedraw(false)  // hover light and particles need frames after the layout settles
-      .cooldownTicks(260).d3VelocityDecay(0.32);
+      .warmupTicks(160).cooldownTicks(260).d3VelocityDecay(0.32);  // warm-up: the graph appears settled
     forces(fg2, 2);
     let fitted2 = false;
     fg2.onEngineStop(() => { if (!fitted2) { fitted2 = true; fg2.zoomToFit(500, FIG ? 70 : 40, visible); } });
 
     function forces(fg, d) {
-      fg.d3Force("charge").strength((n) => -40 - n.r * 14).distanceMax(420);
+      // World nodes (spheres, funders) neither push nor pull ours: our graph lays out as it does without the world,
+      // and the figure is placed around it.
+      const free = (l) => !(l.frame || (FIG && (isWorld(l.source) || isWorld(l.target))));
+      fg.d3Force("charge").strength((n) => FIG && isWorld(n) ? 0 : -40 - n.r * 14).distanceMax(420);
       fg.d3Force("link").distance((l) => 26 + (1 - (l.weight ?? 0.5)) * 46 + (l.source.r || 5) + (l.target.r || 5))
-        .strength((l) => l.frame || l.source.kind === "sphere" || l.target.kind === "sphere" ? 0 : 0.15 + (l.weight ?? 0.5) * 0.5);
+        .strength((l) => free(l) ? 0.15 + (l.weight ?? 0.5) * 0.5 : 0);
       fg.d3Force("collide", collide());
-      fg.d3Force("figure", containment(d));
+      // The engine's own centring averages ALL nodes, the octahedron included, which then follows that centre: a
+      // feedback loop that drifts the graph away. Our centring uses only our graph; the figure is placed around it.
+      fg.d3Force("center", null);
+      fg.d3Force("figure", figureAround(d));
     }
-    function containment(d) {  // with the octahedron, its six spheres are the extremes: every other node stays inside
-      let nodes = [], home = {};
-      const force = (a) => {
+    function figureAround(d) {
+      // The octahedron around our graph: centred on it, regular (all 12 edges equal), just big enough for the
+      // inscribed sphere (3D) or the hexagon's inner circle (2D) to wrap it. Funders sit between the graph and
+      // their strongest sphere, on a small ring. Recomputed each tick, smoothed, so it follows the layout.
+      let nodes = [], inner = [], spheres = [], groups = {}, Rs = 0, axes = [], normals = [];
+      const ring = {};
+      const force = () => {
+        if (!inner.length) return;
+        let cx = 0, cy = 0, cz = 0;
+        inner.forEach((n) => { cx += n.x; cy += n.y; cz += n.z || 0; });
+        cx /= inner.length; cy /= inner.length; cz /= inner.length;
+        inner.forEach((n) => { n.x -= cx; n.y -= cy; if (d === 3) n.z = (n.z || 0) - cz; });  // centre our graph on 0
+        cx = cy = cz = 0;
         if (!FIG) return;
-        const R = d === 3 ? R3 : R2, V = Object.entries(FIG.vertices);
-        // 3D: inside the octahedron, |p·a1| + |p·a2| + |p·a3| <= R (a_i its three orthogonal axes).
-        // 2D: inside the hexagon it makes seen from above (apothem along the mid-directions of neighbouring vertices).
-        const axes = (FIG.top || []).map((id) => FIG.vertices[id]);
-        const P = V.map(([, v]) => [v[0] * R, v[2] * R]).sort((p, q) => Math.atan2(p[1], p[0]) - Math.atan2(q[1], q[0]));
-        const sides = P.map((p, i) => { const q = P[(i + 1) % P.length], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], h = Math.hypot(m[0], m[1]) || 1; return [m[0] / h, m[1] / h, h]; });
-        for (const n of nodes) {
-          if (n.pin || n.x === undefined) continue;
-          const sph = home[n.id];  // funders lean towards the corner of their strongest sphere
-          if (sph) { const v = FIG.vertices[sph], k = 0.62 * R;
-            const tx = v[0] * k, ty = d === 3 ? v[1] * k : v[2] * k, tz = d === 3 ? v[2] * k : 0;
-            n.vx += (tx - n.x) * a * 0.08; n.vy += (ty - n.y) * a * 0.08; if (d === 3) n.vz += (tz - (n.z || 0)) * a * 0.08; }
-          let k = 1;
-          if (d === 3 && axes.length === 3) {
-            const s = axes.reduce((acc, v) => acc + Math.abs(n.x * v[0] + n.y * v[1] + (n.z || 0) * v[2]), 0);
-            if (s > 0.9 * R) k = 0.9 * R / s;
-          } else if (d === 2) {
-            const s = Math.max(...sides.map(([ux, uy, h]) => (n.x * ux + n.y * uy) / h));
-            if (s > 0.92) k = 0.92 / s;
-          }
-          if (k < 1) { n.x *= k; n.y *= k; if (d === 3) n.z *= k; }
-        }
+        // The smallest regular figure that holds every node, plus a margin. 3D: a point p is inside the octahedron of
+        // vertex distance R when |p·a1| + |p·a2| + |p·a3| <= R (a_i its three axes). 2D: inside the hexagon of
+        // apothem R/√2 (the vertices project at R·√(2/3)) when p·u <= R/√2 for its six side normals u.
+        let m = 0;
+        inner.forEach((n) => {
+          const x = n.x, y = n.y, z = n.z || 0, pad = n.r + 6;
+          m = Math.max(m, d === 3 ? axes.reduce((s, a) => s + Math.abs(x * a[0] + y * a[1] + z * a[2]), 0) + pad * 1.7
+            : Math.SQRT2 * (Math.max(...normals.map((u) => x * u[0] + y * u[1])) + pad));
+        });
+        const R = 1.08 * m;
+        Rs = Rs ? Rs + (R - Rs) * 0.25 : R;
+        const at = (v, k) => d === 3 ? [cx + v[0] * Rs * k, cy + v[1] * Rs * k, cz + v[2] * Rs * k] : [cx + v[0] * Rs * k, cy + v[2] * Rs * k, 0];
+        const put = (n, p) => { n.x = n.fx = p[0]; n.y = n.fy = p[1]; n.vx = n.vy = 0; if (d === 3) { n.z = n.fz = p[2]; n.vz = 0; } };
+        spheres.forEach((n) => put(n, at(FIG.vertices[n.id], 1)));
+        Object.entries(groups).forEach(([sid, fs]) => {
+          const v = FIG.vertices[sid], c = at(v, 0.72), r = fs.length > 1 ? 0.1 * Rs : 0;
+          fs.forEach((n, i) => {
+            const a = (2 * Math.PI * i) / fs.length, o = ring[sid];
+            put(n, d === 3 ? [c[0] + (o[0][0] * Math.cos(a) + o[1][0] * Math.sin(a)) * r, c[1] + (o[0][1] * Math.cos(a) + o[1][1] * Math.sin(a)) * r,
+              c[2] + (o[0][2] * Math.cos(a) + o[1][2] * Math.sin(a)) * r] : [c[0] + Math.cos(a) * r, c[1] + Math.sin(a) * r, 0]);
+          });
+        });
       };
       force.initialize = (ns) => {
-        nodes = ns; home = {};
+        nodes = ns; Rs = 0;
+        inner = ns.filter((n) => !(FIG && isWorld(n)));
+        if (FIG) {
+          axes = (FIG.top || []).map((id) => FIG.vertices[id]);
+          const P = Object.values(FIG.vertices).map((v) => Math.atan2(v[2], v[0])).sort((a, b) => a - b);
+          normals = P.map((a, i) => { const b = i + 1 < P.length ? P[i + 1] : P[0] + 2 * Math.PI, c = (a + b) / 2; return [Math.cos(c), Math.sin(c)]; });
+        }
+        spheres = FIG ? ns.filter((n) => FIG.vertices[n.id]) : [];
+        groups = {};
         if (!FIG) return;
-        (G.edges || []).forEach((e) => {
+        const best = {};
+        (G.edges || []).forEach((e) => {  // each funder goes to its strongest sphere
           if (!FIG.vertices[e.from] || !meta[e.to] || meta[e.to].kind !== "funder") return;
-          if (!home[e.to] || (e.weight ?? 0) > home[e.to + "#w"]) { home[e.to] = e.from; home[e.to + "#w"] = e.weight ?? 0; }
+          if (!best[e.to] || (e.weight ?? 0) > best[e.to][1]) best[e.to] = [e.from, e.weight ?? 0];
+        });
+        ns.filter((n) => n.kind === "funder" && best[n.id]).forEach((n) => { (groups[best[n.id][0]] = groups[best[n.id][0]] || []).push(n); });
+        const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+        const unit = (a) => { const l = Math.hypot(...a) || 1; return a.map((x) => x / l); };
+        Object.keys(groups).forEach((sid) => {
+          const c = FIG.vertices[sid], u = unit(cross(c, Math.abs(c[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]));
+          ring[sid] = [u, cross(c, u)];
         });
       };
       return force;
@@ -201,6 +233,7 @@
       const force = (a) => {
         for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
           const p = nodes[i], q = nodes[j], dx = q.x - p.x, dy = q.y - p.y, dz = (q.z || 0) - (p.z || 0);
+          if (FIG && (isWorld(p) || isWorld(q))) continue;
           const d = Math.hypot(dx, dy, dz) || 1, min = p.r + q.r + 6;
           if (d < min) { const m = ((min - d) / d) * a * 0.5; p.vx -= dx * m; p.vy -= dy * m; q.vx += dx * m; q.vy += dy * m;
             if (p.vz !== undefined) { p.vz -= dz * m; q.vz += dz * m; } }
@@ -225,7 +258,7 @@
         .onNodeClick((n) => select(n.id, false))
         .onBackgroundClick(() => clear())
         .onNodeDragEnd((n) => { if (!n.pin) { n.fx = n.fy = n.fz = undefined; } })
-        .cooldownTicks(300).d3VelocityDecay(0.3);
+        .warmupTicks(160).cooldownTicks(300).d3VelocityDecay(0.3);
       forces(fg3, 3);
       fg3.onEngineStop(() => { if (!fitted3) { fitted3 = true; fg3.zoomToFit(600, 30, visible); } });
       paint3();
@@ -261,17 +294,10 @@
         ctx.fillStyle = C.ink; ctx.fillText(txt, p.x, p.y + 9);
       }
     }
-    function pinFigure(nodes, d) {  // the octahedron: spheres on its vertices, the Fundacion at the centre
-      nodes.forEach((n) => { if (n.pin) { n.fx = n.fy = n.fz = undefined; } n.pin = false; });
-      if (!FIG) return;
-      const at = { [FIG.centre || "e_fund"]: [0, 0, 0] };
-      Object.entries(FIG.vertices).forEach(([id, v]) => {  // 2D: seen from above, the six vertices form a hexagon
-        at[id] = d === 3 ? [v[0] * R3, v[1] * R3, v[2] * R3] : [v[0] * R2, v[2] * R2, 0];
-      });
+    function pinFigure(nodes) {  // spheres and funders are placed by the figure force (not draggable away)
       nodes.forEach((n) => {
-        const p = at[n.id]; if (!p) return;
-        n.x = n.fx = p[0]; n.y = n.fy = p[1]; if (d === 3) n.z = n.fz = p[2];
-        n.pin = true;
+        if (n.pin) { n.fx = n.fy = n.fz = undefined; }
+        n.pin = !!(FIG && isWorld(n));
       });
     }
 
@@ -420,7 +446,7 @@
     function build3() {
       if (!fg3) return;
       const c = copy(d3); d3 = c.data; by3 = c.by; fitted3 = c.kept;
-      pinFigure(d3.nodes, 3);
+      pinFigure(d3.nodes);
       fg3.graphData(d3); paint3();
     }
     function setData(g) {
@@ -435,8 +461,9 @@
       edges.forEach((e) => { (nbr[e.from] = nbr[e.from] || []).push([e.to, e]); (nbr[e.to] = nbr[e.to] || []).push([e.from, e]); });
       list.replaceChildren(...G.nodes.map((n) => el("option", { value: n.label })));
       const c = copy(d2); d2 = c.data; by2 = c.by; fitted2 = c.kept;
-      pinFigure(d2.nodes, 2);
+      pinFigure(d2.nodes);
       fg2.graphData(d2);
+      if (!fitted2) setTimeout(() => fg2.zoomToFit(0, FIG ? 70 : 40, visible), 0);  // the warm-up already settled it
       build3();
       route = route.filter((i) => meta[i]);
       if (sel && !meta[sel]) clear(); else if (route.length) { lightRoute(); renderCard(meta[sel]); } else if (sel) { lightUp(sel); renderCard(meta[sel]); }

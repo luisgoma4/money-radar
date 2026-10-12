@@ -145,35 +145,22 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
 
   // ------------------------------------------------------------------ deterministic 3D layout
   function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  let VIEW_DIST = 700;  // camera distance that frames the whole graph (bigger with the octahedron around it)
   function layout() {
-    // With the world, the figure (planner.figure) frames everything: an octahedron whose six vertices (the spheres)
-    // are the extremes of the graph, the Fundación at the centre, every other node inside. Without it, the old shells.
-    const RV = 360, rand = rng(7), fig = G.figure;
-    const fixed = { e_fund: [0, 0, 0] };
-    if (fig) Object.entries(fig.vertices).forEach(([id, v]) => { fixed[id] = [v[0] * RV, -v[1] * RV, v[2] * RV]; });  // screen y points down
-    const shell = fig ? { entity: 45, face: 70, factor: 90, partner: 100, product: 115, milestone: 130, call: 175 }
-      : { entity: 150, face: 175, product: 220, partner: 200, factor: 190, funder: 250, milestone: 280, call: 330 };
-    // Inside a regular octahedron: |p·a1| + |p·a2| + |p·a3| <= R, with a_i the three (orthogonal) vertex axes.
-    const axes = fig ? fig.top.filter((id) => fixed[id]).map((id) => fixed[id].map((c) => c / RV)) : [];
-    const LIM = 0.9 * RV;
-    const contain = (n) => {
-      if (axes.length !== 3) return;
-      const s = axes.reduce((acc, a) => acc + Math.abs(n.x * a[0] + n.y * a[1] + n.z * a[2]), 0);
-      if (s > LIM) { const k = LIM / s; n.x *= k; n.y *= k; n.z *= k; }
-    };
-    G.nodes.forEach((n) => {
-      if (fixed[n.id]) { [n.x, n.y, n.z] = fixed[n.id]; n.fixed = true; return; }
-      n.fixed = false; n.anchor = null;
-      let anchor = [0, 0, 0];
-      if (n.kind === "funder") {  // towards its strongest sphere: inside that corner with the octahedron, beyond it without
-        const s = inn[n.id].filter((e) => byId[e.from] && byId[e.from].kind === "sphere").sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0))[0];
-        if (s && fixed[s.from]) { anchor = fixed[s.from].map((v) => v * (fig ? 0.62 : 1.9)); if (fig) n.anchor = anchor; }
-      }
-      const u = rand() * 2 - 1, th = rand() * Math.PI * 2, r = (n.anchor ? 40 : shell[n.kind] || 100) * (0.8 + rand() * 0.25), s = Math.sqrt(1 - u * u);
-      const f = n.anchor ? 1 : 0.6;
-      n.x = anchor[0] * f + r * s * Math.cos(th); n.y = anchor[1] * f + r * u; n.z = anchor[2] * f + r * s * Math.sin(th);
+    // Our graph is laid out exactly as without the world: same seed, nodes, edges and forces, the Fundación at the
+    // centre. With the world, the octahedron (planner.figure) is then built AROUND it: regular (its 12 edges equal),
+    // centred on the Fundación and just big enough for its inscribed sphere to wrap the graph. Funders sit between
+    // the graph and their strongest sphere. World nodes never push or pull our nodes.
+    const rand = rng(7), fig = G.figure, isWorld = (n) => n.kind === "sphere" || n.kind === "funder";
+    const N = G.nodes.filter((n) => !isWorld(n)), inBase = new Set(N.map((n) => n.id));
+    const E = G.edges.filter((e) => inBase.has(e.from) && inBase.has(e.to));
+    const shell = { entity: 150, face: 175, product: 220, partner: 200, factor: 190, milestone: 280, call: 330 };
+    G.nodes.forEach((n) => { n.fixed = false; });
+    N.forEach((n) => {
+      if (n.id === "e_fund") { n.x = n.y = n.z = 0; n.fixed = true; return; }
+      const u = rand() * 2 - 1, th = rand() * Math.PI * 2, r = (shell[n.kind] || 180) * (0.85 + rand() * 0.3), s = Math.sqrt(1 - u * u);
+      n.x = r * s * Math.cos(th); n.y = r * u; n.z = r * s * Math.sin(th);
     });
-    const N = G.nodes, E = G.edges.filter((e) => byId[e.from] && byId[e.to]);
     for (let it = 0; it < 260; it++) {
       const cool = 1 - it / 260;
       N.forEach((n) => { n.vx = 0; n.vy = 0; n.vz = 0; });
@@ -187,7 +174,6 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
       }
       E.forEach((e) => {
         const a = byId[e.from], b = byId[e.to];
-        if (a.kind === "sphere" || b.kind === "sphere") return;  // the vertices are far by design: no spring to them
         const rest = (a.kind === "call" || b.kind === "call") ? 95 : 70;
         let dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z; const d = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.01;
         const f = (d - rest) * 0.012 * (0.4 + (e.weight ?? 0.5));
@@ -196,17 +182,40 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
       });
       N.forEach((n) => {
         if (n.fixed) return;
-        if (n.anchor) {  // funders: pulled to their corner
-          n.vx += (n.anchor[0] - n.x) * 0.05; n.vy += (n.anchor[1] - n.y) * 0.05; n.vz += (n.anchor[2] - n.z) * 0.05;
-        } else {
-          const sh = shell[n.kind] || 100, d = Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + 0.01, pull = (d - sh) * (fig ? 0.04 : 0.02);
-          n.vx -= n.x / d * pull; n.vy -= n.y / d * pull; n.vz -= n.z / d * pull;
-        }
+        const sh = shell[n.kind] || 180, d = Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + 0.01, pull = (d - sh) * 0.02;
+        n.vx -= n.x / d * pull; n.vy -= n.y / d * pull; n.vz -= n.z / d * pull;
         const cap = 12 * cool + 1;
         n.x += Math.max(-cap, Math.min(cap, n.vx)); n.y += Math.max(-cap, Math.min(cap, n.vy)); n.z += Math.max(-cap, Math.min(cap, n.vz));
-        contain(n);
       });
     }
+    let m = 0; N.forEach((n) => { m = Math.max(m, Math.sqrt(n.x * n.x + n.y * n.y + n.z * n.z) + radiusOf(n)); });
+    VIEW_DIST = Math.max(700, m * 2);
+    if (!fig) return;
+    const V = {};
+    Object.entries(fig.vertices).forEach(([id, v]) => { V[id] = [v[0], -v[1], v[2]]; });  // screen y points down
+    // The smallest regular octahedron that holds every node (+8%): p is inside when |p·a1| + |p·a2| + |p·a3| <= R.
+    const axes = (fig.top || []).map((id) => V[id]).filter(Boolean);
+    let L = 0;
+    N.forEach((n) => { L = Math.max(L, axes.reduce((s, a) => s + Math.abs(n.x * a[0] + n.y * a[1] + n.z * a[2]), 0) + radiusOf(n) * 1.7); });
+    const R = 1.08 * (axes.length === 3 ? L : Math.sqrt(3) * m);
+    VIEW_DIST = R * 2.1;
+    Object.entries(V).forEach(([id, v]) => { const n = byId[id]; if (n) { n.x = v[0] * R; n.y = v[1] * R; n.z = v[2] * R; n.fixed = true; } });
+    const groups = {};
+    G.nodes.filter((n) => n.kind === "funder").forEach((n) => {
+      const s = inn[n.id].filter((e) => V[e.from]).sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0))[0];
+      if (s) (groups[s.from] = groups[s.from] || []).push(n);
+    });
+    const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    const unit = (a) => { const l = Math.hypot(...a) || 1; return a.map((x) => x / l); };
+    Object.entries(groups).forEach(([sid, fs]) => {  // a small ring around the axis, at 72% of the way to the vertex
+      const c = V[sid], u = unit(cross(c, Math.abs(c[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0])), w = cross(c, u);
+      const ring = fs.length > 1 ? 0.12 * R : 0;
+      fs.forEach((n, i) => {
+        const a = (2 * Math.PI * i) / fs.length, ca = Math.cos(a) * ring, sa = Math.sin(a) * ring;
+        n.x = c[0] * 0.72 * R + u[0] * ca + w[0] * sa; n.y = c[1] * 0.72 * R + u[1] * ca + w[1] * sa; n.z = c[2] * 0.72 * R + u[2] * ca + w[2] * sa;
+        n.fixed = true;
+      });
+    });
   }
 
   // ------------------------------------------------------------------ camera and rendering
@@ -214,7 +223,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   let W, H, DPR;
   function resize() { DPR = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = W + "px"; canvas.style.height = H + "px"; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
   addEventListener("resize", resize); resize();
-  const cam = { yaw: 0.5, pitch: -0.25, dist: 1000, tx: 0, ty: 0, tz: 0, goal: { x: 0, y: 0, z: 0, dist: WORLD ? 900 : 700 }, spin: !EMBED };
+  const cam = { yaw: 0.5, pitch: -0.25, dist: VIEW_DIST * 1.3, tx: 0, ty: 0, tz: 0, goal: { x: 0, y: 0, z: 0, dist: VIEW_DIST }, spin: !EMBED };
   const focal = 700;
   let focusId = null, hoverId = null, path = [], pathT = 0, trail = [];
   function project(n) {
@@ -331,7 +340,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     cam.yaw += dx * 0.006; cam.pitch = Math.max(-1.4, Math.min(1.4, cam.pitch + dy * 0.006)); lx = e.clientX; ly = e.clientY;
   });
   addEventListener("pointerup", (e) => { if (drag && !moved) { const id = pick(e.clientX, e.clientY); if (id) focus(id); } drag = false; });
-  canvas.addEventListener("wheel", (e) => { e.preventDefault(); cam.goal.dist = Math.max(80, Math.min(1600, cam.goal.dist * Math.pow(1.0012, e.deltaY))); }, { passive: false });
+  canvas.addEventListener("wheel", (e) => { e.preventDefault(); cam.goal.dist = Math.max(80, Math.min(4000, cam.goal.dist * Math.pow(1.0012, e.deltaY))); }, { passive: false });
   function pick(x, y) {
     let best = null, bd = 18 * 18;
     for (const id in LAST) { const p = LAST[id], dx = p.sx - x, dy = p.sy - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = id; } }
@@ -362,7 +371,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     renderCard(); renderTrail();
     return true;
   }
-  function core() { focusId = null; path = []; cam.goal = { x: 0, y: 0, z: 0, dist: G.figure ? 900 : 700 }; $("card").classList.remove("open"); renderTrail(); }
+  function core() { focusId = null; path = []; cam.goal = { x: 0, y: 0, z: 0, dist: VIEW_DIST }; $("card").classList.remove("open"); renderTrail(); }
   function showPath(ids) {
     ids = ids.filter((i) => byId[i]); if (!ids.length) return;
     path = ids; pathT = 0; focusId = ids[ids.length - 1];
@@ -424,7 +433,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   $("world").addEventListener("click", () => setWorld(!WORLD));
   addEventListener("keydown", (e) => { if (e.key === "Escape") core(); });
 
-  load(); legend(); requestAnimationFrame(render);
+  load(); legend(); cam.goal.dist = VIEW_DIST; cam.dist = VIEW_DIST * 1.3; requestAnimationFrame(render);
   if (location.hash.length > 1) {
     const [kind, id] = decodeURIComponent(location.hash.slice(1)).split(":");
     const nid = kind === "call" ? "c_" + id : kind === "milestone" ? "m_" + id : kind === "face" ? (FACE_NODE[id] || id) : id;
@@ -435,7 +444,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   function directView(v) {
     if (!v) return;
     if (v.camera === "in") { cam.goal.dist = Math.max(80, cam.goal.dist * 0.6); return; }
-    if (v.camera === "out") { cam.goal.dist = Math.min(1600, cam.goal.dist * 1.6); return; }
+    if (v.camera === "out") { cam.goal.dist = Math.min(4000, cam.goal.dist * 1.6); return; }
     if (v.camera === "spin") { cam.spin = true; return; }
     if (v.camera === "stop") { cam.spin = false; return; }
     if ((v.world === true || v.world === false) && v.world !== WORLD) setWorld(v.world);
