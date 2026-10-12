@@ -29,6 +29,24 @@
      "summary": "«camino de A a B» parte la frase por « a », « con » o « hacia »: un nombre que contenga esas palabras se corta mal.",
      "fix": "Ningún nombre actual lo provoca. Si aparece, probar todas las particiones y quedarse con la de mejor puntuación."}
    ]
+  },
+  {
+   "date": "2026-10-12",
+   "commit": "0f1a587",
+   "title": "Deuda: la vista del grafo no refleja el diamante (bloqueado, rediseño pendiente)",
+   "summary": "Tras muchos ajustes del diamante (octaedro, tres ejes ortogonales, parejas por análisis, grafo base envuelto, selector 2D/3D unificado), lo que se ve en el grafo no refleja esos cambios. Trabajo parado por decisión del equipo: hay que rediseñar la vista del grafo antes de seguir. No verificado en navegador real: las capturas sin ventana no ejecutan el encuadre de force-graph.",
+   "findings": [
+    {"file": "grafo_red.js", "severity": "fallo", "status": "abierto",
+     "summary": "La Red (2D y 3D) no muestra de forma reconocible el octaedro con sus tres ejes y parejas (Tecnología–Sociedad, Bancos–Ciencia, Política–Arte) envolviendo el grafo base. Acumula capas de parches: fuerza figureAround, centrado propio, pinFigure, proyección isométrica, enlaces de marco y de eje, warm-up y cámara oblicua."},
+    {"file": "espacio_template.html", "severity": "fallo", "status": "abierto",
+     "summary": "El Espacio dibuja el octaedro alrededor del grafo base, pero hay que revisar con el rediseño que la lectura (ejes, parejas, financiadores entre grafo y esfera) sea la buscada y coincida con la Red."},
+    {"file": "dashboard_template.html", "severity": "mejora", "status": "abierto",
+     "summary": "Rediseñar la vista del grafo desde cero: una sola fuente de geometría (planner.figure) para Red, 3D y Espacio, criterios de aceptación acordados antes de programar y comprobación en navegador real."},
+    {"file": "grafo_red.js", "severity": "menor", "status": "abierto",
+     "summary": "Vistos y sin cambiar: financiadores al 72 % hacia su esfera pueden solaparse con nodos; con menos de seis esferas el hexágono deja de ser regular; Columnas durante la carga del 3D deja la Red oculta en 3D; el giro automático persiste al pasar a 2D."},
+    {"file": "strategy.json", "severity": "mejora", "status": "abierto",
+     "summary": "Para una ceremonia: x_lr solo canaliza por Arte (añadir Tecnología 0,3–0,5); ninguna esfera cubre el eje local ↔ internacional."}
+   ]
   }
  ]
 }
