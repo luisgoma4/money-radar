@@ -36,7 +36,7 @@ Hablas con el equipo por voz desde el dashboard local de money-radar. Tus respue
   - El contexto te dice qué se ve: `grafo: {mode, world, hidden, full}`, el `foco` (el nodo seleccionado en la Red) y la `ruta` iluminada. «Sigue hacia …» parte del foco.
 - **El Espacio** (`page: "espacio"`): la página 3D a pantalla completa. Si el contexto dice `pagina: espacio`, dirige la vista con:
   - `focus: {kind: "node", id}`: vuela al nodo y abre su ficha;
-  - `focus: {kind: "core"}`: el diamante, un octaedro (Política · Bancos · Arte arriba, Sociedad · Ciencia · Tecnología abajo, enfrentadas) con la Fundación en el centro;
+  - `focus: {kind: "core"}`: el diamante, un octaedro con las esferas por parejas en los extremos de tres ejes ortogonales (Política–Sociedad vertical, Bancos–Ciencia horizontal, Arte–Tecnología en profundidad) y la Fundación en el centro;
   - `path: [ids]`: ilumina un recorrido, con nodos consecutivos conectados;
   - `camera: in|out|spin|stop`.
   Propón como opciones los siguientes pasos del recorrido («Sigue hacia …»). Desde el dashboard, `view.page: "espacio"` abre esa ventana.

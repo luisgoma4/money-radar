@@ -277,26 +277,28 @@ def funder_edges(strategy):
 
 
 def figure(strategy, ids):
-    """The world figure: an octahedron whose vertices are the world spheres, with the centre node (the Fundación)
-    inside. strategy.json -> graph.figure: `top` is one triangle and `bottom` the opposite one (bottom[i] faces
-    top[i]). Returns unit vertices (y up), the 12 frame edges (geometry, not causes) and the centre, or None."""
+    """The world figure: a regular octahedron whose vertices are the world spheres, in opposite pairs at the two ends
+    of three orthogonal axes of space (the pairs are as far apart as they can be), around the centre node (the
+    Fundación). strategy.json -> graph.figure: top[i] and bottom[i] are the two ends of axis i; axis 0 is the
+    vertical (y, up), axis 1 the horizontal (x) and axis 2 the depth (z). Returns unit vertices, the 3 axes, the
+    12 frame edges (geometry, not causes) and the centre, or None."""
     fig = strategy.get("graph", {}).get("figure") or {}
     top, bottom = fig.get("top", []), fig.get("bottom", [])
-    verts, opposite = {}, {}
-    for i, sid in enumerate(top):
-        a = math.pi / 2 + i * 2 * math.pi / 3
-        v = [math.sqrt(2 / 3) * math.cos(a), 1 / math.sqrt(3), math.sqrt(2 / 3) * math.sin(a)]
-        verts[sid] = [round(x, 4) for x in v]
+    unit = ([0, 1, 0], [1, 0, 0], [0, 0, 1])
+    verts, opposite, axes = {}, {}, []
+    for i, sid in enumerate(top[:3]):
+        verts[sid] = list(unit[i])
         if i < len(bottom):
-            verts[bottom[i]] = [round(-x, 4) for x in v]
+            verts[bottom[i]] = [-x for x in unit[i]]
             opposite[sid], opposite[bottom[i]] = bottom[i], sid
     verts = {k: v for k, v in verts.items() if k in ids}
     if not verts:
         return None
+    axes = [[a, opposite[a]] for a in top if a in verts and opposite.get(a) in verts]
     keys = list(verts)
     frame = [[a, b] for i, a in enumerate(keys) for b in keys[i + 1:] if opposite.get(a) != b]
     return {"shape": fig.get("shape", "octaedro"), "centre": fig.get("centre"), "vertices": verts, "frame": frame,
-            "top": [k for k in top if k in verts]}  # one vertex per axis: the three axes of the octahedron
+            "axes": axes, "top": [k for k in top if k in verts]}  # top: one vertex per axis
 
 
 def without_world(strategy):

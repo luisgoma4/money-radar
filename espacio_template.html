@@ -284,6 +284,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
       }
       ctx.globalAlpha = 0.8; ctx.strokeStyle = sph; ctx.lineWidth = 2.2;
       fig.frame.forEach(([x, y]) => { const a = P[x], b = P[y]; if (!a || !b) return; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); });
+      // the three orthogonal axes: each pair of spheres at the two ends of one axis, through the centre
+      ctx.globalAlpha = 0.55; ctx.lineWidth = 1.4; ctx.setLineDash([8, 6]);
+      (fig.axes || []).forEach(([x, y]) => { const a = P[x], b = P[y]; if (!a || !b) return; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); });
+      ctx.setLineDash([]);
     }
     // causal relations inside the core (sphere -> sphere, sphere -> Fundación): highlighted over the other edges
     const coreSet = new Set(CORE);

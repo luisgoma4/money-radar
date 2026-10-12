@@ -2247,7 +2247,7 @@
       }
     ],
     "figure": {
-      "_doc": "Figura del mundo: un octaedro con las seis esferas en los vértices y la Fundación en el centro; el ecosistema queda dentro, los financiadores y las convocatorias fuera. top es un triángulo y bottom el opuesto (bottom[i] es el vértice opuesto a top[i]). Las 12 aristas del octaedro son geometría, no causas: las relaciones causales entre esferas van en edges y forman un DAG.",
+      "_doc": "Figura del mundo: un octaedro regular con las seis esferas por parejas opuestas en los extremos de tres ejes ortogonales del espacio (top[i] y bottom[i] son los dos extremos del eje i: 0 vertical, 1 horizontal, 2 profundidad), lo más separadas posible, con la Fundación en el centro. El ecosistema se dibuja como sin el mundo y el octaedro lo envuelve. Las 12 aristas y los 3 ejes son geometría, no causas: las relaciones causales entre esferas van en edges y forman un DAG.",
       "shape": "octaedro",
       "centre": "e_fund",
       "top": [

@@ -86,6 +86,9 @@
     let G = { nodes: [], edges: [] }, meta = {}, nbr = {}, hidden = new Set(), hover = null, sel = null, hl = new Set(), hlLinks = new Set(), route = [];
     let FIG = null;  // the world figure of the current graph, or null (graph without the diamond)
     const isWorld = (n) => n.kind === "sphere" || n.kind === "funder";
+    // 2D shows the 3D axes in isometric view: the three orthogonal axes at 120°, each pair of spheres opposite
+    // through the centre (y up in 3D, down on the canvas).
+    const iso = (v) => [(v[0] - v[2]) * Math.sqrt(3) / 2, -v[1] + (v[0] + v[2]) / 2];
     let dim = 2, fg2 = null, fg3 = null, d2 = { nodes: [], links: [] }, d3 = { nodes: [], links: [] }, by2 = {}, by3 = {};
     const exists = (n) => !(n.status === "planned" || n.status === "proposed");
     const visible = (n) => !(n && n.face && hidden.has(n.face));
@@ -136,8 +139,8 @@
       })
       .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 2, 0, 2 * Math.PI); ctx.fill(); })
       .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.3 : 0.85) : hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : alpha(C.axis, 0.7))
-      .linkWidth((l) => l.frame ? 2.4 : (hlLinks.has(key(l)) ? 1.2 : 0.4) + (l.weight ?? 0.5) * (hlLinks.has(key(l)) ? 2.6 : 1.6))
-      .linkLineDash((l) => l.frame ? null : l.status === "planned" ? [3, 2] : null)
+      .linkWidth((l) => l.axis ? 1.4 : l.frame ? 2.4 : (hlLinks.has(key(l)) ? 1.2 : 0.4) + (l.weight ?? 0.5) * (hlLinks.has(key(l)) ? 2.6 : 1.6))
+      .linkLineDash((l) => l.axis ? [8, 6] : l.frame ? null : l.status === "planned" ? [3, 2] : null)
       .linkDirectionalArrowLength((l) => l.frame ? 0 : hlLinks.has(key(l)) ? 5 : 3).linkDirectionalArrowRelPos(1)
       .linkDirectionalArrowColor((l) => hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : C.axis)
       .linkDirectionalParticles((l) => hlLinks.has(key(l)) ? 2 : 0).linkDirectionalParticleWidth(2.2)
@@ -180,17 +183,18 @@
         cx = cy = cz = 0;
         if (!FIG) return;
         // The smallest regular figure that holds every node, plus a margin. 3D: a point p is inside the octahedron of
-        // vertex distance R when |p·a1| + |p·a2| + |p·a3| <= R (a_i its three axes). 2D: inside the hexagon of
-        // apothem R/√2 (the vertices project at R·√(2/3)) when p·u <= R/√2 for its six side normals u.
+        // vertex distance R when |p·a1| + |p·a2| + |p·a3| <= R (a_i its three axes). 2D: inside the isometric
+        // hexagon (vertices at R, apothem R·cos 30°) when p·u <= R·cos 30° for its six side normals u.
         let m = 0;
         inner.forEach((n) => {
           const x = n.x, y = n.y, z = n.z || 0, pad = n.r + 6;
           m = Math.max(m, d === 3 ? axes.reduce((s, a) => s + Math.abs(x * a[0] + y * a[1] + z * a[2]), 0) + pad * 1.7
-            : Math.SQRT2 * (Math.max(...normals.map((u) => x * u[0] + y * u[1])) + pad));
+            : (Math.max(...normals.map((u) => x * u[0] + y * u[1])) + pad) / Math.cos(Math.PI / 6));
         });
         const R = 1.08 * m;
         Rs = Rs ? Rs + (R - Rs) * 0.25 : R;
-        const at = (v, k) => d === 3 ? [cx + v[0] * Rs * k, cy + v[1] * Rs * k, cz + v[2] * Rs * k] : [cx + v[0] * Rs * k, cy + v[2] * Rs * k, 0];
+        const at = (v, k) => { if (d === 3) return [cx + v[0] * Rs * k, cy + v[1] * Rs * k, cz + v[2] * Rs * k];
+          const q = iso(v); return [cx + q[0] * Rs * k, cy + q[1] * Rs * k, 0]; };
         const put = (n, p) => { n.x = n.fx = p[0]; n.y = n.fy = p[1]; n.vx = n.vy = 0; if (d === 3) { n.z = n.fz = p[2]; n.vz = 0; } };
         spheres.forEach((n) => put(n, at(FIG.vertices[n.id], 1)));
         Object.entries(groups).forEach(([sid, fs]) => {
@@ -207,7 +211,7 @@
         inner = ns.filter((n) => !(FIG && isWorld(n)));
         if (FIG) {
           axes = (FIG.top || []).map((id) => FIG.vertices[id]);
-          const P = Object.values(FIG.vertices).map((v) => Math.atan2(v[2], v[0])).sort((a, b) => a - b);
+          const P = Object.values(FIG.vertices).map((v) => { const q = iso(v); return Math.atan2(q[1], q[0]); }).sort((a, b) => a - b);
           normals = P.map((a, i) => { const b = i + 1 < P.length ? P[i + 1] : P[0] + 2 * Math.PI, c = (a + b) / 2; return [Math.cos(c), Math.sin(c)]; });
         }
         spheres = FIG ? ns.filter((n) => FIG.vertices[n.id]) : [];
@@ -260,7 +264,9 @@
         .onNodeDragEnd((n) => { if (!n.pin) { n.fx = n.fy = n.fz = undefined; } })
         .warmupTicks(160).cooldownTicks(300).d3VelocityDecay(0.3);
       forces(fg3, 3);
-      fg3.onEngineStop(() => { if (!fitted3) { fitted3 = true; fg3.zoomToFit(600, 30, visible); } });
+      // Oblique view: with the octahedron the three orthogonal axes must all be visible (not one seen end-on).
+      fg3.cameraPosition({ x: 900, y: 570, z: 1320 }, { x: 0, y: 0, z: 0 });
+      fg3.onEngineStop(() => { if (!fitted3) { fitted3 = true; fg3.zoomToFit(600, FIG ? 60 : 30, visible); } });
       paint3();
     }
     function paint3() {  // 3D accessors are evaluated once: re-set them so the light, filters and theme apply
@@ -268,7 +274,7 @@
       const lit = (l) => hlLinks.has(key(l));
       fg3.nodeColor((n) => { const c = colorOf(n), base = exists(n) && !n.pending ? 1 : 0.32; return alpha(c, hl.size && !hl.has(n.id) ? base * 0.15 : base); })
         .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.35 : 0.9) : lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : l.status === "planned" ? 0.35 : 0.7))
-        .linkWidth((l) => l.frame ? 2.6 : lit(l) ? 0.6 + (l.weight ?? 0.5) * 1.6 : 0)
+        .linkWidth((l) => l.axis ? 1.2 : l.frame ? 2.6 : lit(l) ? 0.6 + (l.weight ?? 0.5) * 1.6 : 0)
         .linkDirectionalArrowLength((l) => l.frame ? 0 : lit(l) ? 5 : 2.5)
         .linkDirectionalArrowColor((l) => lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : 0.7))
         .linkDirectionalParticles((l) => lit(l) ? 2 : 0).linkDirectionalParticleColor(() => C.accent)
@@ -440,7 +446,8 @@
       prev.nodes.forEach((n) => { keep[n.id] = { x: n.x, y: n.y, z: n.z }; });  // switching copies keeps the layout steady
       const nodes = G.nodes.map((n) => Object.assign({}, n, keep[n.id] || {}));
       const links = G.edges.map((e) => Object.assign({}, e, { source: e.from, target: e.to }))
-        .concat(FIG ? FIG.frame.map(([a, b]) => ({ source: a, target: b, frame: true })) : []);
+        .concat(FIG ? FIG.frame.map(([a, b]) => ({ source: a, target: b, frame: true })) : [])
+        .concat(FIG ? (FIG.axes || []).map(([a, b]) => ({ source: a, target: b, frame: true, axis: true })) : []);
       return { data: { nodes, links }, by: Object.fromEntries(nodes.map((n) => [n.id, n])), kept: Object.keys(keep).length > 0 };
     }
     function build3() {
