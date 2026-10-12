@@ -31,7 +31,7 @@ Hablas con el equipo por voz desde el dashboard local de money-radar. Tus respue
     - `mode`: `net` (la **Red**, por defecto: red viva al estilo Obsidian; al enfocar un nodo se abre su ficha con causas y efectos), `2d` (columnas de causa a efecto) o `3d`.
     - `path: [ids]`: en la Red ilumina el recorrido (nodos consecutivos conectados), lo encuadra y abre la ficha del último. Úsalo para caminos causales, «quién financia» y la nave de la ceremonia.
     - `world`: `true` muestra el diamante (esferas `s_*`) y los financiadores (`u_*`); `false` enseña la copia sin ellos (el grafo de antes). Si enfocas una esfera o un financiador con el mundo oculto, la web lo vuelve a mostrar sola.
-    - `filter`: `{only: [caras]}`, `{hide: [caras]}`, `{show: [caras]}` o `"all"`; caras = `cloudy | semf | causality | branchout | delfina`. Los nodos sin cara (hitos, esferas, financiadores) siempre se ven.
+    - `filter`: `{only: [caras]}`, `{hide: [caras]}`, `{show: [caras]}` o `"all"`; caras = `cloudy | semf | causality | branchout | delfina | cosmo`. Los nodos sin cara (hitos, esferas, financiadores) siempre se ven.
     - `fit: true` encuadra todo el grafo; `fullscreen: true|false` pone la Red a pantalla completa. El navegador solo deja la pantalla completa tras un clic: ofrécela también como opción con ese `view`.
   - El contexto te dice qué se ve: `grafo: {mode, world, hidden, full}`, el `foco` (el nodo seleccionado en la Red) y la `ruta` iluminada. «Sigue hacia …» parte del foco.
 - **El Espacio** (`page: "espacio"`): la página 3D a pantalla completa. Si el contexto dice `pagina: espacio`, dirige la vista con:

@@ -23,6 +23,7 @@
   --line-causality: #1baf7a;
   --line-branchout: #eda100;
   --line-delfina: #e87ba4;
+  --line-cosmo: #a23fb3;
   --world-sphere: #4a3aa7;
   --world-funder: #008300;
   --good: #0ca30c;
@@ -38,7 +39,7 @@
     --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
     --accent: #3987e5;
-    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --world-sphere: #9085e9; --world-funder: #0ca30c;
+    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-cosmo: #c062d1; --world-sphere: #9085e9; --world-funder: #0ca30c;
     --good-ink: #0ca30c; --shadow: none;
   }
 }
@@ -48,7 +49,7 @@
   --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
   --accent: #3987e5;
-  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181;
+  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-cosmo: #c062d1;
   --world-sphere: #9085e9; --world-funder: #0ca30c;
   --good-ink: #0ca30c; --shadow: none;
 }
@@ -412,7 +413,12 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
       </div>
       <select id="scope" aria-label="Scope">
         <option value="">All scopes</option>
-        <option>Madrid West</option><option>Madrid</option><option>Spain</option><option>EU</option><option>International</option>
+        <option>Madrid West</option><option>Madrid</option><option>Spain</option><option>France</option><option>EU</option><option>International</option>
+      </select>
+      <select id="kindsel" aria-label="Type of money">
+        <option value="">All types</option>
+        <option value="funding">Grants, loans &amp; prizes</option>
+        <option value="investment">Investors (equity)</option>
       </select>
       <label class="check"><input type="checkbox" id="verified"> Verified only</label>
     </div>
@@ -583,7 +589,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     set(k, v) { try { localStorage.setItem("money-radar:" + k, JSON.stringify(v)); } catch (e) {} },
   };
   const state = Object.assign(
-    { lines: LINE_KEYS.slice(), status: "actionable", scope: "", verified: false, q: "", sort: "deadline", view: "cards" },
+    { lines: LINE_KEYS.slice(), status: "actionable", scope: "", kindsel: "", verified: false, q: "", sort: "deadline", view: "cards" },
     store.get("view") || {}, { q: "" }
   );
   // Remember which lines the viewer hid (not which were shown), so a newly added
@@ -622,6 +628,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   function matches(o) {
     if (!linesOf(o).some((k) => state.lines.includes(k))) return false;
     if (state.scope && o.scope !== state.scope) return false;
+    if (state.kindsel && (o.kind === "equity") !== (state.kindsel === "investment")) return false;
     if (state.verified && o.verification !== "verified") return false;
     const s = state.status;
     if (s === "archive") { if (!o.archived) return false; }
@@ -692,10 +699,12 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   const syncStatus = bindSeg("status-seg", "status");
   const syncView = bindSeg("view-seg", "view");
   const scopeSel = document.getElementById("scope");
+  const kindSel = document.getElementById("kindsel");
   const verifiedBox = document.getElementById("verified");
   const qBox = document.getElementById("q");
   const sortSel = document.getElementById("sort");
   scopeSel.addEventListener("change", () => { state.scope = scopeSel.value; update(); });
+  kindSel.addEventListener("change", () => { state.kindsel = kindSel.value; update(); });
   verifiedBox.addEventListener("change", () => { state.verified = verifiedBox.checked; update(); });
   qBox.addEventListener("input", () => { state.q = qBox.value.trim(); update(); });
   sortSel.addEventListener("change", () => { state.sort = sortSel.value; update(); });
@@ -873,7 +882,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
     store.set("view", Object.assign({}, state, { q: "", lines: undefined,
       hiddenLines: LINE_KEYS.filter((k) => !state.lines.includes(k)) }));
     renderChips(); syncStatus(); syncView();
-    scopeSel.value = state.scope; verifiedBox.checked = state.verified; sortSel.value = state.sort;
+    scopeSel.value = state.scope; kindSel.value = state.kindsel || ""; verifiedBox.checked = state.verified; sortSel.value = state.sort;
     const list = sorted(DATA.opportunities.filter(matches));
     document.getElementById("count").textContent = `${list.length} of ${DATA.opportunities.length} calls`;
     renderTimeline(list);
@@ -1410,7 +1419,7 @@ svg.dim .g-edge:not(.hl) { opacity: .15; } svg.dim .g-node:not(.hl):not(:focus) 
   // Oráculo por voz: panel compartido (oracle_dock.js) + adaptador de esta página.
   // Solo aparece con oracle_server.py en local; en Pages no hay API.
   // =====================================================================
-  const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund" };
+  const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund", cosmo: "f_cosmo" };
   const $ = (id) => document.getElementById(id);
   const currentTab = () => (["radar", "strategy", "calendar", "graph", "oracle", "west", "repo"].find((v) => !$("view-" + v).hidden)) || "radar";
   let FOCUS = null;

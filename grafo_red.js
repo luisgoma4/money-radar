@@ -23,7 +23,7 @@
   const KIND_ES = { entity: "figura legal", face: "cara", product: "producto", partner: "socio", factor: "factor de contexto",
     milestone: "hito", call: "convocatoria", sphere: "esfera del mundo", funder: "financiador" };
   const STATUS_ES = { exists: "existe", planned: "por crear", proposed: "propuesta", external: "socio externo", factor: "factor" };
-  const FACE_VAR = { cloudy: "--line-cloudy", semf: "--line-semf", causality: "--line-causality", branchout: "--line-branchout", delfina: "--line-delfina" };
+  const FACE_VAR = { cloudy: "--line-cloudy", semf: "--line-semf", causality: "--line-causality", branchout: "--line-branchout", delfina: "--line-delfina", cosmo: "--line-cosmo" };
   const LIB3D = "vendor/3d-force-graph.min.js";
   const key = (e) => e.from + ">" + e.to;
 

@@ -2,7 +2,7 @@
   "_doc": "Planificador de estrategia. Un solo proyecto con varias caras al mundo: cada convocatoria se ataca con una entidad solicitante (figura legal) y una combinación de caras que forman la oferta de valor. Estimaciones de valor = juicio de planificación basado en ganadores reales (campo winners) o rangos oficiales; no son importes confirmados. planner.py calcula grado, preparación, calendario y qué hitos desbloquean más valor. Los prerrequisitos de cada convocatoria son solo los propios de la estrategia; los de la figura legal (p. ej. que la fundación exista) se añaden automáticamente según la entidad solicitante elegida: la primera de la lista que ya existe.",
   "project": {
     "name": "Ecosistema Delfina León",
-    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (Fundación Delfina León) que comparte espacio y gobierno."
+    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (Fundación Delfina León) que comparte espacio y gobierno; CosmoVentures, estudio científico en París, abre la puerta a Francia y a la seguridad de la IA."
   },
   "faces": {
     "cloudy": {
@@ -55,6 +55,17 @@
         "paraguas",
         "espacio",
         "gobernanza"
+      ]
+    },
+    "cosmo": {
+      "name": "CosmoVentures",
+      "offers": "Estudio de consultoría científica en París (SASU unipersonal): revisión científica de productos, estrategia de I+D, asesoría de contenidos para medios, evaluación de seguridad y razonamiento de IA, juegos educativos de navegador y talleres que cruzan astronomía, arte y música; socio francés para consorcios europeos.",
+      "tags": [
+        "consultoría científica",
+        "seguridad de IA",
+        "juegos educativos",
+        "arte-astronomía",
+        "Francia"
       ]
     }
   },
@@ -200,6 +211,23 @@
         "universidad socia en FECYT y Erasmus+",
         "prácticas, TFG/TFM y divulgación con estudiantes de Física",
         "aval académico para SEMF y Cloudy"
+      ],
+      "requires": []
+    },
+    "cosmo_sasu": {
+      "name": "CosmoVentures SASU",
+      "form": "SASU (sociedad por acciones simplificada unipersonal, Francia)",
+      "status": "exists",
+      "seat": "París (Francia)",
+      "faces": [
+        "cosmo"
+      ],
+      "can": [
+        "ayudas y préstamos de honor franceses (Bpifrance, Réseau Entreprendre)",
+        "CNC (jeu vidéo)",
+        "inversores y business angels franceses",
+        "filantropía de seguridad de IA",
+        "socio francés en Erasmus+ y Horizon Europe"
       ],
       "requires": []
     }
@@ -600,7 +628,8 @@
       "lead": "cloudy",
       "support": [
         "semf",
-        "delfina"
+        "delfina",
+        "cosmo"
       ],
       "level": 2,
       "fit": 4,
@@ -609,7 +638,7 @@
       "prep_weeks": 8,
       "value_basis": "Asociaciones a pequeña escala con suma global; pensada para organizaciones nuevas.",
       "ask": "Materiales bilingües de ciencia y salud para familias con un socio de otro país de la UE.",
-      "offer": "Cloudy aporta el contenido bilingüe, SEMF el socio europeo y la fundación el vehículo.",
+      "offer": "Cloudy aporta el contenido bilingüe, SEMF el socio europeo y la fundación el vehículo. CosmoVentures (París) es el socio francés y aporta talleres y juegos.",
       "prereqs": [
         "M_EU_PIC"
       ],
@@ -978,6 +1007,172 @@
       "prereqs": [
         "M_ASOC_LOCAL"
       ]
+    },
+    "bstartup-inversion": {
+      "applicant": [
+        "branchout_sl",
+        "causality_ent"
+      ],
+      "lead": "branchout",
+      "support": [
+        "causality"
+      ],
+      "level": 2,
+      "fit": 3,
+      "value": 3,
+      "strategic": 2,
+      "prep_weeks": 6,
+      "typical_award_eur": 200000,
+      "value_basis": "Ticket inicial de hasta 200.000 € y follow-on hasta 2 M€ (página oficial de BStartup); 100+ startups en cartera.",
+      "ask": "Ronda seed para una startup tecnológica o científica del hub (software, IA, deeptech, B2B).",
+      "offer": "BranchOut presenta un producto con tracción; Causality Graphs aporta el diferencial científico y la medición de impacto.",
+      "prereqs": [
+        "M_CERT"
+      ],
+      "products": [
+        "p_hub",
+        "p_lib"
+      ]
+    },
+    "bstartup-health-2026": {
+      "applicant": [
+        "causality_ent"
+      ],
+      "lead": "causality",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 3,
+      "strategic": 2,
+      "prep_weeks": 6,
+      "typical_award_eur": 200000,
+      "value_basis": "Hasta 200.000 € por startup de salud, al menos 3 inversiones por edición (BStartup Health 2026).",
+      "ask": "Inversión pre-seed/seed para un producto e-Health de inferencia causal (p. ej. la librería de DAGs aplicada a datos clínicos).",
+      "offer": "Causality Graphs con el PI del CSIC como dirección científica y un socio clínico (IDIPHISA).",
+      "prereqs": [
+        "M_PRODUCTO",
+        "M_PARTNER_IDIPHISA"
+      ],
+      "products": [
+        "p_lib",
+        "p_consult"
+      ]
+    },
+    "ban-madrimasd": {
+      "applicant": [
+        "branchout_sl",
+        "causality_ent"
+      ],
+      "lead": "branchout",
+      "support": [
+        "causality"
+      ],
+      "level": 2,
+      "fit": 3,
+      "value": 2,
+      "strategic": 2,
+      "prep_weeks": 4,
+      "typical_award_eur": 280000,
+      "value_basis": "Inversión media 280.000 € (mínimo 10.000 €); 3-4 foros al año; 80+ empresas invertidas (madri+d).",
+      "ask": "Presentar una startup de base científico-tecnológica de la Comunidad de Madrid en un foro de inversión.",
+      "offer": "Proyecto tecnológico de BranchOut con base científica de Causality Graphs.",
+      "prereqs": [
+        "M_CERT"
+      ],
+      "products": [
+        "p_hub"
+      ]
+    },
+    "iese-ban": {
+      "applicant": [
+        "branchout_sl",
+        "causality_ent",
+        "cosmo_sasu"
+      ],
+      "lead": "branchout",
+      "support": [
+        "causality",
+        "cosmo"
+      ],
+      "level": 2,
+      "fit": 2,
+      "value": 2,
+      "strategic": 1,
+      "prep_weeks": 3,
+      "value_basis": "Red sin comisiones; tickets según ronda, decisiones individuales de cada inversor (IESE). Sin importe oficial.",
+      "ask": "Formulario para entrar en el flujo de operaciones de la red (Madrid/Barcelona, abierta al resto de Europa).",
+      "offer": "La startup del ecosistema con más tracción; CosmoVentures puede entrar como empresa europea.",
+      "prereqs": [],
+      "products": [
+        "p_hub"
+      ]
+    },
+    "ship2b-montana": {
+      "applicant": [
+        "causality_ent"
+      ],
+      "lead": "causality",
+      "support": [
+        "cloudy"
+      ],
+      "level": 2,
+      "fit": 2,
+      "value": 3,
+      "strategic": 2,
+      "prep_weeks": 8,
+      "value_basis": "Fondo europeo de salud infantil: primer cierre 35 M€, unas 15 inversiones con reservas de follow-on (Ship2B). Sin ticket oficial.",
+      "ask": "Inversión para un producto de salud infantil digital con impacto medible.",
+      "offer": "Cloudy aporta el público familiar y los retos de salud; Causality Graphs mide el impacto con métodos causales.",
+      "prereqs": [
+        "M_PRODUCTO"
+      ],
+      "products": [
+        "p_books",
+        "p_eval"
+      ]
+    },
+    "taif-ea-funds": {
+      "applicant": [
+        "cosmo_sasu"
+      ],
+      "lead": "cosmo",
+      "support": [
+        "causality"
+      ],
+      "level": 2,
+      "fit": 3,
+      "value": 2,
+      "strategic": 2,
+      "prep_weeks": 3,
+      "value_basis": "Subvenciones de 10.000-150.000 USD habitualmente, rara vez más de 300.000 USD (EA Funds). Importe en USD, sin cifra en euros.",
+      "ask": "Benchmarks y evaluaciones del razonamiento de modelos de IA, y juegos educativos sobre seguridad de IA.",
+      "offer": "CosmoVentures aporta los benchmarks y el laboratorio de juegos de seguridad de IA; Causality Graphs, el rigor causal de las evaluaciones.",
+      "prereqs": [],
+      "products": [
+        "p_cv_consult",
+        "p_cv_games"
+      ]
+    },
+    "cnc-fajv-preproduction": {
+      "applicant": [
+        "cosmo_sasu"
+      ],
+      "lead": "cosmo",
+      "support": [
+        "cloudy"
+      ],
+      "level": 2,
+      "fit": 2,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 8,
+      "value_basis": "Hasta el 50 % de los gastos de prototipo; concesiones de 25.000-150.000 € en las comisiones de 2026 (CNC).",
+      "ask": "Pre-producción de un juego educativo de ciencia (física del cosmos) con prototipo jugable.",
+      "offer": "CosmoVentures desarrolla el juego; Cloudy aporta el universo y el público familiar.",
+      "prereqs": [],
+      "products": [
+        "p_cv_games"
+      ]
     }
   },
   "graph": {
@@ -1268,6 +1463,54 @@
         "status": "external",
         "face": null,
         "detail": "Mundo cultural y artístico: fundaciones culturales, políticas culturales, edición y la confluencia arte-ciencia."
+      },
+      {
+        "id": "e_cosmo",
+        "label": "CosmoVentures SASU",
+        "type": "entity",
+        "status": "exists",
+        "face": "cosmo",
+        "detail": "Sociedad unipersonal francesa con sede en París."
+      },
+      {
+        "id": "f_cosmo",
+        "label": "CosmoVentures",
+        "type": "face",
+        "status": "exists",
+        "face": "cosmo",
+        "detail": "Estudio científico: consultoría, evaluación de IA, juegos educativos y formatos culturales (cosmoventures.fr)."
+      },
+      {
+        "id": "p_cv_consult",
+        "label": "Consultoría científica y evaluación de IA",
+        "type": "product",
+        "status": "exists",
+        "face": "cosmo",
+        "detail": "Revisión científica de productos, estrategia de I+D, asesoría a medios y evaluación de razonamiento y seguridad de IA (benchmarks)."
+      },
+      {
+        "id": "p_cv_games",
+        "label": "Juegos educativos de navegador",
+        "type": "product",
+        "status": "exists",
+        "face": "cosmo",
+        "detail": "Juegos gratuitos de lógica y física (paridad, ondas, termodinámica, mareas) y un laboratorio de seguridad de IA; aptos para aula y talleres."
+      },
+      {
+        "id": "p_cv_talleres",
+        "label": "Talleres y formatos arte-astronomía",
+        "type": "product",
+        "status": "exists",
+        "face": "cosmo",
+        "detail": "Talleres, guías interactivas de radioastronomía, juegos de mesa y formatos culturales que unen astronomía, arte y cocina."
+      },
+      {
+        "id": "p_cv_music",
+        "label": "Música en directo para eventos",
+        "type": "product",
+        "status": "exists",
+        "face": "cosmo",
+        "detail": "Línea artística de la fundadora (voz y violín, región de París); sin entidad propia."
       }
     ],
     "edges": [
@@ -1725,6 +1968,118 @@
         "label": "universidad pública",
         "status": "exists",
         "weight": 0.3
+      },
+      {
+        "from": "e_cosmo",
+        "to": "f_cosmo",
+        "label": "titular",
+        "status": "exists",
+        "weight": 1.0
+      },
+      {
+        "from": "f_cosmo",
+        "to": "p_cv_consult",
+        "label": "vende",
+        "status": "exists",
+        "weight": 0.9
+      },
+      {
+        "from": "f_cosmo",
+        "to": "p_cv_games",
+        "label": "desarrolla",
+        "status": "exists",
+        "weight": 0.8
+      },
+      {
+        "from": "f_cosmo",
+        "to": "p_cv_talleres",
+        "label": "organiza",
+        "status": "exists",
+        "weight": 0.7
+      },
+      {
+        "from": "f_cosmo",
+        "to": "p_cv_music",
+        "label": "línea artística",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "p_cv_consult",
+        "to": "z_fondos",
+        "label": "ingresos",
+        "status": "exists",
+        "weight": 0.3
+      },
+      {
+        "from": "f_cosmo",
+        "to": "z_red",
+        "label": "socio en Francia",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "f_cosmo",
+        "to": "z_reputacion",
+        "label": "trayectoria en astrofísica",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "p_cv_games",
+        "to": "p_books",
+        "label": "juegos para libros y cartas",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "p_cv_talleres",
+        "to": "p_ciclo",
+        "label": "talleres arte-astronomía",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "p_cv_talleres",
+        "to": "p_events",
+        "label": "formatos para congresos",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "f_cosmo",
+        "to": "e_fund",
+        "label": "aporta a la fundación",
+        "status": "planned",
+        "weight": 0.2
+      },
+      {
+        "from": "s_arte",
+        "to": "f_cosmo",
+        "label": "música y formatos culturales",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_bancos",
+        "to": "f_cosmo",
+        "label": "inversión y préstamos de honor",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "z_fondos",
+        "to": "c_bstartup-inversion",
+        "label": "ronda con fondos propios",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "z_fondos",
+        "to": "c_ban-madrimasd",
+        "label": "tracción y caja",
+        "status": "planned",
+        "weight": 0.4
       }
     ]
   },
@@ -1823,7 +2178,8 @@
         "s_bancos": 0.3
       },
       "calls": [
-        "cdti-neotec-2026"
+        "cdti-neotec-2026",
+        "cdti-innvierte"
       ]
     },
     {
@@ -1866,7 +2222,8 @@
         "s_politica": 0.7
       },
       "calls": [
-        "healthstart-madrimasd"
+        "healthstart-madrimasd",
+        "ban-madrimasd"
       ]
     },
     {
@@ -1933,7 +2290,83 @@
         "s_bancos": 0.8
       },
       "calls": [
-        "lasrozas-innova-foro"
+        "lasrozas-innova-foro",
+        "iese-ban",
+        "femmes-business-angels",
+        "france-angels"
+      ]
+    },
+    {
+      "id": "u_sabadell",
+      "label": "Banco Sabadell (BStartup)",
+      "spheres": {
+        "s_bancos": 0.9
+      },
+      "calls": [
+        "bstartup-inversion",
+        "bstartup-health-2026"
+      ]
+    },
+    {
+      "id": "u_bolsasocial",
+      "label": "La Bolsa Social (crowdfunding de impacto)",
+      "spheres": {
+        "s_bancos": 0.6
+      },
+      "calls": [
+        "bolsa-social-equity"
+      ]
+    },
+    {
+      "id": "u_ship2b",
+      "label": "Fundación Ship2B (fondos de impacto)",
+      "spheres": {
+        "s_bancos": 0.7
+      },
+      "calls": [
+        "ship2b-montana"
+      ]
+    },
+    {
+      "id": "u_bpifrance",
+      "label": "Bpifrance",
+      "spheres": {
+        "s_politica": 0.8,
+        "s_bancos": 0.5
+      },
+      "calls": [
+        "bpifrance-bourse-french-tech"
+      ]
+    },
+    {
+      "id": "u_reseau",
+      "label": "Réseau Entreprendre Paris",
+      "spheres": {
+        "s_bancos": 0.6
+      },
+      "calls": [
+        "reseau-entreprendre-paris-start"
+      ]
+    },
+    {
+      "id": "u_eafunds",
+      "label": "EA Funds (filantropía de IA)",
+      "spheres": {
+        "s_bancos": 0.5
+      },
+      "calls": [
+        "taif-ea-funds"
+      ]
+    },
+    {
+      "id": "u_cnc",
+      "label": "CNC (Centre national du cinéma)",
+      "spheres": {
+        "s_politica": 0.7,
+        "s_arte": 0.8
+      },
+      "calls": [
+        "cnc-fajv-preproduction"
       ]
     }
   ],

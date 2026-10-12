@@ -54,7 +54,11 @@ def target_deadline(o, today):
 def default_strategy(o):
     lines = o["lines"].split(",")
     company = o["kind"] in ("loan", "equity", "prize") or lines == ["branchout"]
-    return {"applicant": ["branchout_sl"] if company else ["fundacion_dl"], "lead": lines[0],
+    if lines[0] == "cosmo":  # CosmoVentures applies as itself (French SASU)
+        applicant = ["cosmo_sasu"]
+    else:
+        applicant = ["branchout_sl"] if company else ["fundacion_dl"]
+    return {"applicant": applicant, "lead": lines[0],
             "support": lines[1:], "level": 1 if len(lines) == 1 else 2, "fit": 2, "value": 2,
             "strategic": 0, "prep_weeks": 6, "prereqs": [], "offer": "", "ask": "",
             "value_basis": "Sin estrategia específica en strategy.json (valores por defecto).", "default": True}
@@ -244,8 +248,9 @@ def ascii_text(text):
 
 # Legal entities / faces of strategy.json mapped onto graph nodes.
 ENTITY_NODE = {"fundacion_dl": "e_fund", "asoc_local": "e_asoc", "semf_asoc": "e_semf", "causality_ent": "e_cg",
-               "branchout_sl": "e_bo", "partner_csic": "x_csic", "partner_uned": "x_uned", "partner_research": "x_idiphisa"}
-FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
+               "branchout_sl": "e_bo", "partner_csic": "x_csic", "partner_uned": "x_uned", "partner_research": "x_idiphisa",
+               "cosmo_sasu": "e_cosmo"}
+FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund", "cosmo": "f_cosmo"}
 NODE_STATUSES = ("exists", "planned", "proposed", "external", "factor")
 WORLD_KINDS = ("sphere", "funder")          # the outside world: no face of ours
 OUR_KINDS = ("entity", "face", "product", "factor", "milestone", "partner")

@@ -287,7 +287,7 @@ VIEWER = Path.home() / ".claude" / "scripts" / "graphify_3d.py"
 
 
 # Same colour per face as the dashboard (slot order of the categorical palette).
-FACE_SLOTS = {"cloudy": "--c1", "semf": "--c2", "causality": "--c3", "branchout": "--c4", "delfina": "--c5"}
+FACE_SLOTS = {"cloudy": "--c1", "semf": "--c2", "causality": "--c3", "branchout": "--c4", "delfina": "--c5", "cosmo": "--c6"}
 
 
 def planner_ascii(text):

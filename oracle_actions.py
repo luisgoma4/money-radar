@@ -30,7 +30,7 @@ TABS = {"radar": "radar", "estrategia": "strategy", "calendario": "calendar", "g
         "grafo": "graph", "oraculo": "oracle", "madrid oeste": "west", "municipios": "west",
         # The Espacio tab (the repo map). Plain "espacio" stays with the 3D page.
         "repo": "repo", "repositorio": "repo", "codigo": "repo", "revisiones": "repo"}
-FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund"}
+FACE_NODE = {"cloudy": "f_cloudy", "semf": "f_semf", "causality": "f_cg", "branchout": "f_bo", "delfina": "e_fund", "cosmo": "f_cosmo"}
 MONTHS = {m: i for i, m in enumerate(["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
                                       "septiembre", "octubre", "noviembre", "diciembre"], 1)}
 NUM = {"un": 1, "uno": 1, "una": 1, "dos": 2, "tres": 3, "cuatro": 4, "cinco": 5, "seis": 6, "siete": 7, "ocho": 8,
@@ -159,8 +159,9 @@ def _bfs(st, a, b):
 
 # ---------------------------------------------------------------- graph view and repo helpers
 FACE_WORDS = {"cloudy": "cloudy", "semf": "semf", "causality": "causality", "causalidad": "causality", "causal": "causality",
-              "branchout": "branchout", "branch": "branchout", "fundacion": "delfina", "delfina": "delfina"}
-FACE_ES = {"cloudy": "Cloudy", "semf": "SEMF", "causality": "Causality Graphs", "branchout": "BranchOut", "delfina": "la Fundación"}
+              "branchout": "branchout", "branch": "branchout", "fundacion": "delfina", "delfina": "delfina",
+              "cosmo": "cosmo", "cosmoventures": "cosmo"}
+FACE_ES = {"cloudy": "Cloudy", "semf": "SEMF", "causality": "Causality Graphs", "branchout": "BranchOut", "delfina": "la Fundación", "cosmo": "CosmoVentures"}
 WORLD_WORDS = r"(diamante|mundo|esferas|financiadores|mundo exterior)"
 
 

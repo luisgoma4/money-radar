@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**money-radar** is a daily funding radar and grant-application planner for the **Ecosistema Delfina León**: one project with several faces (Cloudy, SEMF, Causality Graphs, BranchOut, Fundación Delfina León), based in Madrid West.
+**money-radar** is a daily funding radar and grant-application planner for the **Ecosistema Delfina León**: one project with several faces (Cloudy, SEMF, Causality Graphs, BranchOut, Fundación Delfina León, CosmoVentures), based in Madrid West, with a French face in Paris.
 
-- It tracks public and private funding (grants, loans, prizes, foundation calls, research networks), **Spain first, Europe second**.
+- It tracks public and private funding (grants, loans, prizes, foundation calls, research networks) and **investors** (venture funds, business angels, equity crowdfunding), **Spain first, Europe second** (France for CosmoVentures).
 - It plans which legal entity applies to each call, and with which combination of faces.
 - It guides each application stage by stage.
 
@@ -16,7 +16,7 @@ The radar runs as a scheduled Claude Code routine (`routine.json`, daily 07:00 E
 
 ## Who the radar is for
 
-Every call is matched against five **faces** (lines of work). A call only needs to fit one. Rows record theirs in `lines` (comma-separated keys).
+Every call is matched against six **faces** (lines of work). A call only needs to fit one. Rows record theirs in `lines` (comma-separated keys).
 
 | Key | Face | What it is (from the sites and the team, Oct 2026) | Funding angles |
 |---|---|---|---|
@@ -25,6 +25,7 @@ Every call is matched against five **faces** (lines of work). A call only needs 
 | `causality` | **Causality Graphs** (causalitygraphs.com) | **Company (confirmed).** Causal-inference consultancy (DAGs, dynamic causal models, causal discovery) for pharma, clinical research and biostatistics teams. | Horizon Europe health / EU4Health as SME methods partner, CaixaResearch and ISCIII through a research centre, NEOTEC, ENISA, NLnet for open-source tooling |
 | `branchout` | **BranchOut** (the technology line) | **SL** (company). Tech-startup hub that wants to build a coworking + coliving space. | Startup Europe and New European Bauhaus (consortia), Las Rozas Innova, ENISA, EIC, NLnet, the housing plan's coliving line, municipal entrepreneurship prizes |
 | `delfina` | **Fundación Delfina León** (planned umbrella) | Foundation, not yet constituted. It will hold all the projects and a **shared physical space**, which SEMF, Causality and Cloudy also need. | Foundation and non-profit calls, Las Rozas collaboration agreements (convenios), municipal space, Erasmus+, the non-profit path of the coliving line |
+| `cosmo` | **CosmoVentures** (cosmoventures.fr) | **SASU** (one-person French company) in **Paris**. Science consulting studio: scientific product review, R&D strategy, media advice, AI reasoning and safety evaluation (benchmarks), free browser science games, workshops and art-astronomy formats; the founder also has a live-music line for events. | AI-safety philanthropy (EA Funds Transformative AI Fund), CNC video-game fund, Bpifrance, Réseau Entreprendre, French angel networks; the **French partner** that Erasmus+ KA210 and EU consortia need |
 
 ### Where and who applies
 
@@ -38,6 +39,7 @@ Every call is matched against five **faces** (lines of work). A call only needs 
   - Causality Graphs: methods partner in consortia, NLnet.
   - Research-centre calls go through partners.
   - Non-profit, cultural and space calls: the foundation once registered. Meanwhile SEMF, or a local association created in Las Rozas.
+  - CosmoVentures SASU: French calls (scope `France`), AI-safety funders, and the French partner role in EU consortia. Madrid West geography does not apply to it. Never write the founder's name or their personal domains in the repo; use cosmoventures.fr.
 - **Local registration decides eligibility.** Municipal space and grants require being on that town's Registro Municipal de Asociaciones, with the registered office there. Las Rozas lends rooms only to *associations*. SEMF is probably registered in Valencia (unconfirmed), so it has no Madrid West seat.
 - **Partners, recorded by role and never by name (the repo is public):**
   - An external researcher of Causality Graphs who is a **CSIC PI in computational neuroscience**. They can lead calls as a research centre (e.g. CaixaResearch Health) and provide the PhD profile behind NEOTEC's higher cap.
@@ -104,7 +106,7 @@ python3 -I oracle_server.py [--port 8000]       # local dashboard + voice oracle
 
 Seven tabs. The selected tab and the filters are remembered per viewer. Filters remember which faces you *hid*, so a newly added face always starts visible.
 
-1. **Radar**: KPIs, filters (face, status including **Archive**, scope including Madrid West, verified only, search, sort), deadline timeline, and calls as cards or a table. Each card shows its plan grade, applicant and past winners.
+1. **Radar**: KPIs, filters (face, status including **Archive**, scope including Madrid West and France, type of money: grants/loans/prizes vs **investors (equity)**, verified only, search, sort), deadline timeline, and calls as cards or a table. Each card shows its plan grade, applicant and past winners.
 2. **Estrategia**:
    - "Qué hacer ahora", the same view as `/becas` and `orchestrator.py estado`, computed once in `planner.what_now`;
    - the faces, legal entities and value levels;
@@ -130,7 +132,7 @@ Seven tabs. The selected tab and the filters are remembered per viewer. Filters 
    - references between files, detected from quoted file names in the code (the layer config in `build.py` sits between `# repo-map:` markers so it is not scanned); hover or click a file to light up what it uses and what uses it;
    - the last 12 commits, and the code reviews from `reviews.json` with each finding's status. Add a review there after each one; keep findings open until fixed.
 
-Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causality aqua, BranchOut yellow, Fundación pink, milestones grey. Status always comes with an icon and a label, never colour alone.
+Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causality aqua, BranchOut yellow, Fundación pink, CosmoVentures plum, milestones grey. Status always comes with an icon and a label, never colour alone.
 
 ## Strategy planner and orchestrator
 
@@ -260,12 +262,13 @@ For every closed call, and before recommending any recurring call, find **who wo
 - `verification` is `verified` only when the facts were read on an official page (funder site, BOE/BOCM, BDNS, EU portal). Snippets, blogs and university summaries mean `unverified`. Cite the source in `source`.
 - `amount_min` / `amount_max` are EUR integers, and only when an official source states them. Otherwise use `None`, with the wording in `amount_text`.
 - `id` is a stable slug. A new edition gets a new id (e.g. `fecyt-fcc-2027`).
-- Scopes: `Madrid West | Madrid | Spain | EU | International`.
+- Scopes: `Madrid West | Madrid | Spain | France | EU | International`.
+- Investors are rows with `kind="equity"` (VC funds, business-angel networks, public co-investment, equity crowdfunding), usually `rolling`. Record the track record (portfolio size, average ticket, comparable investees) in `winners`, and attach each to its funder (`u_inversores` for angel networks).
 
 ## Daily run workflow
 
 1. Read `LESSONS.md`, `money.db`, `ROWS` and `strategy.json`.
-2. Search in Spanish and English across all five faces. Start with Madrid West municipalities (BOCM extracts, BDNS, municipal e-offices), then CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BOE, Comunidad de Madrid / madri+d, EIC / Horizon Europe / EU4Health / COST / Erasmus+ / Funding & Tenders, NLnet, foundations, and prizes. Prioritise the gaps named in the latest lesson.
+2. Search in Spanish, English and French across all six faces, **including investors** (VC and impact funds, business-angel networks and forums, CDTI Innvierte, equity crowdfunding, French networks for CosmoVentures). Start with Madrid West municipalities (BOCM extracts, BDNS, municipal e-offices), then CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BOE, Comunidad de Madrid / madri+d, EIC / Horizon Europe / EU4Health / COST / Erasmus+ / Funding & Tenders, NLnet, foundations, and prizes. Prioritise the gaps named in the latest lesson.
 3. Verify candidates on official pages (WebFetch; binary PDFs → `pdftotext -layout`).
 4. Add or update `ROWS`; add a `strategy.json` → `opportunities` entry for calls worth pursuing.
 5. Research winners for newly closed calls and for `winners` entries still marked pending.

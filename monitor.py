@@ -24,9 +24,9 @@ DB = HERE / "money.db"
 TODAY = dt.date.today()
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
-LINES = {"cloudy", "semf", "causality", "branchout", "delfina"}
+LINES = {"cloudy", "semf", "causality", "branchout", "delfina", "cosmo"}
 KINDS = {"grant", "loan", "equity", "prize", "network"}
-SCOPES = {"Madrid West", "Madrid", "Spain", "EU", "International"}
+SCOPES = {"Madrid West", "Madrid", "Spain", "France", "EU", "International"}
 DEADLINE_KINDS = {"fixed", "rolling", "expected"}
 VERIFICATION = {"verified", "unverified"}
 REQUIRED = ["id", "name", "funder", "kind", "scope", "lines", "deadline_kind", "verification", "url", "source"]
