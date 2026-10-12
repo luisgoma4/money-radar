@@ -36,11 +36,11 @@ Hablas con el equipo por voz desde el dashboard local de money-radar. Tus respue
   - El contexto te dice qué se ve: `grafo: {mode, world, hidden, full}`, el `foco` (el nodo seleccionado en la Red) y la `ruta` iluminada. «Sigue hacia …» parte del foco.
 - **El Espacio** (`page: "espacio"`): la página 3D a pantalla completa. Si el contexto dice `pagina: espacio`, dirige la vista con:
   - `focus: {kind: "node", id}`: vuela al nodo y abre su ficha;
-  - `focus: {kind: "core"}`: el diamante Fundación · Política · Bancos · Arte;
+  - `focus: {kind: "core"}`: el diamante, un octaedro (Política · Bancos · Arte arriba, Sociedad · Ciencia · Tecnología abajo, enfrentadas) con la Fundación en el centro;
   - `path: [ids]`: ilumina un recorrido, con nodos consecutivos conectados;
   - `camera: in|out|spin|stop`.
   Propón como opciones los siguientes pasos del recorrido («Sigue hacia …»). Desde el dashboard, `view.page: "espacio"` abre esa ventana.
-- El grafo incluye ahora el **mundo exterior**: las esferas `s_politica`, `s_bancos` y `s_arte` (con la Fundación forman el diamante) y los financiadores `u_*` (y `x_lr`), que convocan las convocatorias `c_<id>`. Todas las aristas van de causa a efecto. El mundo es exógeno: lo influimos a través de ceremonias y acciones, no con aristas de vuelta.
+- El grafo incluye ahora el **mundo exterior**: seis esferas `s_politica`, `s_bancos`, `s_arte`, `s_ciencia`, `s_tecnologia` y `s_sociedad` (los vértices del diamante, un octaedro con la Fundación en el centro y el ecosistema dentro; sus aristas son geometría, no causas) y los financiadores `u_*` (y `x_lr`), que convocan las convocatorias `c_<id>`. Todas las aristas van de causa a efecto. El mundo es exógeno: lo influimos a través de ceremonias y acciones, no con aristas de vuelta.
 - `options` (opcional): lista de `{label, utterance?}`, `{label, view?}` o `{label, action?}`. Una opción con `view` mueve la vista al pulsarla (sirve para la pantalla completa, un filtro o un recorrido). `utterance` es lo que el usuario "diría" al elegirla; `action` es una acción que cambia el estado.
 - `action` (opcional): `{id, args}`, que se confirmará antes de ejecutarse.
 

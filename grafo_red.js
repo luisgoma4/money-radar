@@ -15,8 +15,10 @@
  *
  * Interaction: drag nodes, wheel/pinch zoom, drag the background to pan (2D) or orbit (3D). Hover lights a node
  * and its neighbours (particles travel cause -> effect); click pins the selection and opens its card; the card
- * lists causes and effects (click to follow). Faces in the legend filter. In 3D the diamond (Fundacion + the
- * three world spheres) is pinned at the centre.
+ * lists causes and effects (click to follow). Faces in the legend filter. The diamond is the world figure
+ * (planner.figure): an octahedron whose six vertices are the world spheres, pinned around the Fundacion at the
+ * centre (in 2D seen from above: a hexagon). Our ecosystem is kept inside it; funders and calls outside. Its 12
+ * edges are drawn as frame links: geometry, not causes (no card, no force, no arrow).
  */
 (function () {
   "use strict";
@@ -81,6 +83,8 @@
 
     // ---- shared state ----
     let G = { nodes: [], edges: [] }, meta = {}, nbr = {}, hidden = new Set(), hover = null, sel = null, hl = new Set(), hlLinks = new Set(), route = [];
+    let FIG = null;  // the world figure of the current graph, or null (graph without the diamond)
+    const R3 = 200, R2 = 320;  // vertex distance of the figure in 3D and (before projecting to a hexagon) in 2D
     let dim = 2, fg2 = null, fg3 = null, d2 = { nodes: [], links: [] }, d3 = { nodes: [], links: [] }, by2 = {}, by3 = {};
     const exists = (n) => !(n.status === "planned" || n.status === "proposed");
     const visible = (n) => !(n && n.face && hidden.has(n.face));
@@ -130,27 +134,47 @@
         ctx.globalAlpha = 1;
       })
       .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 2, 0, 2 * Math.PI); ctx.fill(); })
-      .linkColor((l) => hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : alpha(C.axis, 0.7))
-      .linkWidth((l) => (hlLinks.has(key(l)) ? 1.2 : 0.4) + (l.weight ?? 0.5) * (hlLinks.has(key(l)) ? 2.6 : 1.6))
-      .linkLineDash((l) => l.status === "planned" ? [3, 2] : null)
-      .linkDirectionalArrowLength((l) => hlLinks.has(key(l)) ? 5 : 3).linkDirectionalArrowRelPos(1)
+      .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.2 : 0.55) : hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : alpha(C.axis, 0.7))
+      .linkWidth((l) => l.frame ? 1.1 : (hlLinks.has(key(l)) ? 1.2 : 0.4) + (l.weight ?? 0.5) * (hlLinks.has(key(l)) ? 2.6 : 1.6))
+      .linkLineDash((l) => l.frame ? null : l.status === "planned" ? [3, 2] : null)
+      .linkDirectionalArrowLength((l) => l.frame ? 0 : hlLinks.has(key(l)) ? 5 : 3).linkDirectionalArrowRelPos(1)
       .linkDirectionalArrowColor((l) => hlLinks.has(key(l)) ? C.accent : hl.size ? alpha(C.axis, 0.12) : C.axis)
       .linkDirectionalParticles((l) => hlLinks.has(key(l)) ? 2 : 0).linkDirectionalParticleWidth(2.2)
       .linkDirectionalParticleSpeed((l) => 0.004 + (l.weight ?? 0.5) * 0.008).linkDirectionalParticleColor(() => C.accent)
       .onNodeHover((n) => { hover = n ? n.id : null; stage2.style.cursor = n ? "pointer" : "grab"; if (!sel) lightUp(hover); })
       .onNodeClick((n) => select(n.id, false))
       .onBackgroundClick(() => clear())
-      .onNodeDragEnd((n) => { n.fx = undefined; n.fy = undefined; })  // released nodes float back, as in Obsidian
+      .onNodeDragEnd((n) => { if (!n.pin) { n.fx = undefined; n.fy = undefined; } })  // released nodes float back, as in Obsidian
       .autoPauseRedraw(false)  // hover light and particles need frames after the layout settles
       .cooldownTicks(260).d3VelocityDecay(0.32);
-    forces(fg2);
+    forces(fg2, 2);
     let fitted2 = false;
     fg2.onEngineStop(() => { if (!fitted2) { fitted2 = true; fg2.zoomToFit(500, 40, visible); } });
 
-    function forces(fg) {
+    function forces(fg, d) {
       fg.d3Force("charge").strength((n) => -40 - n.r * 14).distanceMax(420);
-      fg.d3Force("link").distance((l) => 26 + (1 - (l.weight ?? 0.5)) * 46 + (l.source.r || 5) + (l.target.r || 5)).strength((l) => 0.15 + (l.weight ?? 0.5) * 0.5);
+      fg.d3Force("link").distance((l) => 26 + (1 - (l.weight ?? 0.5)) * 46 + (l.source.r || 5) + (l.target.r || 5))
+        .strength((l) => l.frame || l.source.kind === "sphere" || l.target.kind === "sphere" ? 0 : 0.15 + (l.weight ?? 0.5) * 0.5);
       fg.d3Force("collide", collide());
+      fg.d3Force("figure", containment(d));
+    }
+    function containment(d) {  // inside the figure: our ecosystem; outside: funders (by their sphere) and calls
+      let nodes = [];
+      const OUT = { funder: 1.08, call: 1.3 };
+      const force = (a) => {
+        if (!FIG) return;
+        const vr = d === 3 ? R3 : R2 * Math.sqrt(2 / 3), inner = d === 3 ? R3 / Math.sqrt(3) : vr * Math.sqrt(3) / 2;
+        for (const n of nodes) {
+          if (n.pin || n.x === undefined) continue;
+          const z = d === 3 ? n.z || 0 : 0, r = Math.hypot(n.x, n.y, z) || 1;
+          const lo = OUT[n.kind] ? OUT[n.kind] * vr : 0, hi = OUT[n.kind] ? Infinity : inner * 0.82;
+          const k = r > hi ? hi / r : r < lo ? lo / r : 1;  // hard bound: projected back onto the limit
+          if (k === 1) continue;
+          n.x *= k; n.y *= k; if (d === 3) n.z = z * k;
+        }
+      };
+      force.initialize = (ns) => { nodes = ns; };
+      return force;
     }
     function collide() {  // tiny collision force (no d3 import): keeps nodes and their labels from piling up
       let nodes = [];
@@ -182,7 +206,7 @@
         .onBackgroundClick(() => clear())
         .onNodeDragEnd((n) => { if (!n.pin) { n.fx = n.fy = n.fz = undefined; } })
         .cooldownTicks(300).d3VelocityDecay(0.3);
-      forces(fg3);
+      forces(fg3, 3);
       fg3.onEngineStop(() => { if (!fitted3) { fitted3 = true; fg3.zoomToFit(600, 30, visible); } });
       paint3();
     }
@@ -190,9 +214,9 @@
       if (!fg3) return;
       const lit = (l) => hlLinks.has(key(l));
       fg3.nodeColor((n) => { const c = colorOf(n), base = exists(n) && !n.pending ? 1 : 0.32; return alpha(c, hl.size && !hl.has(n.id) ? base * 0.15 : base); })
-        .linkColor((l) => lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : l.status === "planned" ? 0.35 : 0.7))
-        .linkWidth((l) => lit(l) ? 0.6 + (l.weight ?? 0.5) * 1.6 : 0)
-        .linkDirectionalArrowLength((l) => lit(l) ? 5 : 2.5)
+        .linkColor((l) => l.frame ? alpha(C.sphere, hl.size ? 0.25 : 0.7) : lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : l.status === "planned" ? 0.35 : 0.7))
+        .linkWidth((l) => l.frame ? 1.2 : lit(l) ? 0.6 + (l.weight ?? 0.5) * 1.6 : 0)
+        .linkDirectionalArrowLength((l) => l.frame ? 0 : lit(l) ? 5 : 2.5)
         .linkDirectionalArrowColor((l) => lit(l) ? C.accent : alpha(C.axis, hl.size ? 0.08 : 0.7))
         .linkDirectionalParticles((l) => lit(l) ? 2 : 0).linkDirectionalParticleColor(() => C.accent)
         .nodeVisibility(visible).linkVisibility(lvis);
@@ -217,13 +241,18 @@
         ctx.fillStyle = C.ink; ctx.fillText(txt, p.x, p.y + 9);
       }
     }
-    function pinDiamond(nodes) {  // the tetrahedron at the centre: Fundacion on top, the three spheres as the base
-      const R = 70, spheres = ["s_politica", "s_bancos", "s_arte"].filter((i) => nodes.some((n) => n.id === i));
-      nodes.forEach((n) => { n.pin = false; });
-      if (!spheres.length) return;
-      const at = { e_fund: [0, R, 0] };
-      spheres.forEach((id, i) => { const a = (i / 3) * Math.PI * 2, r = R * Math.sqrt(8) / 3; at[id] = [r * Math.cos(a), -R / 3, r * Math.sin(a)]; });
-      nodes.forEach((n) => { if (at[n.id]) { [n.fx, n.fy, n.fz] = at[n.id]; n.pin = true; } else { n.fx = n.fy = n.fz = undefined; } });
+    function pinFigure(nodes, d) {  // the octahedron: spheres on its vertices, the Fundacion at the centre
+      nodes.forEach((n) => { if (n.pin) { n.fx = n.fy = n.fz = undefined; } n.pin = false; });
+      if (!FIG) return;
+      const at = { [FIG.centre || "e_fund"]: [0, 0, 0] };
+      Object.entries(FIG.vertices).forEach(([id, v]) => {  // 2D: seen from above, the six vertices form a hexagon
+        at[id] = d === 3 ? [v[0] * R3, v[1] * R3, v[2] * R3] : [v[0] * R2, v[2] * R2, 0];
+      });
+      nodes.forEach((n) => {
+        const p = at[n.id]; if (!p) return;
+        n.x = n.fx = p[0]; n.y = n.fy = p[1]; if (d === 3) n.z = n.fz = p[2];
+        n.pin = true;
+      });
     }
 
     // ---- switching dimension ----
@@ -364,13 +393,14 @@
       const keep = {};
       prev.nodes.forEach((n) => { keep[n.id] = { x: n.x, y: n.y, z: n.z }; });  // switching copies keeps the layout steady
       const nodes = G.nodes.map((n) => Object.assign({}, n, keep[n.id] || {}));
-      const links = G.edges.map((e) => Object.assign({}, e, { source: e.from, target: e.to }));
+      const links = G.edges.map((e) => Object.assign({}, e, { source: e.from, target: e.to }))
+        .concat(FIG ? FIG.frame.map(([a, b]) => ({ source: a, target: b, frame: true })) : []);
       return { data: { nodes, links }, by: Object.fromEntries(nodes.map((n) => [n.id, n])), kept: Object.keys(keep).length > 0 };
     }
     function build3() {
       if (!fg3) return;
       const c = copy(d3); d3 = c.data; by3 = c.by; fitted3 = c.kept;
-      pinDiamond(d3.nodes);
+      pinFigure(d3.nodes, 3);
       fg3.graphData(d3); paint3();
     }
     function setData(g) {
@@ -380,10 +410,12 @@
       edges.forEach((e) => { deg[e.from] = (deg[e.from] || 0) + 1; deg[e.to] = (deg[e.to] || 0) + 1; });
       Object.values(meta).forEach((n) => { n.deg = deg[n.id] || 0; n.r = radius(n); });
       G = { nodes: Object.values(meta), edges };
+      FIG = g.figure && Object.keys(g.figure.vertices).every((i) => meta[i]) ? g.figure : null;
       nbr = {};
       edges.forEach((e) => { (nbr[e.from] = nbr[e.from] || []).push([e.to, e]); (nbr[e.to] = nbr[e.to] || []).push([e.from, e]); });
       list.replaceChildren(...G.nodes.map((n) => el("option", { value: n.label })));
       const c = copy(d2); d2 = c.data; by2 = c.by; fitted2 = c.kept;
+      pinFigure(d2.nodes, 2);
       fg2.graphData(d2);
       build3();
       route = route.filter((i) => meta[i]);

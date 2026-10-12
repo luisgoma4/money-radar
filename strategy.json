@@ -1511,6 +1511,30 @@
         "status": "exists",
         "face": "cosmo",
         "detail": "Línea artística de la fundadora (voz y violín, región de París); sin entidad propia."
+      },
+      {
+        "id": "s_ciencia",
+        "label": "Ciencia",
+        "type": "sphere",
+        "status": "external",
+        "face": null,
+        "detail": "Mundo científico: universidades, centros de investigación, sociedades científicas y agencias de I+D. Da método, reputación y redes."
+      },
+      {
+        "id": "s_tecnologia",
+        "label": "Tecnología",
+        "type": "sphere",
+        "status": "external",
+        "face": null,
+        "detail": "Mundo tecnológico: startups, industria digital, IA y software abierto. Da herramientas, mercado y capital de riesgo."
+      },
+      {
+        "id": "s_sociedad",
+        "label": "Sociedad",
+        "type": "sphere",
+        "status": "external",
+        "face": null,
+        "detail": "La ciudadanía: familias, asociaciones, voluntariado y opinión pública. Es la demanda de fondo: lo que la política y la cultura acaban atendiendo."
       }
     ],
     "edges": [
@@ -2080,8 +2104,163 @@
         "label": "tracción y caja",
         "status": "planned",
         "weight": 0.4
+      },
+      {
+        "from": "s_sociedad",
+        "to": "s_politica",
+        "label": "demanda y voto",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_sociedad",
+        "to": "s_arte",
+        "label": "público y tradición cultural",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "s_politica",
+        "to": "s_ciencia",
+        "label": "financiación pública de la I+D",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_ciencia",
+        "to": "s_tecnologia",
+        "label": "transferencia de conocimiento",
+        "status": "exists",
+        "weight": 0.7
+      },
+      {
+        "from": "s_bancos",
+        "to": "s_tecnologia",
+        "label": "capital riesgo",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_ciencia",
+        "to": "s_arte",
+        "label": "confluencia arte-ciencia",
+        "status": "exists",
+        "weight": 0.3
+      },
+      {
+        "from": "s_ciencia",
+        "to": "e_fund",
+        "label": "misión científica y patronos académicos",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "s_tecnologia",
+        "to": "e_fund",
+        "label": "herramientas y socios tecnológicos",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "s_sociedad",
+        "to": "e_fund",
+        "label": "fin social, voluntariado y donantes",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "s_ciencia",
+        "to": "f_semf",
+        "label": "frontera de la investigación",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_ciencia",
+        "to": "f_cg",
+        "label": "métodos causales",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_ciencia",
+        "to": "f_cosmo",
+        "label": "astrofísica",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_ciencia",
+        "to": "x_csic",
+        "label": "investigación",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_ciencia",
+        "to": "x_uned",
+        "label": "docencia en Física",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "s_tecnologia",
+        "to": "f_bo",
+        "label": "ecosistema de startups",
+        "status": "exists",
+        "weight": 0.7
+      },
+      {
+        "from": "s_tecnologia",
+        "to": "f_cg",
+        "label": "IA y datos de salud",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "s_tecnologia",
+        "to": "f_cosmo",
+        "label": "evaluación de IA",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_sociedad",
+        "to": "f_cloudy",
+        "label": "familias y salud",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_sociedad",
+        "to": "e_asoc",
+        "label": "tejido asociativo local",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "s_sociedad",
+        "to": "f_bo",
+        "label": "demanda de vivienda (coliving)",
+        "status": "exists",
+        "weight": 0.3
       }
-    ]
+    ],
+    "figure": {
+      "_doc": "Figura del mundo: un octaedro con las seis esferas en los vértices y la Fundación en el centro; el ecosistema queda dentro, los financiadores y las convocatorias fuera. top es un triángulo y bottom el opuesto (bottom[i] es el vértice opuesto a top[i]). Las 12 aristas del octaedro son geometría, no causas: las relaciones causales entre esferas van en edges y forman un DAG.",
+      "shape": "octaedro",
+      "centre": "e_fund",
+      "top": [
+        "s_politica",
+        "s_bancos",
+        "s_arte"
+      ],
+      "bottom": [
+        "s_sociedad",
+        "s_ciencia",
+        "s_tecnologia"
+      ]
+    }
   },
   "ceremony": {
     "_doc": "Ceremonia del oráculo: reunión periódica del ecosistema que dirige Claude como oráculo (skill /ceremonia). Las fases se muestran en la pestaña Oráculo.",
@@ -2129,7 +2308,9 @@
       "id": "u_ce",
       "label": "Comisión Europea",
       "spheres": {
-        "s_politica": 0.9
+        "s_politica": 0.9,
+        "s_ciencia": 0.5,
+        "s_tecnologia": 0.5
       },
       "calls": [
         "eic-accelerator-2026-11",
@@ -2144,7 +2325,8 @@
       "id": "u_cost",
       "label": "COST Association",
       "spheres": {
-        "s_politica": 0.8
+        "s_politica": 0.8,
+        "s_ciencia": 0.8
       },
       "calls": [
         "cost-oc-2026-1"
@@ -2154,7 +2336,8 @@
       "id": "u_nlnet",
       "label": "NLnet (fondos UE)",
       "spheres": {
-        "s_politica": 0.6
+        "s_politica": 0.6,
+        "s_tecnologia": 0.8
       },
       "calls": [
         "nlnet-2026-11"
@@ -2164,7 +2347,9 @@
       "id": "u_fecyt",
       "label": "FECYT",
       "spheres": {
-        "s_politica": 0.9
+        "s_politica": 0.9,
+        "s_ciencia": 0.8,
+        "s_sociedad": 0.4
       },
       "calls": [
         "fecyt-fcc-2026"
@@ -2175,7 +2360,8 @@
       "label": "CDTI",
       "spheres": {
         "s_politica": 0.8,
-        "s_bancos": 0.3
+        "s_bancos": 0.3,
+        "s_tecnologia": 0.7
       },
       "calls": [
         "cdti-neotec-2026",
@@ -2187,7 +2373,8 @@
       "label": "ENISA",
       "spheres": {
         "s_bancos": 0.7,
-        "s_politica": 0.6
+        "s_politica": 0.6,
+        "s_tecnologia": 0.4
       },
       "calls": [
         "enisa-prestamo-participativo"
@@ -2197,7 +2384,8 @@
       "id": "u_vivienda",
       "label": "Ministerio de Vivienda",
       "spheres": {
-        "s_politica": 0.9
+        "s_politica": 0.9,
+        "s_sociedad": 0.6
       },
       "calls": [
         "plan-vivienda-2026-coliving"
@@ -2219,7 +2407,9 @@
       "id": "u_madrimasd",
       "label": "Fundación madri+d",
       "spheres": {
-        "s_politica": 0.7
+        "s_politica": 0.7,
+        "s_ciencia": 0.6,
+        "s_tecnologia": 0.5
       },
       "calls": [
         "healthstart-madrimasd",
@@ -2267,7 +2457,9 @@
       "label": "Fundación «la Caixa»",
       "spheres": {
         "s_bancos": 0.9,
-        "s_arte": 0.3
+        "s_arte": 0.3,
+        "s_ciencia": 0.5,
+        "s_sociedad": 0.6
       },
       "calls": [
         "caixaresearch-health-next"
@@ -2277,7 +2469,8 @@
       "id": "u_carasso",
       "label": "Fundación Carasso",
       "spheres": {
-        "s_arte": 0.9
+        "s_arte": 0.9,
+        "s_sociedad": 0.4
       },
       "calls": [
         "carasso-componer-saberes"
@@ -2287,7 +2480,8 @@
       "id": "u_inversores",
       "label": "Inversores (business angels)",
       "spheres": {
-        "s_bancos": 0.8
+        "s_bancos": 0.8,
+        "s_tecnologia": 0.6
       },
       "calls": [
         "lasrozas-innova-foro",
@@ -2300,7 +2494,8 @@
       "id": "u_sabadell",
       "label": "Banco Sabadell (BStartup)",
       "spheres": {
-        "s_bancos": 0.9
+        "s_bancos": 0.9,
+        "s_tecnologia": 0.4
       },
       "calls": [
         "bstartup-inversion",
@@ -2311,7 +2506,8 @@
       "id": "u_bolsasocial",
       "label": "La Bolsa Social (crowdfunding de impacto)",
       "spheres": {
-        "s_bancos": 0.6
+        "s_bancos": 0.6,
+        "s_sociedad": 0.7
       },
       "calls": [
         "bolsa-social-equity"
@@ -2321,7 +2517,8 @@
       "id": "u_ship2b",
       "label": "Fundación Ship2B (fondos de impacto)",
       "spheres": {
-        "s_bancos": 0.7
+        "s_bancos": 0.7,
+        "s_sociedad": 0.7
       },
       "calls": [
         "ship2b-montana"
@@ -2332,7 +2529,8 @@
       "label": "Bpifrance",
       "spheres": {
         "s_politica": 0.8,
-        "s_bancos": 0.5
+        "s_bancos": 0.5,
+        "s_tecnologia": 0.6
       },
       "calls": [
         "bpifrance-bourse-french-tech"
@@ -2342,7 +2540,8 @@
       "id": "u_reseau",
       "label": "Réseau Entreprendre Paris",
       "spheres": {
-        "s_bancos": 0.6
+        "s_bancos": 0.6,
+        "s_tecnologia": 0.3
       },
       "calls": [
         "reseau-entreprendre-paris-start"
@@ -2352,7 +2551,9 @@
       "id": "u_eafunds",
       "label": "EA Funds (filantropía de IA)",
       "spheres": {
-        "s_bancos": 0.5
+        "s_bancos": 0.5,
+        "s_tecnologia": 0.7,
+        "s_sociedad": 0.3
       },
       "calls": [
         "taif-ea-funds"
@@ -2363,7 +2564,8 @@
       "label": "CNC (Centre national du cinéma)",
       "spheres": {
         "s_politica": 0.7,
-        "s_arte": 0.8
+        "s_arte": 0.8,
+        "s_tecnologia": 0.4
       },
       "calls": [
         "cnc-fajv-preproduction"

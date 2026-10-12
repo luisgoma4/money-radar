@@ -261,6 +261,27 @@
    "community_name": "existe"
   },
   {
+   "id": "s_ciencia",
+   "label": "Ciencia",
+   "source_file": "Esferas/esfera",
+   "source_location": "esfera",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "s_tecnologia",
+   "label": "Tecnologia",
+   "source_file": "Esferas/esfera",
+   "source_location": "esfera",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "s_sociedad",
+   "label": "Sociedad",
+   "source_file": "Esferas/esfera",
+   "source_location": "esfera",
+   "community_name": "socio externo"
+  },
+  {
    "id": "u_ce",
    "label": "Comision Europea",
    "source_file": "Financiadores/financiador",
@@ -1327,10 +1348,164 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "s_sociedad",
+   "target": "s_politica",
+   "weight": 0.6,
+   "relation": "demanda y voto (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "s_arte",
+   "weight": 0.4,
+   "relation": "publico y tradicion cultural (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "s_ciencia",
+   "weight": 0.6,
+   "relation": "financiacion publica de la I+D (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "s_tecnologia",
+   "weight": 0.7,
+   "relation": "transferencia de conocimiento (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_bancos",
+   "target": "s_tecnologia",
+   "weight": 0.5,
+   "relation": "capital riesgo (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "s_arte",
+   "weight": 0.3,
+   "relation": "confluencia arte-ciencia (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "e_fund",
+   "weight": 0.6,
+   "relation": "mision cientifica y patronos academicos (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "e_fund",
+   "weight": 0.3,
+   "relation": "herramientas y socios tecnologicos (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "e_fund",
+   "weight": 0.6,
+   "relation": "fin social, voluntariado y donantes (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "f_semf",
+   "weight": 0.6,
+   "relation": "frontera de la investigacion (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "f_cg",
+   "weight": 0.5,
+   "relation": "metodos causales (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "f_cosmo",
+   "weight": 0.5,
+   "relation": "astrofisica (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "x_csic",
+   "weight": 0.6,
+   "relation": "investigacion (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "x_uned",
+   "weight": 0.4,
+   "relation": "docencia en Fisica (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "f_bo",
+   "weight": 0.7,
+   "relation": "ecosistema de startups (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "f_cg",
+   "weight": 0.4,
+   "relation": "IA y datos de salud (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "f_cosmo",
+   "weight": 0.5,
+   "relation": "evaluacion de IA (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "f_cloudy",
+   "weight": 0.6,
+   "relation": "familias y salud (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "e_asoc",
+   "weight": 0.4,
+   "relation": "tejido asociativo local (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "f_bo",
+   "weight": 0.3,
+   "relation": "demanda de vivienda (coliving) (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "s_politica",
    "target": "u_ce",
    "weight": 0.9,
    "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "u_ce",
+   "weight": 0.5,
+   "relation": "canaliza (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "u_ce",
+   "weight": 0.5,
+   "relation": "canaliza (peso 0.50)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1383,6 +1558,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_ciencia",
+   "target": "u_cost",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_cost",
    "target": "c_cost-oc-2026-1",
    "weight": 1.0,
@@ -1397,6 +1579,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_tecnologia",
+   "target": "u_nlnet",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_nlnet",
    "target": "c_nlnet-2026-11",
    "weight": 1.0,
@@ -1408,6 +1597,20 @@
    "target": "u_fecyt",
    "weight": 0.9,
    "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "u_fecyt",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "u_fecyt",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1429,6 +1632,13 @@
    "target": "u_cdti",
    "weight": 0.3,
    "relation": "canaliza (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "u_cdti",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1460,6 +1670,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_tecnologia",
+   "target": "u_enisa",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_enisa",
    "target": "c_enisa-prestamo-participativo",
    "weight": 1.0,
@@ -1471,6 +1688,13 @@
    "target": "u_vivienda",
    "weight": 0.9,
    "relation": "canaliza (peso 0.90)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "u_vivienda",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1513,6 +1737,20 @@
    "target": "u_madrimasd",
    "weight": 0.7,
    "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "u_madrimasd",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "u_madrimasd",
+   "weight": 0.5,
+   "relation": "canaliza (peso 0.50)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1621,6 +1859,20 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_ciencia",
+   "target": "u_lacaixa",
+   "weight": 0.5,
+   "relation": "canaliza (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "u_lacaixa",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_lacaixa",
    "target": "c_caixaresearch-health-next",
    "weight": 1.0,
@@ -1635,6 +1887,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_sociedad",
+   "target": "u_carasso",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_carasso",
    "target": "c_carasso-componer-saberes",
    "weight": 1.0,
@@ -1646,6 +1905,13 @@
    "target": "u_inversores",
    "weight": 0.8,
    "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "u_inversores",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1684,6 +1950,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_tecnologia",
+   "target": "u_sabadell",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_sabadell",
    "target": "c_bstartup-inversion",
    "weight": 1.0,
@@ -1705,6 +1978,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_sociedad",
+   "target": "u_bolsasocial",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_bolsasocial",
    "target": "c_bolsa-social-equity",
    "weight": 1.0,
@@ -1713,6 +1993,13 @@
   },
   {
    "source": "s_bancos",
+   "target": "u_ship2b",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
    "target": "u_ship2b",
    "weight": 0.7,
    "relation": "canaliza (peso 0.70)",
@@ -1740,6 +2027,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_tecnologia",
+   "target": "u_bpifrance",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_bpifrance",
    "target": "c_bpifrance-bourse-french-tech",
    "weight": 1.0,
@@ -1754,6 +2048,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_tecnologia",
+   "target": "u_reseau",
+   "weight": 0.3,
+   "relation": "canaliza (peso 0.30)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "u_reseau",
    "target": "c_reseau-entreprendre-paris-start",
    "weight": 1.0,
@@ -1765,6 +2066,20 @@
    "target": "u_eafunds",
    "weight": 0.5,
    "relation": "canaliza (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "u_eafunds",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_sociedad",
+   "target": "u_eafunds",
+   "weight": 0.3,
+   "relation": "canaliza (peso 0.30)",
    "confidence": "EXTRACTED"
   },
   {
@@ -1786,6 +2101,13 @@
    "target": "u_cnc",
    "weight": 0.8,
    "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_tecnologia",
+   "target": "u_cnc",
+   "weight": 0.4,
+   "relation": "canaliza (peso 0.40)",
    "confidence": "EXTRACTED"
   },
   {

@@ -509,7 +509,7 @@ def intent(text, ctx, st):
         return _reply("Quito el diamante y los financiadores: es el grafo de antes, solo con lo nuestro.", view={**graph_tab, "world": False},
                       options=[{"label": "Volver a ponerlo", "view": {**graph_tab, "world": True}}])
     if short and re.search(r"\b(muestra|pon|ensename|enciende|activa|con|vuelve a poner|recupera)\b.*\b" + WORLD_WORDS + r"\b", t) and not re.search(r"\b(vuelve|ve|llevame) (al|a el)\b", t):
-        return _reply("Pongo el diamante: Política, Bancos y Arte, con sus financiadores.", view={**graph_tab, "world": True},
+        return _reply("Pongo el diamante: las seis esferas, Política, Bancos, Arte, Ciencia, Tecnología y Sociedad, con sus financiadores.", view={**graph_tab, "world": True},
                       options=[{"label": "Ir al diamante", "view": {**graph_tab, "focus": {"kind": "core"}}}, {"label": "Quitarlo", "view": {**graph_tab, "world": False}}])
     if short and "pantalla completa" in t:
         if page == "espacio":
@@ -561,7 +561,7 @@ def intent(text, ctx, st):
         return _reply("Abro el Espacio en 3D.", view={"page": "espacio", "focus": {"kind": "core"}},
                       options=[{"label": "Abrir el Espacio 3D", "view": {"page": "espacio", "focus": {"kind": "core"}}}])
     if re.fullmatch(r"(vuelve|volver|ve|llevame) (al|a el) (diamante|centro|nucleo|principio)|vista general|el diamante", t):
-        return _reply("El diamante: la Fundación arriba y Política, Bancos y Arte en la base.", view={"focus": {"kind": "core"}},
+        return _reply("El diamante: un octaedro con Política, Bancos y Arte arriba, Sociedad, Ciencia y Tecnología abajo, y la Fundación en el centro, con todo el ecosistema dentro.", view={"focus": {"kind": "core"}},
                       options=[{"label": "Ir a Política", "utterance": "ve a política"}, {"label": "Ir a Bancos", "utterance": "ve a bancos"},
                                {"label": "Ir a Arte", "utterance": "ve a arte"}, {"label": "Ir a la Fundación", "utterance": "ve a la fundación"}])
     cam = {"acercate": "in", "mas cerca": "in", "zoom": "in", "alejate": "out", "mas lejos": "out", "gira": "spin", "rota": "spin",

@@ -19,6 +19,7 @@ Value scores are planning judgements documented in strategy.json, not amounts.
 
 import datetime as dt
 import json
+import math
 import unicodedata
 from pathlib import Path
 
@@ -275,6 +276,28 @@ def funder_edges(strategy):
     return nodes, edges
 
 
+def figure(strategy, ids):
+    """The world figure: an octahedron whose vertices are the world spheres, with the centre node (the Fundación)
+    inside. strategy.json -> graph.figure: `top` is one triangle and `bottom` the opposite one (bottom[i] faces
+    top[i]). Returns unit vertices (y up), the 12 frame edges (geometry, not causes) and the centre, or None."""
+    fig = strategy.get("graph", {}).get("figure") or {}
+    top, bottom = fig.get("top", []), fig.get("bottom", [])
+    verts, opposite = {}, {}
+    for i, sid in enumerate(top):
+        a = math.pi / 2 + i * 2 * math.pi / 3
+        v = [math.sqrt(2 / 3) * math.cos(a), 1 / math.sqrt(3), math.sqrt(2 / 3) * math.sin(a)]
+        verts[sid] = [round(x, 4) for x in v]
+        if i < len(bottom):
+            verts[bottom[i]] = [round(-x, 4) for x in v]
+            opposite[sid], opposite[bottom[i]] = bottom[i], sid
+    verts = {k: v for k, v in verts.items() if k in ids}
+    if not verts:
+        return None
+    keys = list(verts)
+    frame = [[a, b] for i, a in enumerate(keys) for b in keys[i + 1:] if opposite.get(a) != b]
+    return {"shape": fig.get("shape", "octaedro"), "centre": fig.get("centre"), "vertices": verts, "frame": frame}
+
+
 def without_world(strategy):
     """The strategy as it was before the diamond: no world spheres, no funders (and no edges touching them)."""
     g = strategy.get("graph", {})
@@ -346,7 +369,7 @@ def ecosystem(strategy, plans, ranking, milestones, opps):
               for x in (e["from"], e["to"])}
     for n in nodes:
         n["pending"] = n["kind"] == "partner" and n["id"] not in linked
-    return {"columns": g.get("columns", []), "nodes": nodes, "edges": edges}
+    return {"columns": g.get("columns", []), "nodes": nodes, "edges": edges, "figure": figure(strategy, ids)}
 
 
 # ---------------------------------------------------------------- causal analysis
@@ -450,8 +473,9 @@ def causal_summary(eco):
     order, cyc = topo_order(eco)
     f = flows(eco, calls)
     _, pa = _links(eco)
-    # A mediator sits between causes and calls: sources (no parents, e.g. the world spheres) are causes, not mediators.
-    inner = {n: v for n, v in f.items() if n not in calls and kind[n] != "milestone" and v > 0 and pa.get(n)}
+    # A mediator sits between causes and calls: sources (no parents) and the world spheres (exogenous, even when one
+    # feeds another, e.g. Sociedad -> Política) are causes, not mediators.
+    inner = {n: v for n, v in f.items() if n not in calls and kind[n] not in ("milestone", "sphere") and v > 0 and pa.get(n)}
     top = max(inner.values() or [1]) or 1
     mediators = [{"id": n, "label": label[n], "kind": kind[n], "flow": round(v / top, 3)}
                  for n, v in sorted(inner.items(), key=lambda kv: -kv[1])][:10]
@@ -645,6 +669,18 @@ def check(strategy, opp_ids):
         if not 0 <= e.get("weight", 0.5) <= 1:
             problems.append(f"graph edge {e['from']}->{e['to']}: weight must be 0..1")
     sphere_ids = {n["id"] for n in g.get("nodes", []) if n.get("type") == "sphere"}
+    fig = g.get("figure")
+    if fig:
+        corners = fig.get("top", []) + fig.get("bottom", [])
+        if len(fig.get("top", [])) != 3 or len(fig.get("bottom", [])) != 3 or len(set(corners)) != 6:
+            problems.append("graph figure: top and bottom must be two triangles of 3 different spheres")
+        for sid in corners:
+            if sid not in sphere_ids:
+                problems.append(f"graph figure: {sid} is not a sphere node")
+        for sid in sphere_ids - set(corners):
+            problems.append(f"graph figure: sphere {sid} is not a vertex of the figure")
+        if fig.get("centre") and fig["centre"] not in nodes:
+            problems.append(f"graph figure: centre {fig['centre']} missing in graph")
     funded = set()
     for f in strategy.get("funders", []):
         funded.update(f.get("calls", []))
