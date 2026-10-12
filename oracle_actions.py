@@ -499,8 +499,9 @@ def intent(text, ctx, st):
     # Only short commands: a longer sentence ("show me the path to X and leave only Y") goes to Claude, which can combine them.
     graph_tab = {} if page == "espacio" else {"tab": "graph"}
     short = len(t.split()) <= 7
-    if short and re.search(r"\b(vista|modo|cambia a|pon|ver|muestra|ensename)\b.*\b(red|obsidian|columnas|en 3d|tres de)$", t) and page != "espacio":
-        mode = "net" if re.search(r"\b(red|obsidian)\b", t) else "2d" if "columnas" in t else "3d"
+    if short and re.search(r"\b(vista|modo|cambia a|pon|ver|muestra|ensename)\b.*\b(red|obsidian|columnas|en 3d|tres de|en 2d|dos de)$", t) and page != "espacio":
+        # One switch, the same as the page's "Red | 3D | Columnas" control: "en 2D" is the Red (2D), not the columns.
+        mode = "net" if re.search(r"\b(red|obsidian|2d|dos de)\b", t) else "2d" if "columnas" in t else "3d"
         say = {"net": "La Red: arrastra nodos, acerca con la rueda y pulsa uno para ver su ficha.",
                "2d": "Las columnas, de causa a efecto.", "3d": "El grafo en 3D, con el diamante en el centro."}[mode]
         return _reply(say, view={"tab": "graph", "mode": mode},

@@ -3,15 +3,23 @@
  * (WebGL, loaded only the first time 3D is used). Both share one state: selection and card, route, face
  * filters, search, full screen; switching dimension keeps all of it.
  *
- *   const net = GrafoRed.mount(container, { faces, onOpenCall(id), onDim(dim) });
+ *   const net = GrafoRed.mount(container, { faces, onOpenCall(id), onDim(dim), onDimRequest(dim), dimButton });
  *   net.setData(ecosystem)   // { nodes:[{id,label,kind,status,face,detail,pending}], edges:[{from,to,label,weight,status}] }
- *   net.dim(2|3)             // switch engine (returns a promise)
+ *   net.dim(2|3)             // switch engine; resolves true when this request took effect (false: 3D failed to load,
+ *                            // or a later request superseded it). A no-op when already in that dimension.
  *   net.focus(id)            // select a node, fly to it, open its card
  *   net.path([ids])          // light a route (consecutive nodes), frame it, open the last node's card
  *   net.filter({hide|only|show: [faces]} | "all"), net.fit(), net.fullscreen(on?)  // fullscreen needs a user gesture
  *   net.camera("in"|"out"|"spin"|"stop")
  *   net.state()              // {dim, selected, path, hidden, full}: what the oracle is told the user sees
  *   net.clear()
+ *
+ * Switching dimension has ONE source of truth: the host. The in-view 3D button does not switch by itself when the
+ * host passes onDimRequest(dim): it asks the host, which switches through its own control (the dashboard's
+ * "Red | 3D | Columnas") and calls net.dim(). onDim(dim) reports every dimension actually reached (including a
+ * fallback to 2D when the 3D library fails to load), so the host's control never disagrees with the view.
+ * dimButton: "always" (default) or "full": the in-view 3D button is shown only in full screen, where the host's
+ * controls are out of sight. It is a toggle (aria-pressed = in 3D).
  *
  * Interaction: drag nodes, wheel/pinch zoom, drag the background to pan (2D) or orbit (3D). Hover lights a node
  * and its neighbours (particles travel cause -> effect); click pins the selection and opens its card; the card
@@ -56,7 +64,7 @@
     const labels = el("canvas", { class: "net-labels", hidden: true, "aria-hidden": "true" });
     const search = el("input", { type: "search", class: "net-search", placeholder: "Buscar nodo…", "aria-label": "Buscar un nodo del grafo", list: "net-list" });
     const list = el("datalist", { id: "net-list" });
-    const btnDim = el("button", { type: "button", class: "net-btn net-dim", title: "Ver en 3D", "aria-label": "Cambiar entre 2D y 3D" }, "3D");
+    const btnDim = el("button", { type: "button", class: "net-btn net-dim", title: "Ver en 3D", "aria-label": "Ver el grafo en 3D", "aria-pressed": "false" }, "3D");
     const btnFit = el("button", { type: "button", class: "net-btn", title: "Encajar todo", "aria-label": "Encajar todo el grafo" }, "⤧");
     const btnFull = el("button", { type: "button", class: "net-btn", title: "Pantalla completa", "aria-label": "Ver el grafo a pantalla completa", "aria-pressed": "false" }, "⛶");
     const tools = el("div", { class: "net-tools" }, search, list, btnDim, btnFit, btnFull);
@@ -153,7 +161,7 @@
       .warmupTicks(160).cooldownTicks(260).d3VelocityDecay(0.32);  // warm-up: the graph appears settled
     forces(fg2, 2);
     let fitted2 = false;
-    fg2.onEngineStop(() => { if (!fitted2) { fitted2 = true; fg2.zoomToFit(500, FIG ? 70 : 40, visible); } });
+    fg2.onEngineStop(() => { if (!fitted2) { fitted2 = true; if (dim === 2) refocus(500); } });
 
     function forces(fg, d) {
       // World nodes (spheres, funders) neither push nor pull ours: our graph lays out as it does without the world,
@@ -266,7 +274,8 @@
       forces(fg3, 3);
       // Oblique view: with the octahedron the three orthogonal axes must all be visible (not one seen end-on).
       fg3.cameraPosition({ x: 900, y: 570, z: 1320 }, { x: 0, y: 0, z: 0 });
-      fg3.onEngineStop(() => { if (!fitted3) { fitted3 = true; fg3.zoomToFit(600, FIG ? 60 : 30, visible); } });
+      // First layout of this copy: frame what the user was looking at (route, selection or everything).
+      fg3.onEngineStop(() => { if (!fitted3) { fitted3 = true; if (dim === 3) refocus(600); } });
       paint3();
     }
     function paint3() {  // 3D accessors are evaluated once: re-set them so the light, filters and theme apply
@@ -281,8 +290,11 @@
         .nodeVisibility(visible).linkVisibility(lvis);
     }
     // Labels in 3D: projected each frame onto a 2D overlay (lit nodes, the selection, the hubs).
+    // One loop at most (every dim(3) call used to start another one), and only while 3D is on screen.
+    let labelLoop = false, onScreen = true;
+    function startLabels() { if (!labelLoop && dim === 3 && fg3 && onScreen) { labelLoop = true; requestAnimationFrame(drawLabels); } }
     function drawLabels() {
-      if (dim !== 3 || !fg3) return;
+      if (dim !== 3 || !fg3 || !onScreen) { labelLoop = false; return; }
       requestAnimationFrame(drawLabels);
       const w = stage3.clientWidth, h = stage3.clientHeight, dpr = window.devicePixelRatio || 1;
       if (labels.width !== w * dpr || labels.height !== h * dpr) { labels.width = w * dpr; labels.height = h * dpr; labels.style.width = w + "px"; labels.style.height = h + "px"; }
@@ -308,25 +320,54 @@
     }
 
     // ---- switching dimension ----
-    async function setDim(d) {
+    // Requests are numbered: if 2D is asked for while the 3D library is still loading, the late 3D load must not
+    // switch the view back (the host's control would then say "Red" over a 3D view).
+    let dimSeq = 0, switching = null;
+    function setDim(d) {
       d = d === 3 ? 3 : 2;
-      if (d === 3 && !fg3) {
-        note.textContent = "Cargando el 3D…";
-        try { await load3d(); } catch (e) { note.textContent = "No se pudo cargar el 3D."; return false; }
-        note.textContent = ""; make3(); build3();
-      }
-      dim = d;
-      stage2.hidden = dim !== 2; stage3.hidden = labels.hidden = dim !== 3;
-      btnDim.textContent = dim === 3 ? "2D" : "3D"; btnDim.title = dim === 3 ? "Ver en 2D" : "Ver en 3D";
-      wrap.classList.toggle("is3d", dim === 3);
-      if (dim === 3) { fg2.pauseAnimation(); fg3.resumeAnimation(); paint3(); requestAnimationFrame(drawLabels); }
-      else { if (fg3) fg3.pauseAnimation(); fg2.resumeAnimation(); }
-      resize();
-      if (route.length) frame(route); else if (sel) fly(sel); else active().zoomToFit(500, FIG ? 70 : 40, visible);
-      if (opts.onDim) opts.onDim(dim);
-      return true;
+      const my = ++dimSeq;
+      const run = (async () => {
+        if (d === 3 && !fg3) {
+          note.textContent = "Cargando el 3D…"; btnDim.disabled = true;
+          try { await load3d(); } catch (e) {
+            if (my === dimSeq) { note.textContent = "No se pudo cargar el 3D."; btnDim.disabled = false; if (opts.onDim) opts.onDim(dim); }
+            return false;
+          }
+          btnDim.disabled = false;
+          if (my !== dimSeq) return false;
+          note.textContent = ""; make3(); build3(false);
+        }
+        if (my !== dimSeq) return false;
+        const changed = d !== dim;
+        dim = d;
+        stage2.hidden = dim !== 2; stage3.hidden = labels.hidden = dim !== 3;
+        markDim();
+        wrap.classList.toggle("is3d", dim === 3);
+        if (changed) {
+          if (dim === 3) { fg2.pauseAnimation(); if (onScreen) fg3.resumeAnimation(); paint3(); startLabels(); }
+          else { if (fg3) fg3.pauseAnimation(); if (onScreen) fg2.resumeAnimation(); }
+        }
+        resize();
+        // Keep what the user was looking at; a fresh 3D copy has no positions yet: its first engine stop frames it.
+        if (changed && !(dim === 3 && !fitted3)) refocus(500);
+        if (opts.onDim) opts.onDim(dim);
+        return true;
+      })();
+      switching = run; run.finally(() => { if (switching === run) switching = null; });
+      return run;
     }
-    btnDim.addEventListener("click", () => setDim(dim === 3 ? 2 : 3));
+    const afterSwitch = (f) => (switching ? switching.then(f) : f());  // camera moves wait for a pending switch
+    function markDim() {
+      btnDim.setAttribute("aria-pressed", String(dim === 3));
+      btnDim.title = dim === 3 ? "Volver a 2D" : "Ver en 3D";
+      btnDim.setAttribute("aria-label", dim === 3 ? "Volver a la vista 2D" : "Ver el grafo en 3D");
+      btnDim.hidden = opts.dimButton === "full" && !isFull();
+    }
+    btnDim.addEventListener("click", () => {
+      const want = dim === 3 ? 2 : 3;
+      if (opts.onDimRequest) opts.onDimRequest(want); else setDim(want);
+    });
+    markDim();
 
     // ---- size, visibility on screen, full screen ----
     function height() { return isFull() ? window.innerHeight : Math.max(380, Math.min(window.innerHeight * 0.72, 720)); }
@@ -336,7 +377,9 @@
     }
     new ResizeObserver(resize).observe(wrap);
     new IntersectionObserver(([e]) => {  // only animate while on screen (the tab may be hidden)
-      const a = active(); if (!a) return; e.isIntersecting ? a.resumeAnimation() : a.pauseAnimation();
+      onScreen = e.isIntersecting;
+      const a = active(); if (!a) return; onScreen ? a.resumeAnimation() : a.pauseAnimation();
+      startLabels();
     }).observe(wrap);
     function isFull() { return document.fullscreenElement === wrap || document.webkitFullscreenElement === wrap; }
     function toggleFull() {
@@ -347,8 +390,8 @@
     function fullscreen(on) { if (on === undefined || on !== isFull()) try { toggleFull(); } catch (e) { return false; } return true; }
     const onFull = () => {
       const on = isFull();
-      wrap.classList.toggle("full", on); btnFull.setAttribute("aria-pressed", String(on));
-      btnFull.title = on ? "Salir de pantalla completa" : "Pantalla completa"; setTimeout(() => { resize(); active().zoomToFit(400, FIG ? 70 : 50, visible); }, 120);
+      wrap.classList.toggle("full", on); btnFull.setAttribute("aria-pressed", String(on)); markDim();
+      btnFull.title = on ? "Salir de pantalla completa" : "Pantalla completa"; setTimeout(() => { resize(); refocus(400); }, 120);
     };
     document.addEventListener("fullscreenchange", onFull); document.addEventListener("webkitfullscreenchange", onFull);
     btnFull.addEventListener("click", toggleFull);
@@ -364,12 +407,16 @@
     function fly(id) {
       const n = node(id); if (!n || n.x === undefined) return;
       if (dim === 2) { fg2.centerAt(n.x, n.y, 600); fg2.zoom(Math.max(fg2.zoom(), 2.4), 600); return; }
-      const d = 110, r = 1 + d / (Math.hypot(n.x, n.y, n.z) || 1);
-      fg3.cameraPosition({ x: n.x * r, y: n.y * r, z: n.z * r }, { x: n.x, y: n.y, z: n.z }, 900);
+      // Approach from outside (radially from the centre); a node at the centre is approached from the camera's side.
+      const d = 110, l = Math.hypot(n.x, n.y, n.z || 0), p = fg3.cameraPosition();
+      const u = l > 1 ? [n.x / l, n.y / l, (n.z || 0) / l] : (() => { const v = [p.x - n.x, p.y - n.y, p.z - (n.z || 0)], m = Math.hypot(...v) || 1; return v.map((x) => x / m); })();
+      fg3.cameraPosition({ x: n.x + u[0] * d, y: n.y + u[1] * d, z: (n.z || 0) + u[2] * d }, { x: n.x, y: n.y, z: n.z || 0 }, 900);
     }
     function frame(ids) { const set = new Set(ids); active().zoomToFit(700, 80, (n) => set.has(n.id)); }
-    function fit() { if (!route.length) clear(); active().zoomToFit(500, FIG ? 70 : 40, visible); }
-    function camera(c) {
+    function refocus(ms) { if (route.length) frame(route); else if (sel) fly(sel); else active().zoomToFit(ms, FIG ? 70 : 40, visible); }
+    function fit() { afterSwitch(() => { if (!route.length) clear(); active().zoomToFit(500, FIG ? 70 : 40, visible); }); }
+    function camera(c) { afterSwitch(() => moveCamera(c)); }
+    function moveCamera(c) {
       if (dim === 2) {
         if (c === "in" || c === "out") fg2.zoom(fg2.zoom() * (c === "in" ? 1.6 : 1 / 1.6), 500);
         return;
@@ -398,6 +445,11 @@
       if (f && f.show) f.show.forEach((x) => hidden.delete(x));
       if (sel && meta[sel] && !visible(meta[sel])) clear();
       renderLegend(); applyVisibility(); setTimeout(() => active().zoomToFit(500, FIG ? 70 : 40, visible), 50);
+    }
+    function toggleFace(f) {  // a legend chip: same rule as filter(), the card never stays open on a hidden node
+      hidden.has(f) ? hidden.delete(f) : hidden.add(f);
+      if (sel && meta[sel] && !visible(meta[sel])) clear();
+      renderLegend(); applyVisibility();
     }
 
     // ---- selection and card ----
@@ -430,7 +482,7 @@
     function renderLegend() {
       const chips = Object.entries(faces).map(([f, info]) => el("button", { type: "button", class: "net-chip", "aria-pressed": String(!hidden.has(f)),
         title: hidden.has(f) ? "Mostrar " + info.name : "Ocultar " + info.name,
-        onclick: () => { hidden.has(f) ? hidden.delete(f) : hidden.add(f); renderLegend(); applyVisibility(); } },
+        onclick: () => toggleFace(f) },
         el("span", { class: "net-dot", style: `background:${C.face[f] || C.muted}` }), info.name.split(" ")[0]));
       const world = G.nodes.some((n) => n.kind === "sphere");
       legend.replaceChildren(...[...chips,
@@ -450,9 +502,9 @@
         .concat(FIG ? (FIG.axes || []).map(([a, b]) => ({ source: a, target: b, frame: true, axis: true })) : []);
       return { data: { nodes, links }, by: Object.fromEntries(nodes.map((n) => [n.id, n])), kept: Object.keys(keep).length > 0 };
     }
-    function build3() {
+    function build3(figChanged) {
       if (!fg3) return;
-      const c = copy(d3); d3 = c.data; by3 = c.by; fitted3 = c.kept;
+      const c = copy(d3); d3 = c.data; by3 = c.by; fitted3 = c.kept && !figChanged;
       pinFigure(d3.nodes);
       fg3.graphData(d3); paint3();
     }
@@ -463,18 +515,21 @@
       edges.forEach((e) => { deg[e.from] = (deg[e.from] || 0) + 1; deg[e.to] = (deg[e.to] || 0) + 1; });
       Object.values(meta).forEach((n) => { n.deg = deg[n.id] || 0; n.r = radius(n); });
       G = { nodes: Object.values(meta), edges };
+      const hadFig = !!FIG;
       FIG = g.figure && Object.keys(g.figure.vertices).every((i) => meta[i]) ? g.figure : null;
       nbr = {};
       edges.forEach((e) => { (nbr[e.from] = nbr[e.from] || []).push([e.to, e]); (nbr[e.to] = nbr[e.to] || []).push([e.from, e]); });
       list.replaceChildren(...G.nodes.map((n) => el("option", { value: n.label })));
-      const c = copy(d2); d2 = c.data; by2 = c.by; fitted2 = c.kept;
+      // Adding or removing the octahedron changes the extent of the drawing: frame it again after the layout.
+      const figChanged = hadFig !== !!FIG;
+      const c = copy(d2); d2 = c.data; by2 = c.by; fitted2 = c.kept && !figChanged;
       pinFigure(d2.nodes);
       fg2.graphData(d2);
-      if (!fitted2) setTimeout(() => fg2.zoomToFit(0, FIG ? 70 : 40, visible), 0);  // the warm-up already settled it
-      build3();
+      if (!c.kept) setTimeout(() => { if (dim === 2) fg2.zoomToFit(0, FIG ? 70 : 40, visible); }, 0);  // the warm-up already settled it
+      build3(figChanged);
       route = route.filter((i) => meta[i]);
       if (sel && !meta[sel]) clear(); else if (route.length) { lightRoute(); renderCard(meta[sel]); } else if (sel) { lightUp(sel); renderCard(meta[sel]); }
-      renderLegend(); resize();
+      renderLegend(); resize(); markDim();
     }
 
     return { setData, dim: setDim, focus: (id) => select(id, true), path, filter, fullscreen, camera, clear, fit, resize,

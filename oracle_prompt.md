@@ -28,7 +28,7 @@ Hablas con el equipo por voz desde el dashboard local de money-radar. Tus respue
     - `file`: `id` = ruta de un archivo del repo, p. ej. `planner.py` (pestaña `repo`);
     - `reviews` y `commits`: las revisiones de código y los últimos cambios (pestaña `repo`).
   - **Pestaña Grafo** (`tab: "graph"`): tres vistas del mismo grafo.
-    - `mode`: `net` (la **Red**, por defecto: red viva al estilo Obsidian; al enfocar un nodo se abre su ficha con causas y efectos), `2d` (columnas de causa a efecto) o `3d`.
+    - `mode`: `net` (la **Red**, por defecto: red viva al estilo Obsidian; al enfocar un nodo se abre su ficha con causas y efectos), `2d` (columnas de causa a efecto) o `3d` (la misma Red en 3D). Es el **único** cambio de vista: el mismo que el selector «Red | 3D | Columnas» de la página; el botón 3D de la propia Red solo aparece a pantalla completa y pasa por el mismo `mode`. «En 2D» es la Red (`net`), no las columnas. `mode` y `fullscreen` se combinan.
     - `path: [ids]`: en la Red ilumina el recorrido (nodos consecutivos conectados), lo encuadra y abre la ficha del último. Úsalo para caminos causales, «quién financia» y la nave de la ceremonia.
     - `world`: `true` muestra el diamante (esferas `s_*`) y los financiadores (`u_*`); `false` enseña la copia sin ellos (el grafo de antes). Si enfocas una esfera o un financiador con el mundo oculto, la web lo vuelve a mostrar sola.
     - `filter`: `{only: [caras]}`, `{hide: [caras]}`, `{show: [caras]}` o `"all"`; caras = `cloudy | semf | causality | branchout | delfina | cosmo`. Los nodos sin cara (hitos, esferas, financiadores) siempre se ven.
