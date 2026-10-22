@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **▶ Next session: read `REDISENO.md` first.** A redesign of the whole repo is pending (the ecosystem as a core for several machines, a human-network graph, an oracle that proposes the next actions). It is not started; its open questions must be answered before any code.
+
 ## What this is
 
 **money-radar** is a daily funding radar and grant-application planner for the **Ecosistema Delfina León**: one project with several faces (Cloudy, SEMF, Causality Graphs, BranchOut, Fundación Delfina León, CosmoVentures), based in Madrid West, with a French face in Paris.
@@ -82,6 +84,7 @@ Eligibility matters more than topic.
 | `.claude/agents/arquitecto-causal.md` | The **arquitecto-causal** subagent, for discussing and proposing nodes, relations, mediators, confounders and weights. The oracle consults it in the graph-reading phase. |
 | `reviews.json` | Code reviews of this repo: one entry per review, each finding with file, severity and status (`arreglado \| abierto \| descartado`). Shown in the dashboard's Espacio tab. Files and findings only, never names. |
 | `LESSONS.md` | One bullet per run: useful or noisy sources, broken queries, gaps to search next. The last 10 are shown on the dashboard. |
+| `REDISENO.md` | Pending redesign of the repo (22 Oct 2026): the ecosystem core with machines (funding radar, documentation, synergies, causal force and cascades, joint projects, services, marketing), a private human-network graph and an action-proposing oracle. Holds all open questions; nothing implemented yet. |
 | `CLAUDE.md` | This guide: what the project is, its files, rules and daily workflow. The Espacio tab reads each file's role from this table. |
 | `routine.json` | The scheduled-routine definition. Keep it in sync with this file. |
 
