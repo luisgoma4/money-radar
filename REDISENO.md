@@ -33,6 +33,11 @@
 
   Ese rediseño debe encajar ahora en el rediseño mayor: dos grafos y máquinas.
 
+## 2b. Deuda abierta que el rediseño debe resolver
+
+- **Vista del grafo**: bloqueada desde el 12-oct (`reviews.json`, revisión de 0f1a587).
+- **Versión en inglés**: interfaz, oráculo, textos de estrategia y documentación para colaboradores extranjeros (`reviews.json`, revisión de 082b3c1; preguntas 44–48).
+
 ## 3. Arquitectura que hay que decidir (borrador para discutir, no aprobado)
 
 ```
@@ -130,14 +135,22 @@ Hoy `planner.what_now` y `oracle()` ordenan hitos por valor desbloqueado y propo
 39. ¿Cada cuánto: en la ceremonia de cada 14 días, a diario con la rutina, o a demanda? ¿Avisa (Telegram, correo, calendario)?
 40. ¿Cómo se mide si una acción movilizó el ecosistema (seguimiento del compromiso, cambio en el grafo, dinero conseguido)?
 
-### 6.6 Proceso
-41. ¿Fases y criterio para cerrar cada una? Propuesta: una revisión tuya en un navegador real al final de cada fase.
-42. ¿Qué se congela mientras dura el rediseño: la rutina diaria sigue funcionando, la vista del grafo queda bloqueada...?
-43. ¿Plazo o fecha objetivo? ¿Alguna convocatoria cercana que obligue a priorizar una máquina (p. ej. documentación para EIC o NLnet)?
+### 6.6 Idioma: versión en inglés (deuda abierta, `reviews.json`, 22-oct-2026)
+Hay colaboradores extranjeros: SEMF es multinacional y CosmoVentures está en París. Hoy la interfaz, el oráculo y los textos de estrategia están en español o mezclan idiomas.
+44. ¿Qué tiene que existir en inglés: el dashboard, El Espacio, el oráculo de voz, las salidas de las máquinas (dossieres, planes), la documentación (README para colaboradores, REDISENO.md)?
+45. ¿Selector ES/EN en todas las vistas (recordado por visitante) o una versión inglesa aparte?
+46. ¿Cómo se guardan los textos bilingües del núcleo: campos `label_en` / `detail_en` en `strategy.json`, un archivo de traducciones, o traducción automática revisada? ¿Debe `monitor.py` avisar de las traducciones que falten?
+47. ¿El idioma de trabajo de los datos y del repo: el inglés (como las filas del radar) o el español? ¿Y el de las ceremonias y los compromisos?
+48. ¿Hacen falta otros idiomas (francés para CosmoVentures, valenciano o catalán para las convocatorias de València)?
+
+### 6.7 Proceso
+49. ¿Fases y criterio para cerrar cada una? Propuesta: una revisión tuya en un navegador real al final de cada fase.
+50. ¿Qué se congela mientras dura el rediseño: la rutina diaria sigue funcionando, la vista del grafo queda bloqueada...?
+51. ¿Plazo o fecha objetivo? ¿Alguna convocatoria cercana que obligue a priorizar una máquina (p. ej. documentación para EIC o NLnet)?
 
 ## 7. Siguiente sesión: por dónde empezar
 
 1. Leer este documento, `CLAUDE.md` y `proyectos/rediseno/plan_grafo_themap.md`.
-2. Repasar con el usuario las preguntas de la sección 6 (empezando por 6.2, 6.4 y 19), sin escribir código.
+2. Repasar con el usuario las preguntas de la sección 6 (empezando por 6.2, 6.4, 6.6 y la pregunta 19), sin escribir código.
 3. Con las respuestas, redactar el plan por fases: arquitectura, contrato de las máquinas, modelo de datos del grafo humano, oráculo y vista del grafo integrada. Incluir criterios de aceptación.
 4. Mantener vivo el radar diario mientras tanto.

@@ -47,6 +47,56 @@
     {"file": "strategy.json", "severity": "mejora", "status": "abierto",
      "summary": "Para una ceremonia: x_lr solo canaliza por Arte (añadir Tecnología 0,3–0,5); ninguna esfera cubre el eje local ↔ internacional."}
    ]
+  },
+  {
+   "date": "2026-10-22",
+   "commit": "082b3c1",
+   "title": "Deuda: falta una versión en inglés (hay colaboradores extranjeros)",
+   "summary": "El ecosistema tiene colaboradores que no hablan español (SEMF es multinacional; CosmoVentures está en París), pero la interfaz, el oráculo y los textos de estrategia están en español o mezclan idiomas. Se registra como deuda; se resolverá dentro del rediseño (REDISENO.md, preguntas 44–48).",
+   "findings": [
+    {
+     "file": "dashboard_template.html",
+     "severity": "mejora",
+     "status": "abierto",
+     "summary": "Mezcla idiomas: declara lang=\"en\", pero pestañas, plan, calendario, Oráculo y Madrid Oeste están en español; no hay selector de idioma.",
+     "fix": "Textos de la interfaz en un diccionario ES/EN, selector recordado por visitante y lang correcto en cada vista."
+    },
+    {
+     "file": "espacio_template.html",
+     "severity": "mejora",
+     "status": "abierto",
+     "summary": "El Espacio solo existe en español (leyenda, fichas, avisos).",
+     "fix": "Mismo diccionario y selector que el dashboard."
+    },
+    {
+     "file": "strategy.json",
+     "severity": "mejora",
+     "status": "abierto",
+     "summary": "Etiquetas y detalles de nodos, caras, hitos, etapas y estrategia por convocatoria solo en español.",
+     "fix": "Campos bilingües (p. ej. label/label_en, detail/detail_en) o un archivo de traducciones; monitor.py avisa de los que falten."
+    },
+    {
+     "file": "planner.py",
+     "severity": "mejora",
+     "status": "abierto",
+     "summary": "Los textos generados (plan, qué hacer ahora, calendario, lectura del oráculo) se escriben en español.",
+     "fix": "Generar los textos con el idioma como parámetro, sin duplicar lógica."
+    },
+    {
+     "file": "oracle_actions.py",
+     "severity": "mejora",
+     "status": "abierto",
+     "summary": "El oráculo de voz entiende y habla solo en es-ES (intents, respuestas, prompt).",
+     "fix": "Intents y respuestas en inglés, voz en-GB/en-US según el selector, y oracle_prompt.md con la regla de responder en el idioma del usuario."
+    },
+    {
+     "file": "CLAUDE.md",
+     "severity": "menor",
+     "status": "abierto",
+     "summary": "La documentación para personas (REDISENO.md, lecciones, ceremonias) está en español; las filas del radar están en inglés.",
+     "fix": "Decidir qué documentos necesitan versión inglesa (al menos un README para colaboradores) y cuál es el idioma de trabajo de los datos."
+    }
+   ]
   }
  ]
 }
