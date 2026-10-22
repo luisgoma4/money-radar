@@ -16,16 +16,17 @@ The radar runs as a scheduled Claude Code routine (`routine.json`, daily 07:00 E
 
 ## Who the radar is for
 
-Every call is matched against six **faces** (lines of work). A call only needs to fit one. Rows record theirs in `lines` (comma-separated keys).
+Every call is matched against seven **faces** (lines of work). A call only needs to fit one. Rows record theirs in `lines` (comma-separated keys).
 
 | Key | Face | What it is (from the sites and the team, Oct 2026) | Funding angles |
 |---|---|---|---|
 | `cloudy` | **Cloudy** (cloudybooks.org) | Non-profit project run by volunteer authors. Bilingual (ES/EN) illustrated science books "from the Big Bang to us", collectible cards, a 3D animated series and family health challenges. No legal form of its own. | FECYT science culture and citizen science, family/child health education, Erasmus+ small-scale partnerships, foundation social calls, publication subsidies (Pozuelo), book and outreach prizes |
-| `semf` | **SEMF** (semf.org.es) | Society for Explorative Multidisciplinary Frontiers, a multinational non-profit association. Interdisciplinary conferences, a summer school in Valencia, workshops. Partners include IAS, Wolfram, ICMAT and LSE CPNSS. | COST Actions, FECYT (art-science-technology), AEI networking, art+science foundations (Carasso), municipal cultural space |
+| `semf` | **SEMF** (semf.org.es) | Society for Explorative Multidisciplinary Frontiers, a multinational non-profit association. Yearly cycle from October (General Assembly) to September. 2026–27 program (git-ignored `proyectos/semf/`): the Interdisciplinary School in Valencia (July 2027, ~120 participants, hosted by the Universitat Politècnica de València), 3–4 workshops at the Real Academia de Ciencias in Madrid (January–June 2027), online interviews and debates (SEMFiloquia, Concept Colliders), and a video archive. Top priority: unrestricted funding for administration hours. Partners include IAS, Wolfram, ICMAT and LSE CPNSS. | COST Actions, FECYT (art-science-technology), AEI networking, art+science foundations (Carasso), municipal cultural space |
 | `causality` | **Causality Graphs** (causalitygraphs.com) | **Company (confirmed).** Causal-inference consultancy (DAGs, dynamic causal models, causal discovery) for pharma, clinical research and biostatistics teams. | Horizon Europe health / EU4Health as SME methods partner, CaixaResearch and ISCIII through a research centre, NEOTEC, ENISA, NLnet for open-source tooling |
-| `branchout` | **BranchOut** (the technology line) | **SL** (company). Tech-startup hub that wants to build a coworking + coliving space. | Startup Europe and New European Bauhaus (consortia), Las Rozas Innova, ENISA, EIC, NLnet, the housing plan's coliving line, municipal entrepreneurship prizes |
+| `branchout` | **BranchOut** (the technology line) | **SL** (company, Branchout Agency). Deep-tech venture studio and tech-startup hub that wants to build a coworking + coliving space. Projects (Oct 2026, from the shared Drive): Indago Research (AI research and sector intelligence, running), ACM Engine (digital twin and expert-knowledge capture for machinery makers), CoDevs (disused buildings turned into co-development hubs), Branchout OS (open collaboration system), post-quantum security, ModeNode, Buildverso; and two projects it manages for others: **Phoenician Trail** (Mediterranean submarine cable; applicant Phoenician Trail Neutral Optic Cable SL) and **IGNICIÓN-MADRID** (innovative public procurement for a fusion laser facility). | Startup Europe and New European Bauhaus (consortia), Las Rozas Innova, ENISA, EIC, NLnet, CDTI PID, CEF Digital (cables), ECCC cybersecurity, the housing plan's coliving line, municipal entrepreneurship prizes |
 | `delfina` | **Fundación Delfina León** (planned umbrella) | Foundation, not yet constituted. It will hold all the projects and a **shared physical space**, which SEMF, Causality and Cloudy also need. | Foundation and non-profit calls, Las Rozas collaboration agreements (convenios), municipal space, Erasmus+, the non-profit path of the coliving line |
 | `cosmo` | **CosmoVentures** (cosmoventures.fr) | **SASU** (one-person French company) in **Paris**. Science consulting studio: scientific product review, R&D strategy, media advice, AI reasoning and safety evaluation (benchmarks), free browser science games, workshops and art-astronomy formats; the founder also has a live-music line for events. | AI-safety philanthropy (EA Funds Transformative AI Fund), CNC video-game fund, Bpifrance, Réseau Entreprendre, French angel networks; the **French partner** that Erasmus+ KA210 and EU consortia need |
+| `dako` | **El Gran DaKo** | **Performing-arts company** with its registered office in the city of Madrid (milestone `M_DAKO_ALTA` done). Produces a poetry-and-live-music stage show (*Lo que no morirá*), premiering in a Madrid venue, then touring. | Ayuntamiento de Madrid grants to performing-arts producers (needs a registered office in the city), Comunidad de Madrid theatre-company grants, INAEM music and touring, theatre prizes |
 
 ### Where and who applies
 
@@ -39,6 +40,7 @@ Every call is matched against six **faces** (lines of work). A call only needs t
   - Causality Graphs: methods partner in consortia, NLnet.
   - Research-centre calls go through partners.
   - Non-profit, cultural and space calls: the foundation once registered. Meanwhile SEMF, or a local association created in Las Rozas.
+  - El Gran DaKo: performing-arts calls (scope `Madrid` or `Spain`). Never write the artist's personal name in the repo; use El Gran DaKo.
   - CosmoVentures SASU: French calls (scope `France`), AI-safety funders, and the French partner role in EU consortia. Madrid West geography does not apply to it. Never write the founder's name or their personal domains in the repo; use cosmoventures.fr.
 - **Local registration decides eligibility.** Municipal space and grants require being on that town's Registro Municipal de Asociaciones, with the registered office there. Las Rozas lends rooms only to *associations*. SEMF is probably registered in Valencia (unconfirmed), so it has no Madrid West seat.
 - **Partners, recorded by role and never by name (the repo is public):**
@@ -74,6 +76,7 @@ Eligibility matters more than topic.
 | `oracle_dock.js`, `oracle_dock.css` | The voice-oracle panel shared by `dashboard.html` and `espacio.html`: voice in and out (Safari and Chrome), options, confirmation, ceremony. Each page passes a host adapter (`plan`, `view`, `directView`, `refresh`, `onPhase`). |
 | `alerts.json` | Generated each run, git-ignored. Holds `closing_soon`, `new_high_value`, `new_today`, `changed_today` and `review_due`. |
 | `solicitudes/<id>/` | Application work folders (`PLAN.md` plus drafts). **Git-ignored**: drafts and budgets must never reach the public repo. |
+| `proyectos/<face>/` | Private notes on each face's projects (e.g. BranchOut's shared Drive folder: project sheets, partners, team). **Git-ignored**, not served by `oracle_server.py` and left out of the repo map; only a project's name and a one-line description go into `strategy.json`. |
 | `.claude/skills/becas/` | The `/becas` skill: Claude guides applications on top of the orchestrator. It includes the 3D-graph specialization. |
 | `.claude/skills/ceremonia/` | The `/ceremonia` skill: Claude acts as the **oracle** and runs the 7-phase ceremony (opening, graph reading, round of faces, deliberation, verdict, commitments, record). |
 | `.claude/agents/arquitecto-causal.md` | The **arquitecto-causal** subagent, for discussing and proposing nodes, relations, mediators, confounders and weights. The oracle consults it in the graph-reading phase. |
@@ -132,7 +135,7 @@ Seven tabs. The selected tab and the filters are remembered per viewer. Filters 
    - references between files, detected from quoted file names in the code (the layer config in `build.py` sits between `# repo-map:` markers so it is not scanned); hover or click a file to light up what it uses and what uses it;
    - the last 12 commits, and the code reviews from `reviews.json` with each finding's status. Add a review there after each one; keep findings open until fixed.
 
-Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causality aqua, BranchOut yellow, Fundación pink, CosmoVentures plum, milestones grey. Status always comes with an icon and a label, never colour alone.
+Colours: each face keeps one colour everywhere: Cloudy blue, SEMF orange, Causality aqua, BranchOut yellow, Fundación pink, CosmoVentures plum, El Gran DaKo crimson, milestones grey. Status always comes with an icon and a label, never colour alone.
 
 ## Strategy planner and orchestrator
 
@@ -270,7 +273,7 @@ For every closed call, and before recommending any recurring call, find **who wo
 ## Daily run workflow
 
 1. Read `LESSONS.md`, `money.db`, `ROWS` and `strategy.json`.
-2. Search in Spanish, English and French across all six faces, **including investors** (VC and impact funds, business-angel networks and forums, CDTI Innvierte, equity crowdfunding, French networks for CosmoVentures). Start with Madrid West municipalities (BOCM extracts, BDNS, municipal e-offices), then CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BOE, Comunidad de Madrid / madri+d, EIC / Horizon Europe / EU4Health / COST / Erasmus+ / Funding & Tenders, NLnet, foundations, and prizes. Prioritise the gaps named in the latest lesson.
+2. Search in Spanish, English and French across all seven faces, **including investors** (VC and impact funds, business-angel networks and forums, CDTI Innvierte, equity crowdfunding, French networks for CosmoVentures). Start with Madrid West municipalities (BOCM extracts, BDNS, municipal e-offices), then CDTI, ENISA, Red.es, FECYT, AEI, ISCIII, BOE, Comunidad de Madrid / madri+d, EIC / Horizon Europe / EU4Health / COST / Erasmus+ / Funding & Tenders, NLnet, foundations, and prizes. Prioritise the gaps named in the latest lesson.
 3. Verify candidates on official pages (WebFetch; binary PDFs → `pdftotext -layout`).
 4. Add or update `ROWS`; add a `strategy.json` → `opportunities` entry for calls worth pursuing.
 5. Research winners for newly closed calls and for `winners` entries still marked pending.

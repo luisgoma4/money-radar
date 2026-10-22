@@ -34,7 +34,7 @@
   const KIND_ES = { entity: "figura legal", face: "cara", product: "producto", partner: "socio", factor: "factor de contexto",
     milestone: "hito", call: "convocatoria", sphere: "esfera del mundo", funder: "financiador" };
   const STATUS_ES = { exists: "existe", planned: "por crear", proposed: "propuesta", external: "socio externo", factor: "factor" };
-  const FACE_VAR = { cloudy: "--line-cloudy", semf: "--line-semf", causality: "--line-causality", branchout: "--line-branchout", delfina: "--line-delfina", cosmo: "--line-cosmo" };
+  const FACE_VAR = { cloudy: "--line-cloudy", semf: "--line-semf", causality: "--line-causality", branchout: "--line-branchout", delfina: "--line-delfina", cosmo: "--line-cosmo", dako: "--line-dako" };
   const LIB3D = "vendor/3d-force-graph.min.js";
   const key = (e) => e.from + ">" + e.to;
 
@@ -105,17 +105,26 @@
     const node = (id) => (dim === 3 ? by3 : by2)[id];
     function lightUp(id) {
       if (route.length) return lightRoute();
-      hl = new Set(); hlLinks = new Set();
-      if (id) { hl.add(id); (nbr[id] || []).forEach(([o, e]) => { hl.add(o); hlLinks.add(key(e)); }); }
+      hl = new Set(); hlLinks = new Set(); hlW = {};
+      if (id) { hl.add(id); hlW[id] = 2; (nbr[id] || []).forEach(([o, e]) => { hl.add(o); hlLinks.add(key(e)); hlW[o] = Math.max(hlW[o] || 0, e.weight ?? 0.5); }); }
       paint3();
     }
     function lightRoute() {
-      hl = new Set(route); hlLinks = new Set();
+      hl = new Set(route); hlLinks = new Set(); hlW = {}; route.forEach((id) => { hlW[id] = 1; });
       for (let i = 0; i + 1 < route.length; i++) {
         const hit = (nbr[route[i]] || []).find(([o]) => o === route[i + 1]); if (hit) hlLinks.add(key(hit[1]));
       }
       paint3();
     }
+    // Label text: the node under the pointer, the selection and the spheres read in full; the rest are cut short.
+    let hlW = {};
+    const isMain = (n) => n.id === hover || n.id === sel || n.kind === "sphere";
+    function shortLabel(s, max) {
+      if (s.length <= max) return s;
+      const cut = s.slice(0, max), sp = cut.lastIndexOf(" ");
+      return (sp > max * 0.5 ? cut.slice(0, sp) : cut).replace(/[\s,·—–:-]+$/, "") + "…";
+    }
+    const labelOf = (n) => (isMain(n) ? n.label : shortLabel(n.label, hl.size ? 22 : 30));
     const radius = (n) => (n.kind === "sphere" ? 10 : n.kind === "milestone" ? 2 : 2.6) + Math.sqrt(n.deg || 0) * 1.25;
 
     // ---- 2D engine ----
@@ -137,7 +146,7 @@
         // Labels fade in with zoom, like Obsidian; with something lit, only the lit ones.
         const show = hl.size ? hl.has(n.id) : k > 2.1 || (k > 1.1 && n.r >= 7) || n.r >= 10;
         if (show) {
-          const fs = Math.max(10 / k, 2.6), txt = n.label.length > 34 && !hl.has(n.id) ? n.label.slice(0, 33) + "…" : n.label;
+          const fs = Math.max(10 / k, 2.6), txt = labelOf(n);
           ctx.font = `${n.id === sel || n.id === hover ? 600 : 500} ${fs}px -apple-system, system-ui, sans-serif`;
           ctx.textAlign = "center"; ctx.textBaseline = "top";
           ctx.lineWidth = 3 / k; ctx.strokeStyle = alpha(C.page, 0.85); ctx.strokeText(txt, n.x, n.y + r + 2);
@@ -300,15 +309,28 @@
       if (labels.width !== w * dpr || labels.height !== h * dpr) { labels.width = w * dpr; labels.height = h * dpr; labels.style.width = w + "px"; labels.style.height = h + "px"; }
       const ctx = labels.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
       ctx.textAlign = "center"; ctx.textBaseline = "top";
+      // Candidates first, then drawn by priority; a label that would overlap one already drawn is skipped,
+      // so a lit hub shows its strongest neighbours legibly instead of a pile of text.
+      const cand = [];
       for (const n of d3.nodes) {
         if (!visible(n) || n.x === undefined) continue;
-        const show = hl.size ? hl.has(n.id) : n.r >= 9 || n.kind === "sphere";
-        if (!show) continue;
+        if (!(hl.size ? hl.has(n.id) : n.r >= 9 || n.kind === "sphere")) continue;
         const p = fg3.graph2ScreenCoords(n.x, n.y, n.z);
         if (p.x < -50 || p.y < -20 || p.x > w + 50 || p.y > h + 20) continue;
-        const txt = n.label.length > 34 && !hl.has(n.id) ? n.label.slice(0, 33) + "…" : n.label;
-        ctx.font = `${n.id === sel || n.id === hover ? 600 : 500} 11.5px -apple-system, system-ui, sans-serif`;
-        ctx.lineWidth = 3; ctx.strokeStyle = alpha(C.page, 0.85); ctx.strokeText(txt, p.x, p.y + 9);
+        cand.push([isMain(n) ? 9 : (hlW[n.id] || 0) + n.r / 100, n, p]);
+      }
+      cand.sort((a, b) => b[0] - a[0]);
+      const placed = [];
+      let extra = 0;
+      for (const [, n, p] of cand) {
+        const main = isMain(n);
+        if (!main && ++extra > 14) break;
+        const txt = labelOf(n);
+        ctx.font = `${n.id === sel || n.id === hover ? 600 : 500} ${main ? 12.5 : 11}px -apple-system, system-ui, sans-serif`;
+        const tw = ctx.measureText(txt).width, box = [p.x - tw / 2 - 3, p.y + 8, p.x + tw / 2 + 3, p.y + 24];
+        if (!main && placed.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) continue;
+        placed.push(box);
+        ctx.lineWidth = 3; ctx.strokeStyle = alpha(C.page, 0.9); ctx.strokeText(txt, p.x, p.y + 9);
         ctx.fillStyle = C.ink; ctx.fillText(txt, p.x, p.y + 9);
       }
     }

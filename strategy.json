@@ -2,7 +2,7 @@
   "_doc": "Planificador de estrategia. Un solo proyecto con varias caras al mundo: cada convocatoria se ataca con una entidad solicitante (figura legal) y una combinación de caras que forman la oferta de valor. Estimaciones de valor = juicio de planificación basado en ganadores reales (campo winners) o rangos oficiales; no son importes confirmados. planner.py calcula grado, preparación, calendario y qué hitos desbloquean más valor. Los prerrequisitos de cada convocatoria son solo los propios de la estrategia; los de la figura legal (p. ej. que la fundación exista) se añaden automáticamente según la entidad solicitante elegida: la primera de la lista que ya existe.",
   "project": {
     "name": "Ecosistema Delfina León",
-    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (Fundación Delfina León) que comparte espacio y gobierno; CosmoVentures, estudio científico en París, abre la puerta a Francia y a la seguridad de la IA."
+    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (Fundación Delfina León) que comparte espacio y gobierno; CosmoVentures, estudio científico en París, abre la puerta a Francia y a la seguridad de la IA; El Gran DaKo, empresa de artes escénicas, lleva la parte de arte en vivo."
   },
   "faces": {
     "cloudy": {
@@ -18,7 +18,7 @@
     },
     "semf": {
       "name": "SEMF",
-      "offers": "Red internacional interdisciplinar (IAS, Wolfram, ICMAT, LSE CPNSS…), congresos, escuela de verano y talleres; credibilidad científica y dimensión europea.",
+      "offers": "Red internacional interdisciplinar (IAS, Wolfram, ICMAT, LSE CPNSS…): Escuela Interdisciplinar anual en Valencia, talleres en la Real Academia de Ciencias en Madrid, debates y entrevistas online, archivo de vídeo; credibilidad científica y dimensión europea.",
       "tags": [
         "red",
         "eventos",
@@ -66,6 +66,16 @@
         "juegos educativos",
         "arte-astronomía",
         "Francia"
+      ]
+    },
+    "dako": {
+      "name": "El Gran DaKo",
+      "offers": "Empresa de artes escénicas: espectáculo de poesía y música en directo, con dirección escénica, proyección e iluminación; estreno en sala de Madrid y gira posterior.",
+      "tags": [
+        "artes escénicas",
+        "música en directo",
+        "poesía",
+        "cultura"
       ]
     }
   },
@@ -230,6 +240,52 @@
         "socio francés en Erasmus+ y Horizon Europe"
       ],
       "requires": []
+    },
+    "dako_ent": {
+      "name": "El Gran DaKo",
+      "form": "Empresa de artes escénicas",
+      "status": "exists",
+      "seat": "Madrid capital",
+      "faces": [
+        "dako"
+      ],
+      "can": [
+        "ayudas a entidades productoras de artes escénicas (Ayuntamiento de Madrid)",
+        "ayudas bienales a empresas de teatro (Comunidad de Madrid)",
+        "giras y música (INAEM)",
+        "certámenes y premios de teatro"
+      ],
+      "requires": [
+        "M_DAKO_ALTA"
+      ]
+    },
+    "ptrail_sl": {
+      "name": "Phoenician Trail Neutral Optic Cable SL",
+      "form": "Sociedad Limitada, inscrita como operador de telecomunicaciones",
+      "status": "external",
+      "seat": "España",
+      "faces": [
+        "branchout"
+      ],
+      "can": [
+        "CEF Digital — Global Gateways (cables submarinos)",
+        "BEI y financiación de infraestructuras"
+      ],
+      "requires": []
+    },
+    "partner_upv": {
+      "name": "Universitat Politècnica de València",
+      "form": "Universidad pública",
+      "status": "external",
+      "seat": "València",
+      "faces": [
+        "semf"
+      ],
+      "can": [
+        "AORG de la Generalitat Valenciana (congresos internacionales)",
+        "aulas y alojamiento para la Escuela Interdisciplinar"
+      ],
+      "requires": []
     }
   },
   "milestones": {
@@ -304,6 +360,12 @@
       "detail": "Producto propio (p. ej. plataforma de evidencia causal o software abierto) para EIC, NEOTEC o NLnet.",
       "weeks": 12,
       "status": "pending"
+    },
+    "M_DAKO_ALTA": {
+      "name": "El Gran DaKo dada de alta",
+      "detail": "Elegir forma jurídica (autónomo o SL), alta en Hacienda con epígrafe de artes escénicas y domicilio fiscal; si se quiere la ayuda municipal de Madrid, domicilio en la capital.",
+      "weeks": 4,
+      "status": "done"
     }
   },
   "levels": {
@@ -470,7 +532,8 @@
         "M_RED_COST"
       ],
       "products": [
-        "p_events"
+        "p_events",
+        "p_semf_online"
       ]
     },
     "nlnet-2026-11": {
@@ -495,7 +558,9 @@
         "M_PRODUCTO"
       ],
       "products": [
-        "p_lib"
+        "p_lib",
+        "p_bo_os",
+        "p_bo_modenode"
       ]
     },
     "eic-accelerator-2026-11": {
@@ -521,7 +586,8 @@
         "M_EU_PIC"
       ],
       "products": [
-        "p_lib"
+        "p_lib",
+        "p_bo_acm"
       ]
     },
     "horizon-hlth-2027-01-02": {
@@ -570,7 +636,8 @@
         "M_CERT"
       ],
       "products": [
-        "p_hub"
+        "p_hub",
+        "p_bo_indago"
       ]
     },
     "healthstart-madrimasd": {
@@ -667,7 +734,8 @@
       "prereqs": [],
       "products": [
         "p_ciclo",
-        "p_events"
+        "p_events",
+        "p_semf_rac"
       ]
     },
     "plan-vivienda-2026-coliving": {
@@ -714,7 +782,8 @@
       ],
       "products": [
         "p_coliving",
-        "p_cowork"
+        "p_cowork",
+        "p_bo_codevs"
       ]
     },
     "startup-europe-2027": {
@@ -760,6 +829,10 @@
       "offer": "Servicio de acompañamiento del hub a sus miembros.",
       "prereqs": [
         "M_CERT"
+      ],
+      "products": [
+        "p_bo_acm",
+        "p_bo_indago"
       ]
     },
     "madrid-sello-excelencia": {
@@ -823,7 +896,8 @@
         "M_CERT"
       ],
       "products": [
-        "p_hub"
+        "p_hub",
+        "p_bo_codevs"
       ]
     },
     "pozuelo-innpar-vivero": {
@@ -919,7 +993,9 @@
       "prereqs": [],
       "products": [
         "p_books",
-        "p_eval"
+        "p_eval",
+        "p_semf_rac",
+        "p_semf_video"
       ]
     },
     "cdti-neotec-2026": {
@@ -1173,6 +1249,155 @@
       "products": [
         "p_cv_games"
       ]
+    },
+    "cdti-pid": {
+      "applicant": [
+        "branchout_sl",
+        "causality_ent"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 8,
+      "value_basis": "Préstamo parcialmente no reembolsable sobre presupuestos de 175.000 € o más (fuentes secundarias); no es un importe de ayuda directa.",
+      "ask": "Proyecto de I+D de ACM Engine (gemelo digital y captura de conocimiento) como desarrollo experimental con un fabricante piloto.",
+      "offer": "I+D empresarial con cliente piloto industrial y equipo propio de software e IA.",
+      "prereqs": [
+        "M_PRODUCTO",
+        "M_CERT"
+      ],
+      "products": [
+        "p_bo_acm"
+      ]
+    },
+    "cef-dig-gateways-next": {
+      "applicant": [
+        "ptrail_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 4,
+      "strategic": 2,
+      "prep_weeks": 16,
+      "value_basis": "Ronda de 2024: 21 proyectos y 142 M€ (p. ej. Medusa Africa 14,3 M€, según prensa). Cofinanciación del 30–70 %.",
+      "ask": "Estudios del Sector 3 (anillo Baleares–Ceuta–Melilla, Mediterráneo occidental) del cable Phoenician Trail.",
+      "offer": "Traza diversa y segura alineada con las áreas CPEI de la UE; BranchOut gestiona la candidatura.",
+      "prereqs": [],
+      "products": [
+        "p_bo_ptrail"
+      ]
+    },
+    "digital-eccc-2027": {
+      "applicant": [
+        "branchout_sl"
+      ],
+      "lead": "branchout",
+      "support": [],
+      "level": 1,
+      "fit": 2,
+      "value": 3,
+      "strategic": 1,
+      "prep_weeks": 12,
+      "value_basis": "Convocatoria 2026: unos 128 M€ en 33 proyectos (fuente secundaria). Sin ganadores publicados aún.",
+      "ask": "Adopción de criptografía poscuántica por pymes y sector público, en consorcio con un socio de ciberseguridad.",
+      "offer": "Consultoría de transición poscuántica y cumplimiento NIS2.",
+      "prereqs": [
+        "M_EU_PIC"
+      ],
+      "products": [
+        "p_bo_qtc"
+      ]
+    },
+    "madrid-companias-escenicas-2027": {
+      "applicant": [
+        "dako_ent"
+      ],
+      "lead": "dako",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 2,
+      "strategic": 1,
+      "prep_weeks": 6,
+      "value_basis": "Edición 2026: 67 ayudas, mediana 12.589 €, máximo 15.000 € (BDNS 890734).",
+      "ask": "Producción y estreno del espectáculo en Madrid.",
+      "offer": "Espectáculo de poesía y música en directo con dramaturgia propia.",
+      "prereqs": [
+        "M_DAKO_ALTA"
+      ],
+      "products": [
+        "p_dako_show"
+      ],
+      "typical_award_eur": 12589
+    },
+    "cam-estructuras-teatro-2028": {
+      "applicant": [
+        "dako_ent"
+      ],
+      "lead": "dako",
+      "support": [],
+      "level": 1,
+      "fit": 1,
+      "value": 3,
+      "strategic": 0,
+      "prep_weeks": 8,
+      "value_basis": "Bienal 2026–27: 4 M€ (BDNS 899729); la línea de producción de 2024 dio 61 ayudas con mediana de 11.500 € (BDNS 742335).",
+      "ask": "Estructura de la compañía para la gira del espectáculo.",
+      "offer": "Compañía con espectáculo estrenado y gira.",
+      "prereqs": [
+        "M_DAKO_ALTA"
+      ],
+      "products": [
+        "p_dako_show"
+      ]
+    },
+    "valencia-proyectos-culturales-2027": {
+      "applicant": [
+        "semf_asoc"
+      ],
+      "lead": "semf",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 2,
+      "strategic": 1,
+      "prep_weeks": 5,
+      "value_basis": "Edición 2026: 35 ayudas, mediana 5.104 €, máximo 15.000 € (BDNS 888264); una asociación científica ganó 14.592 € en 2025.",
+      "ask": "La Escuela Interdisciplinar de julio de 2027 en València como proyecto cultural singular de arte y ciencia.",
+      "offer": "Una semana con ~15 ponentes y ~120 participantes, talleres de creación colectiva y programa abierto a la ciudad.",
+      "prereqs": [
+        "M_SEMF_REG",
+        "M_CERT"
+      ],
+      "products": [
+        "p_events"
+      ],
+      "typical_award_eur": 5104
+    },
+    "gva-aorg-2028": {
+      "applicant": [
+        "partner_upv"
+      ],
+      "lead": "semf",
+      "support": [],
+      "level": 1,
+      "fit": 3,
+      "value": 2,
+      "strategic": 1,
+      "prep_weeks": 6,
+      "value_basis": "CIAORG-2026: 105 ayudas, mediana 9.000 € (el máximo).",
+      "ask": "Viajes y honorarios de ponentes internacionales y difusión de la Escuela Interdisciplinar de 2028.",
+      "offer": "Reunión internacional con comité científico y ponentes de varios países, en sede de la UPV.",
+      "prereqs": [],
+      "products": [
+        "p_events"
+      ],
+      "typical_award_eur": 9000
     }
   },
   "graph": {
@@ -1270,7 +1495,7 @@
         "type": "face",
         "status": "exists",
         "face": "semf",
-        "detail": "Red interdisciplinar internacional."
+        "detail": "Red interdisciplinar internacional. Ciclo anual de octubre a septiembre: escuela en Valencia, talleres en Madrid y actividades online."
       },
       {
         "id": "f_cg",
@@ -1306,11 +1531,11 @@
       },
       {
         "id": "p_events",
-        "label": "Congresos, escuela de verano y talleres",
+        "label": "Escuela Interdisciplinar y congresos",
         "type": "product",
         "status": "exists",
         "face": "semf",
-        "detail": "Escuela de verano en Valencia; congresos internacionales."
+        "detail": "Escuela Interdisciplinar anual en Valencia (julio; una semana, ~15 ponentes, ~120 participantes), con talleres de creación colectiva; congresos internacionales."
       },
       {
         "id": "p_ciclo",
@@ -1535,6 +1760,166 @@
         "status": "external",
         "face": null,
         "detail": "La ciudadanía: familias, asociaciones, voluntariado y opinión pública. Es la demanda de fondo: lo que la política y la cultura acaban atendiendo."
+      },
+      {
+        "id": "e_dako",
+        "label": "El Gran DaKo",
+        "type": "entity",
+        "status": "exists",
+        "face": "dako",
+        "detail": "Empresa de artes escénicas con domicilio en Madrid capital."
+      },
+      {
+        "id": "f_dako",
+        "label": "El Gran DaKo",
+        "type": "face",
+        "status": "exists",
+        "face": "dako",
+        "detail": "Artes escénicas: poesía y música en directo."
+      },
+      {
+        "id": "p_dako_show",
+        "label": "Espectáculo «Lo que no morirá»",
+        "type": "product",
+        "status": "planned",
+        "face": "dako",
+        "detail": "Espectáculo escénico de poesía y música en directo en tres actos; estreno en sala de Madrid y después gira."
+      },
+      {
+        "id": "x_ptrail",
+        "label": "Phoenician Trail Neutral Optic Cable SL",
+        "type": "partner",
+        "status": "external",
+        "face": "branchout",
+        "detail": "Sociedad titular del cable submarino; BranchOut actúa como gestor externo."
+      },
+      {
+        "id": "p_bo_indago",
+        "label": "Indago Research",
+        "type": "product",
+        "status": "exists",
+        "face": "branchout",
+        "detail": "Consultoría de investigación e inteligencia sectorial con IA (informes de industria y ciencia)."
+      },
+      {
+        "id": "p_bo_acm",
+        "label": "ACM Engine",
+        "type": "product",
+        "status": "planned",
+        "face": "branchout",
+        "detail": "Gemelo digital y captura de conocimiento experto para fabricantes de maquinaria (formación, prevención y posventa)."
+      },
+      {
+        "id": "p_bo_codevs",
+        "label": "CoDevs",
+        "type": "product",
+        "status": "planned",
+        "face": "branchout",
+        "detail": "Rescate de edificios en desuso como hubs de codesarrollo y coworking gestionados con IA."
+      },
+      {
+        "id": "p_bo_os",
+        "label": "Branchout OS",
+        "type": "product",
+        "status": "planned",
+        "face": "branchout",
+        "detail": "Sistema abierto de colaboración: orquestación de agentes IA y atribución de autoría sobre git."
+      },
+      {
+        "id": "p_bo_qtc",
+        "label": "Ciberseguridad poscuántica",
+        "type": "product",
+        "status": "proposed",
+        "face": "branchout",
+        "detail": "Transición poscuántica y cumplimiento NIS2 para empresas y sector público, con un socio de ciberseguridad."
+      },
+      {
+        "id": "p_bo_modenode",
+        "label": "ModeNode",
+        "type": "product",
+        "status": "proposed",
+        "face": "branchout",
+        "detail": "Electrónica modular y abierta: nodos IoT de ciudad y sensórica agroganadera."
+      },
+      {
+        "id": "p_bo_buildverso",
+        "label": "Buildverso",
+        "type": "product",
+        "status": "proposed",
+        "face": "branchout",
+        "detail": "Software para construcción industrializada: traduce proyectos clásicos a sistemas industrializados."
+      },
+      {
+        "id": "p_bo_ptrail",
+        "label": "Phoenician Trail",
+        "type": "product",
+        "status": "planned",
+        "face": "branchout",
+        "detail": "Cable submarino mediterráneo neutral (16 países); BranchOut como gestor externo del relanzamiento."
+      },
+      {
+        "id": "p_bo_ignicion",
+        "label": "IGNICIÓN-MADRID",
+        "type": "product",
+        "status": "proposed",
+        "face": "branchout",
+        "detail": "Propuesta de Compra Pública Innovadora: estación de láseres para fusión por confinamiento inercial con universidades madrileñas."
+      },
+      {
+        "id": "x_rac",
+        "label": "Real Academia de Ciencias (RAC)",
+        "type": "partner",
+        "status": "external",
+        "face": "semf",
+        "detail": "Sede y difusión de los talleres SEMF en Madrid (2027)."
+      },
+      {
+        "id": "x_upv",
+        "label": "Universitat Politècnica de València",
+        "type": "partner",
+        "status": "external",
+        "face": "semf",
+        "detail": "Aulas, alojamiento de estudiantes e instalaciones para la Escuela Interdisciplinar; difusión cruzada."
+      },
+      {
+        "id": "p_semf_rac",
+        "label": "Talleres SEMF en la Real Academia de Ciencias",
+        "type": "product",
+        "status": "planned",
+        "face": "semf",
+        "detail": "Serie de 3–4 jornadas en Madrid (enero–junio 2027) sobre conocimiento e interdisciplinariedad, ~3 ponentes y 50–100 asistentes; una sesión en la Universidad Complutense."
+      },
+      {
+        "id": "p_semf_online",
+        "label": "SEMFiloquia y Concept Colliders",
+        "type": "product",
+        "status": "exists",
+        "face": "semf",
+        "detail": "Actividades online recurrentes: entrevistas con expertos y debates interdisciplinares abiertos a la comunidad."
+      },
+      {
+        "id": "p_semf_video",
+        "label": "Archivo de vídeo y divulgación en redes",
+        "type": "product",
+        "status": "planned",
+        "face": "semf",
+        "detail": "Publicar el archivo de grabaciones de eventos en YouTube, clips y piezas cortas, y un plan de redes con contenido de fondo."
+      },
+      {
+        "id": "p_semf_book",
+        "label": "Libro y revista SEMF",
+        "type": "product",
+        "status": "proposed",
+        "face": "semf",
+        "detail": "Propuesta: libro de entrevistas y reflexiones sobre interdisciplinariedad y una revista editorial con ensayos de la comunidad."
+      },
+      {
+        "id": "p_semf_retreat",
+        "label": "Retiro interdisciplinar",
+        "type": "product",
+        "status": "proposed",
+        "face": "semf",
+        "detail": "Propuesta: ~20 personas en trabajo colaborativo intensivo (posible sede: isla de Tabarca)."
       }
     ],
     "edges": [
@@ -2244,6 +2629,209 @@
         "label": "demanda de vivienda (coliving)",
         "status": "exists",
         "weight": 0.3
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_indago",
+        "label": "opera",
+        "status": "exists",
+        "weight": 0.8
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_acm",
+        "label": "desarrolla",
+        "status": "planned",
+        "weight": 0.7
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_codevs",
+        "label": "desarrolla",
+        "status": "planned",
+        "weight": 0.7
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_os",
+        "label": "desarrolla",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_qtc",
+        "label": "propone",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_modenode",
+        "label": "propone",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_buildverso",
+        "label": "propone",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_ptrail",
+        "label": "gestión externa",
+        "status": "planned",
+        "weight": 0.5
+      },
+      {
+        "from": "f_bo",
+        "to": "p_bo_ignicion",
+        "label": "gestión CPI y comunicación",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "e_dako",
+        "to": "f_dako",
+        "label": "titular",
+        "status": "exists",
+        "weight": 1.0
+      },
+      {
+        "from": "f_dako",
+        "to": "p_dako_show",
+        "label": "produce",
+        "status": "planned",
+        "weight": 0.9
+      },
+      {
+        "from": "s_arte",
+        "to": "f_dako",
+        "label": "artes escénicas",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "x_ptrail",
+        "to": "p_bo_ptrail",
+        "label": "titular del proyecto",
+        "status": "planned",
+        "weight": 0.9
+      },
+      {
+        "from": "x_uned",
+        "to": "p_bo_ignicion",
+        "label": "UNED en el consorcio (neutrónica)",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "x_lr",
+        "to": "p_bo_codevs",
+        "label": "piloto municipal",
+        "status": "planned",
+        "weight": 0.5
+      },
+      {
+        "from": "p_bo_codevs",
+        "to": "p_cowork",
+        "label": "rescata espacios",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "p_bo_codevs",
+        "to": "p_space",
+        "label": "busca y adapta el espacio",
+        "status": "planned",
+        "weight": 0.4
+      },
+      {
+        "from": "p_bo_indago",
+        "to": "z_fondos",
+        "label": "ingresos",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "f_semf",
+        "to": "p_semf_rac",
+        "label": "organiza",
+        "status": "planned",
+        "weight": 0.8
+      },
+      {
+        "from": "f_semf",
+        "to": "p_semf_online",
+        "label": "organiza",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "f_semf",
+        "to": "p_semf_video",
+        "label": "produce",
+        "status": "planned",
+        "weight": 0.6
+      },
+      {
+        "from": "f_semf",
+        "to": "p_semf_book",
+        "label": "propone",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "f_semf",
+        "to": "p_semf_retreat",
+        "label": "propone",
+        "status": "planned",
+        "weight": 0.2
+      },
+      {
+        "from": "x_rac",
+        "to": "p_semf_rac",
+        "label": "sede y difusión",
+        "status": "planned",
+        "weight": 0.8
+      },
+      {
+        "from": "x_upv",
+        "to": "p_events",
+        "label": "sede de la escuela",
+        "status": "planned",
+        "weight": 0.7
+      },
+      {
+        "from": "p_semf_rac",
+        "to": "p_ciclo",
+        "label": "formato replicable en Madrid Oeste",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "p_events",
+        "to": "p_semf_video",
+        "label": "grabaciones",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "p_semf_rac",
+        "to": "p_semf_video",
+        "label": "grabaciones",
+        "status": "planned",
+        "weight": 0.5
+      },
+      {
+        "from": "p_semf_video",
+        "to": "z_reputacion",
+        "label": "visibilidad",
+        "status": "planned",
+        "weight": 0.3
       }
     ],
     "figure": {
@@ -2318,7 +2906,9 @@
         "horizon-neb-2026",
         "startup-europe-2027",
         "erasmus-ka210-2027",
-        "neb-connect-cocreate-2027"
+        "neb-connect-cocreate-2027",
+        "cef-dig-gateways-next",
+        "digital-eccc-2027"
       ]
     },
     {
@@ -2365,7 +2955,8 @@
       },
       "calls": [
         "cdti-neotec-2026",
-        "cdti-innvierte"
+        "cdti-innvierte",
+        "cdti-pid"
       ]
     },
     {
@@ -2400,7 +2991,8 @@
       "calls": [
         "madrid-cheque-innovacion",
         "madrid-sello-excelencia",
-        "madrid-cesion-centros-educativos"
+        "madrid-cesion-centros-educativos",
+        "cam-estructuras-teatro-2028"
       ]
     },
     {
@@ -2569,6 +3161,39 @@
       },
       "calls": [
         "cnc-fajv-preproduction"
+      ]
+    },
+    {
+      "id": "u_madrid_ayto",
+      "label": "Ayuntamiento de Madrid",
+      "spheres": {
+        "s_politica": 0.7,
+        "s_arte": 0.7
+      },
+      "calls": [
+        "madrid-companias-escenicas-2027"
+      ]
+    },
+    {
+      "id": "u_gva",
+      "label": "Generalitat Valenciana",
+      "spheres": {
+        "s_politica": 0.8,
+        "s_ciencia": 0.5
+      },
+      "calls": [
+        "gva-aorg-2028"
+      ]
+    },
+    {
+      "id": "u_valencia_ayto",
+      "label": "Ajuntament de València",
+      "spheres": {
+        "s_politica": 0.6,
+        "s_arte": 0.7
+      },
+      "calls": [
+        "valencia-proyectos-culturales-2027"
       ]
     }
   ],

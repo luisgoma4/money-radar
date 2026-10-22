@@ -80,7 +80,7 @@
   },
   {
    "id": "p_events",
-   "label": "Congresos, escuela de verano y talleres",
+   "label": "Escuela Interdisciplinar y congresos",
    "source_file": "SEMF/producto",
    "source_location": "producto",
    "community_name": "existe"
@@ -282,6 +282,146 @@
    "community_name": "socio externo"
   },
   {
+   "id": "e_dako",
+   "label": "El Gran DaKo",
+   "source_file": "El Gran DaKo/figura legal",
+   "source_location": "figura legal",
+   "community_name": "existe"
+  },
+  {
+   "id": "f_dako",
+   "label": "El Gran DaKo",
+   "source_file": "El Gran DaKo/cara",
+   "source_location": "cara",
+   "community_name": "existe"
+  },
+  {
+   "id": "p_dako_show",
+   "label": "Espectaculo \"Lo que no morira\" (por crear)",
+   "source_file": "El Gran DaKo/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "x_ptrail",
+   "label": "Phoenician Trail Neutral Optic Cable SL",
+   "source_file": "BranchOut/socio",
+   "source_location": "socio",
+   "community_name": "socio externo - relacion por crear"
+  },
+  {
+   "id": "p_bo_indago",
+   "label": "Indago Research",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "existe"
+  },
+  {
+   "id": "p_bo_acm",
+   "label": "ACM Engine (por crear)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "p_bo_codevs",
+   "label": "CoDevs (por crear)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "p_bo_os",
+   "label": "Branchout OS (por crear)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "p_bo_qtc",
+   "label": "Ciberseguridad poscuantica (propuesta)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "propuesta"
+  },
+  {
+   "id": "p_bo_modenode",
+   "label": "ModeNode (propuesta)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "propuesta"
+  },
+  {
+   "id": "p_bo_buildverso",
+   "label": "Buildverso (propuesta)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "propuesta"
+  },
+  {
+   "id": "p_bo_ptrail",
+   "label": "Phoenician Trail (por crear)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "p_bo_ignicion",
+   "label": "IGNICION-MADRID (propuesta)",
+   "source_file": "BranchOut/producto",
+   "source_location": "producto",
+   "community_name": "propuesta"
+  },
+  {
+   "id": "x_rac",
+   "label": "Real Academia de Ciencias (RAC)",
+   "source_file": "SEMF/socio",
+   "source_location": "socio",
+   "community_name": "socio externo - relacion por crear"
+  },
+  {
+   "id": "x_upv",
+   "label": "Universitat Politecnica de Valencia",
+   "source_file": "SEMF/socio",
+   "source_location": "socio",
+   "community_name": "socio externo - relacion por crear"
+  },
+  {
+   "id": "p_semf_rac",
+   "label": "Talleres SEMF en la Real Academia de Ciencias (por crear)",
+   "source_file": "SEMF/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "p_semf_online",
+   "label": "SEMFiloquia y Concept Colliders",
+   "source_file": "SEMF/producto",
+   "source_location": "producto",
+   "community_name": "existe"
+  },
+  {
+   "id": "p_semf_video",
+   "label": "Archivo de video y divulgacion en redes (por crear)",
+   "source_file": "SEMF/producto",
+   "source_location": "producto",
+   "community_name": "por crear"
+  },
+  {
+   "id": "p_semf_book",
+   "label": "Libro y revista SEMF (propuesta)",
+   "source_file": "SEMF/producto",
+   "source_location": "producto",
+   "community_name": "propuesta"
+  },
+  {
+   "id": "p_semf_retreat",
+   "label": "Retiro interdisciplinar (propuesta)",
+   "source_file": "SEMF/producto",
+   "source_location": "producto",
+   "community_name": "propuesta"
+  },
+  {
    "id": "u_ce",
    "label": "Comision Europea",
    "source_file": "Financiadores/financiador",
@@ -429,9 +569,37 @@
    "community_name": "socio externo"
   },
   {
+   "id": "u_madrid_ayto",
+   "label": "Ayuntamiento de Madrid",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_gva",
+   "label": "Generalitat Valenciana",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
+   "id": "u_valencia_ayto",
+   "label": "Ajuntament de Valencia",
+   "source_file": "Financiadores/financiador",
+   "source_location": "financiador",
+   "community_name": "socio externo"
+  },
+  {
    "id": "c_caixaresearch-health-next",
    "label": "[A] CaixaResearch Health Research Call (next edition)",
    "source_file": "Causality Graphs/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado A"
+  },
+  {
+   "id": "c_cef-dig-gateways-next",
+   "label": "[A] CEF Digital - Backbone connectivity for Digital Global Gateways (next call, submarine cables)",
+   "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
    "community_name": "convocatoria - grado A"
   },
@@ -474,6 +642,20 @@
    "id": "c_cnc-fajv-preproduction",
    "label": "[B] CNC Fonds d'aide au jeu video (FAJV) - pre-production aid",
    "source_file": "CosmoVentures/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado B"
+  },
+  {
+   "id": "c_madrid-companias-escenicas-2027",
+   "label": "[B] Ayuntamiento de Madrid - grants to performing-arts producers (theatre, circus, dance, puppets), 2027 edition",
+   "source_file": "El Gran DaKo/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado B"
+  },
+  {
+   "id": "c_gva-aorg-2028",
+   "label": "[B] Generalitat Valenciana - AORG grants for international scientific meetings held in 2028",
+   "source_file": "SEMF/convocatoria",
    "source_location": "convocatoria",
    "community_name": "convocatoria - grado B"
   },
@@ -541,6 +723,13 @@
    "community_name": "convocatoria - grado C"
   },
   {
+   "id": "c_cam-estructuras-teatro-2028",
+   "label": "[C] Comunidad de Madrid - biennial grants to strengthen theatre companies (next edition 2028-2029)",
+   "source_file": "El Gran DaKo/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado C"
+  },
+  {
    "id": "c_pozuelo-subv-cultura-2026",
    "label": "[C] Pozuelo de Alarcon - subsidies for non-profit cultural entities 2026",
    "source_file": "Cloudy/convocatoria",
@@ -604,6 +793,13 @@
    "community_name": "convocatoria - grado C"
   },
   {
+   "id": "c_cdti-pid",
+   "label": "[C] CDTI Proyectos de I+D (PID) - partly non-refundable loans for company R&D",
+   "source_file": "BranchOut/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado C"
+  },
+  {
    "id": "c_nlnet-2026-11",
    "label": "[C] NLnet open calls (Restack, CodeSupply, open call)",
    "source_file": "Causality Graphs/convocatoria",
@@ -637,6 +833,20 @@
    "source_file": "BranchOut/convocatoria",
    "source_location": "convocatoria",
    "community_name": "convocatoria - grado C"
+  },
+  {
+   "id": "c_digital-eccc-2027",
+   "label": "[D] Digital Europe - ECCC cybersecurity calls (next round; post-quantum and SME uptake)",
+   "source_file": "BranchOut/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado D"
+  },
+  {
+   "id": "c_valencia-proyectos-culturales-2027",
+   "label": "[D] Ajuntament de Valencia - grants to cultural programmes and projects, 2027 edition",
+   "source_file": "SEMF/convocatoria",
+   "source_location": "convocatoria",
+   "community_name": "convocatoria - grado D"
   },
   {
    "id": "c_iese-ban",
@@ -716,6 +926,13 @@
    "community_name": "hito pendiente"
   },
   {
+   "id": "m_M_SEMF_REG",
+   "label": "Confirmar el registro de SEMF",
+   "source_file": "Hitos/hito",
+   "source_location": "hito",
+   "community_name": "hito pendiente"
+  },
+  {
    "id": "m_M_SEDE_LR",
    "label": "Domicilio social en Las Rozas",
    "source_file": "Hitos/hito",
@@ -725,13 +942,6 @@
   {
    "id": "m_M_FUND",
    "label": "Constituir la Fundacion Delfina Leon",
-   "source_file": "Hitos/hito",
-   "source_location": "hito",
-   "community_name": "hito pendiente"
-  },
-  {
-   "id": "m_M_SEMF_REG",
-   "label": "Confirmar el registro de SEMF",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito pendiente"
@@ -774,6 +984,13 @@
   {
    "id": "m_M_CG_FORM",
    "label": "Confirmar la forma juridica de Causality Graphs",
+   "source_file": "Hitos/hito",
+   "source_location": "hito",
+   "community_name": "hito hecho"
+  },
+  {
+   "id": "m_M_DAKO_ALTA",
+   "label": "El Gran DaKo dada de alta",
    "source_file": "Hitos/hito",
    "source_location": "hito",
    "community_name": "hito hecho"
@@ -1488,6 +1705,209 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "f_bo",
+   "target": "p_bo_indago",
+   "weight": 0.8,
+   "relation": "opera (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_acm",
+   "weight": 0.7,
+   "relation": "desarrolla (peso 0.70)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_codevs",
+   "weight": 0.7,
+   "relation": "desarrolla (peso 0.70)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_os",
+   "weight": 0.6,
+   "relation": "desarrolla (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_qtc",
+   "weight": 0.4,
+   "relation": "propone (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_modenode",
+   "weight": 0.3,
+   "relation": "propone (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_buildverso",
+   "weight": 0.3,
+   "relation": "propone (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_ptrail",
+   "weight": 0.5,
+   "relation": "gestion externa (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_bo",
+   "target": "p_bo_ignicion",
+   "weight": 0.4,
+   "relation": "gestion CPI y comunicacion (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "e_dako",
+   "target": "f_dako",
+   "weight": 1.0,
+   "relation": "titular (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_dako",
+   "target": "p_dako_show",
+   "weight": 0.9,
+   "relation": "produce (peso 0.90)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "s_arte",
+   "target": "f_dako",
+   "weight": 0.6,
+   "relation": "artes escenicas (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_ptrail",
+   "target": "p_bo_ptrail",
+   "weight": 0.9,
+   "relation": "titular del proyecto (peso 0.90)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "x_uned",
+   "target": "p_bo_ignicion",
+   "weight": 0.3,
+   "relation": "UNED en el consorcio (neutronica) (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "x_lr",
+   "target": "p_bo_codevs",
+   "weight": 0.5,
+   "relation": "piloto municipal (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_codevs",
+   "target": "p_cowork",
+   "weight": 0.6,
+   "relation": "rescata espacios (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_codevs",
+   "target": "p_space",
+   "weight": 0.4,
+   "relation": "busca y adapta el espacio (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_indago",
+   "target": "z_fondos",
+   "weight": 0.4,
+   "relation": "ingresos (peso 0.40)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_semf",
+   "target": "p_semf_rac",
+   "weight": 0.8,
+   "relation": "organiza (peso 0.80)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_semf",
+   "target": "p_semf_online",
+   "weight": 0.6,
+   "relation": "organiza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_semf",
+   "target": "p_semf_video",
+   "weight": 0.6,
+   "relation": "produce (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_semf",
+   "target": "p_semf_book",
+   "weight": 0.3,
+   "relation": "propone (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "f_semf",
+   "target": "p_semf_retreat",
+   "weight": 0.2,
+   "relation": "propone (peso 0.20)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "x_rac",
+   "target": "p_semf_rac",
+   "weight": 0.8,
+   "relation": "sede y difusion (peso 0.80)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "x_upv",
+   "target": "p_events",
+   "weight": 0.7,
+   "relation": "sede de la escuela (peso 0.70)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_semf_rac",
+   "target": "p_ciclo",
+   "weight": 0.3,
+   "relation": "formato replicable en Madrid Oeste (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_events",
+   "target": "p_semf_video",
+   "weight": 0.6,
+   "relation": "grabaciones (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "p_semf_rac",
+   "target": "p_semf_video",
+   "weight": 0.5,
+   "relation": "grabaciones (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_semf_video",
+   "target": "z_reputacion",
+   "weight": 0.3,
+   "relation": "visibilidad (peso 0.30)",
+   "confidence": "INFERRED"
+  },
+  {
    "source": "s_politica",
    "target": "u_ce",
    "weight": 0.9,
@@ -1546,6 +1966,20 @@
   {
    "source": "u_ce",
    "target": "c_neb-connect-cocreate-2027",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_cef-dig-gateways-next",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_ce",
+   "target": "c_digital-eccc-2027",
    "weight": 1.0,
    "relation": "convoca (peso 1.00)",
    "confidence": "EXTRACTED"
@@ -1656,6 +2090,13 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "u_cdti",
+   "target": "c_cdti-pid",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "s_bancos",
    "target": "u_enisa",
    "weight": 0.7,
@@ -1728,6 +2169,13 @@
   {
    "source": "u_cam",
    "target": "c_madrid-cesion-centros-educativos",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_cam",
+   "target": "c_cam-estructuras-teatro-2028",
    "weight": 1.0,
    "relation": "convoca (peso 1.00)",
    "confidence": "EXTRACTED"
@@ -2118,6 +2566,69 @@
    "confidence": "EXTRACTED"
   },
   {
+   "source": "s_politica",
+   "target": "u_madrid_ayto",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "u_madrid_ayto",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_madrid_ayto",
+   "target": "c_madrid-companias-escenicas-2027",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_gva",
+   "weight": 0.8,
+   "relation": "canaliza (peso 0.80)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_ciencia",
+   "target": "u_gva",
+   "weight": 0.5,
+   "relation": "canaliza (peso 0.50)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_gva",
+   "target": "c_gva-aorg-2028",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_politica",
+   "target": "u_valencia_ayto",
+   "weight": 0.6,
+   "relation": "canaliza (peso 0.60)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "s_arte",
+   "target": "u_valencia_ayto",
+   "weight": 0.7,
+   "relation": "canaliza (peso 0.70)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "u_valencia_ayto",
+   "target": "c_valencia-proyectos-culturales-2027",
+   "weight": 1.0,
+   "relation": "convoca (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "x_csic",
    "target": "c_caixaresearch-health-next",
    "weight": 1.0,
@@ -2141,6 +2652,27 @@
   {
    "source": "p_consult",
    "target": "c_caixaresearch-health-next",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "x_ptrail",
+   "target": "c_cef-dig-gateways-next",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_bo",
+   "target": "c_cef-dig-gateways-next",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_ptrail",
+   "target": "c_cef-dig-gateways-next",
    "weight": 0.5,
    "relation": "evidencia (peso 0.50)",
    "confidence": "INFERRED"
@@ -2300,6 +2832,20 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "p_semf_rac",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_semf_video",
+   "target": "c_fecyt-fcc-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
    "source": "m_M_SEMF_REG",
    "target": "c_fecyt-fcc-2026",
    "weight": 1.0,
@@ -2440,6 +2986,55 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "e_dako",
+   "target": "c_madrid-companias-escenicas-2027",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_dako",
+   "target": "c_madrid-companias-escenicas-2027",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_dako_show",
+   "target": "c_madrid-companias-escenicas-2027",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_DAKO_ALTA",
+   "target": "c_madrid-companias-escenicas-2027",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "x_upv",
+   "target": "c_gva-aorg-2028",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_semf",
+   "target": "c_gva-aorg-2028",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_events",
+   "target": "c_gva-aorg-2028",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
    "source": "e_semf",
    "target": "c_cost-oc-2026-1",
    "weight": 1.0,
@@ -2469,6 +3064,13 @@
   },
   {
    "source": "p_events",
+   "target": "c_cost-oc-2026-1",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_semf_online",
    "target": "c_cost-oc-2026-1",
    "weight": 0.5,
    "relation": "evidencia (peso 0.50)",
@@ -2713,6 +3315,34 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "e_dako",
+   "target": "c_cam-estructuras-teatro-2028",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_dako",
+   "target": "c_cam-estructuras-teatro-2028",
+   "weight": 0.4,
+   "relation": "lidera la oferta (peso 0.40)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_dako_show",
+   "target": "c_cam-estructuras-teatro-2028",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_DAKO_ALTA",
+   "target": "c_cam-estructuras-teatro-2028",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
    "source": "e_asoc",
    "target": "c_pozuelo-subv-cultura-2026",
    "weight": 1.0,
@@ -2930,6 +3560,13 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "p_semf_rac",
+   "target": "c_carasso-componer-saberes",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
    "source": "m_M_SEMF_REG",
    "target": "c_carasso-componer-saberes",
    "weight": 1.0,
@@ -2958,6 +3595,13 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "p_bo_codevs",
+   "target": "c_lasrozas-innova-foro",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
    "source": "m_M_CERT",
    "target": "c_lasrozas-innova-foro",
    "weight": 1.0,
@@ -2980,6 +3624,13 @@
   },
   {
    "source": "p_hub",
+   "target": "c_enisa-prestamo-participativo",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_indago",
    "target": "c_enisa-prestamo-participativo",
    "weight": 0.5,
    "relation": "evidencia (peso 0.50)",
@@ -3070,6 +3721,41 @@
    "confidence": "INFERRED"
   },
   {
+   "source": "e_bo",
+   "target": "c_cdti-pid",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_bo",
+   "target": "c_cdti-pid",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_acm",
+   "target": "c_cdti-pid",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_PRODUCTO",
+   "target": "c_cdti-pid",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_CERT",
+   "target": "c_cdti-pid",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
    "source": "e_cg",
    "target": "c_nlnet-2026-11",
    "weight": 1.0,
@@ -3092,6 +3778,20 @@
   },
   {
    "source": "p_lib",
+   "target": "c_nlnet-2026-11",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_os",
+   "target": "c_nlnet-2026-11",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_modenode",
    "target": "c_nlnet-2026-11",
    "weight": 0.5,
    "relation": "evidencia (peso 0.50)",
@@ -3127,6 +3827,13 @@
   },
   {
    "source": "p_lib",
+   "target": "c_eic-accelerator-2026-11",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_acm",
    "target": "c_eic-accelerator-2026-11",
    "weight": 0.5,
    "relation": "evidencia (peso 0.50)",
@@ -3190,6 +3897,13 @@
   },
   {
    "source": "p_cowork",
+   "target": "c_horizon-neb-2026",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_codevs",
    "target": "c_horizon-neb-2026",
    "weight": 0.5,
    "relation": "evidencia (peso 0.50)",
@@ -3281,6 +3995,76 @@
   },
   {
    "source": "e_bo",
+   "target": "c_digital-eccc-2027",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_bo",
+   "target": "c_digital-eccc-2027",
+   "weight": 0.5,
+   "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_qtc",
+   "target": "c_digital-eccc-2027",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_EU_PIC",
+   "target": "c_digital-eccc-2027",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_CERT",
+   "target": "c_digital-eccc-2027",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "e_semf",
+   "target": "c_valencia-proyectos-culturales-2027",
+   "weight": 1.0,
+   "relation": "solicita (peso 1.00)",
+   "confidence": "EXTRACTED"
+  },
+  {
+   "source": "f_semf",
+   "target": "c_valencia-proyectos-culturales-2027",
+   "weight": 0.6,
+   "relation": "lidera la oferta (peso 0.60)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_events",
+   "target": "c_valencia-proyectos-culturales-2027",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_SEMF_REG",
+   "target": "c_valencia-proyectos-culturales-2027",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "m_M_CERT",
+   "target": "c_valencia-proyectos-culturales-2027",
+   "weight": 1.0,
+   "relation": "habilita (peso 1.00)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "e_bo",
    "target": "c_iese-ban",
    "weight": 1.0,
    "relation": "solicita (peso 1.00)",
@@ -3361,6 +4145,20 @@
    "target": "c_madrid-cheque-innovacion",
    "weight": 0.5,
    "relation": "lidera la oferta (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_acm",
+   "target": "c_madrid-cheque-innovacion",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
+   "confidence": "INFERRED"
+  },
+  {
+   "source": "p_bo_indago",
+   "target": "c_madrid-cheque-innovacion",
+   "weight": 0.5,
+   "relation": "evidencia (peso 0.50)",
    "confidence": "INFERRED"
   },
   {

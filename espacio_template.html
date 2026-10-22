@@ -11,7 +11,7 @@
   --page: #f9f9f7; --surface: #fcfcfb; --surface-2: #f3f2ee;
   --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781; --grid: #e1e0d9; --axis: #c3c2b7;
   --border: rgba(11,11,11,0.10); --accent: #2a78d6; --critical: #d03b3b; --warning: #fab219; --good-ink: #006300;
-  --line-cloudy: #2a78d6; --line-semf: #eb6834; --line-causality: #1baf7a; --line-branchout: #eda100; --line-delfina: #e87ba4; --line-cosmo: #a23fb3;
+  --line-cloudy: #2a78d6; --line-semf: #eb6834; --line-causality: #1baf7a; --line-branchout: #eda100; --line-delfina: #e87ba4; --line-cosmo: #a23fb3; --line-dako: #c4314b;
   --world-sphere: #4a3aa7; --world-funder: #008300; --edge: rgba(11,11,11,0.16);
 }
 @media (prefers-color-scheme: dark) {
@@ -19,7 +19,7 @@
     color-scheme: dark;
     --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --accent: #3987e5; --good-ink: #0ca30c;
-    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-cosmo: #c062d1;
+    --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-cosmo: #c062d1; --line-dako: #e2566d;
     --world-sphere: #9085e9; --world-funder: #0ca30c; --edge: rgba(255,255,255,0.16);
   }
 }
@@ -27,7 +27,7 @@
   color-scheme: dark;
   --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --accent: #3987e5; --good-ink: #0ca30c;
-  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-cosmo: #c062d1;
+  --line-cloudy: #3987e5; --line-semf: #d95926; --line-causality: #199e70; --line-branchout: #c98500; --line-delfina: #d55181; --line-cosmo: #c062d1; --line-dako: #e2566d;
   --world-sphere: #9085e9; --world-funder: #0ca30c; --edge: rgba(255,255,255,0.16);
 }
 * { box-sizing: border-box; }
@@ -101,7 +101,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
   // Two copies of the graph: with the world (diamond + funders) or without it (?world=0), as it was before.
   let WORLD = new URLSearchParams(location.search).get("world") !== "0";
   if (EMBED) document.body.classList.add("embed");
-  const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund", cosmo: "f_cosmo" };
+  const FACE_NODE = { cloudy: "f_cloudy", semf: "f_semf", causality: "f_cg", branchout: "f_bo", delfina: "e_fund", cosmo: "f_cosmo", dako: "f_dako" };
   let CORE = ["e_fund"];  // the centre plus the vertices of the world figure (set in load())
   const KIND_ES = { entity: "figura legal", face: "cara", product: "producto", partner: "socio", factor: "factor de contexto",
     milestone: "hito", call: "convocatoria", sphere: "esfera del mundo", funder: "financiador" };
@@ -242,6 +242,11 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
     if (hollow) { ctx.fillStyle = css("--surface"); ctx.fill(); ctx.setLineDash(dashed); ctx.strokeStyle = stroke; ctx.lineWidth = 1.8; ctx.stroke(); ctx.setLineDash([]); }
     else { ctx.fillStyle = fill; ctx.fill(); if (n.kind === "factor") { ctx.strokeStyle = css("--surface"); ctx.lineWidth = 1.5; ctx.stroke(); } }
   }
+  function shortLabel(s, max) {  // cut at a word, so a neighbour's label stays short
+    if (s.length <= max) return s;
+    const cut = s.slice(0, max), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.5 ? cut.slice(0, sp) : cut).replace(/[\s,·—–:-]+$/, "") + "…";
+  }
   function render(t) {
     CS = getComputedStyle(document.documentElement);
     cam.tx += (cam.goal.x - cam.tx) * 0.08; cam.ty += (cam.goal.y - cam.ty) * 0.08; cam.tz += (cam.goal.z - cam.tz) * 0.08;
@@ -317,15 +322,23 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
       shape(n, p, r, c, c, hollow, n.pending ? [1.5, 3] : [4, 3]);
       if (n.id === focusId) { ctx.globalAlpha = 1; ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.sx, p.sy, r + 6, 0, Math.PI * 2); ctx.stroke(); }
       if (lit && (CORE.includes(n.id) || n.id === focusId || n.id === hoverId || pathSet.has(n.id) || (nb && nb.has(n.id)))) {
-        const txt = (n.kind === "call" ? `[${n.grade}] ` : "") + (n.label.length > 42 ? n.label.slice(0, 41) + "…" : n.label);
-        labels.push([txt, p.sx + r + 5, p.sy + 4, CORE.includes(n.id), n.id === focusId]);
+        const main = CORE.includes(n.id) || n.id === focusId || n.id === hoverId;
+        const txt = (n.kind === "call" ? `[${n.grade}] ` : "") + (main ? n.label : shortLabel(n.label, 24));
+        labels.push([txt, p.sx + r + 5, p.sy + 4, CORE.includes(n.id), n.id === focusId || n.id === hoverId, main, p.s]);
       }
     });
     // labels last, over every node (halo keeps them legible on top of edges)
     const page = css("--page");
-    labels.forEach(([txt, x, y, isCore, isFocus]) => {
+    // Focus, pointer and the diamond first, then the nearest; a label that would overlap one already drawn is
+    // skipped, so a hub with many neighbours stays readable.
+    labels.sort((a, b) => (b[5] - a[5]) || (b[6] - a[6]));
+    const placed = [];
+    labels.forEach(([txt, x, y, isCore, isFocus, main]) => {
       ctx.globalAlpha = 1;
       ctx.font = `${isCore || isFocus ? 700 : 500} ${isCore ? 14 : 12}px system-ui, -apple-system, sans-serif`;
+      const tw = ctx.measureText(txt).width, box = [x - 2, y - 13, x + tw + 2, y + 4];
+      if (!main && placed.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) return;
+      placed.push(box);
       ctx.lineWidth = 4; ctx.strokeStyle = page; ctx.strokeText(txt, x, y);
       ctx.fillStyle = ink; ctx.fillText(txt, x, y);
     });
@@ -418,7 +431,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page);
 
   // ------------------------------------------------------------------ chrome
   function legend() {
-    const L = [["--line-cloudy", "Cloudy"], ["--line-semf", "SEMF"], ["--line-causality", "Causality"], ["--line-branchout", "BranchOut"], ["--line-delfina", "Fundación"], ["--line-cosmo", "CosmoVentures"]];
+    const L = [["--line-cloudy", "Cloudy"], ["--line-semf", "SEMF"], ["--line-causality", "Causality"], ["--line-branchout", "BranchOut"], ["--line-delfina", "Fundación"], ["--line-cosmo", "CosmoVentures"], ["--line-dako", "El Gran DaKo"]];
     $("legend").replaceChildren(...L.map(([v, t]) => el("span", {}, el("i", { style: `background:var(${v})` }), t)),
       ...(WORLD ? [el("span", {}, el("i", { class: "dia", style: "background:var(--world-sphere)" }), "esfera"),
         el("span", {}, el("i", { class: "sq", style: "background:var(--world-funder)" }), "financiador")] : []),

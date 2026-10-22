@@ -1,6 +1,6 @@
 {
   "name": "money-radar",
-  "description": "Daily Spain/EU funding and investor radar and grant planner for the Ecosistema Delfina Leon (6 faces): search, verify, plan, research winners, rebuild dashboard, push.",
+  "description": "Daily Spain/EU funding and investor radar and grant planner for the Ecosistema Delfina Leon (7 faces): search, verify, plan, research winners, rebuild dashboard, push.",
   "schedule": "0 7 * * *",
   "timezone": "Europe/Madrid",
   "repository": "luisgoma4/money-radar",
@@ -16,7 +16,7 @@
   "prompt": {
     "goal": "Find public and private funding opportunities (grants, loans, prizes, foundation calls) and investors (venture and impact funds, business-angel networks, public co-investment, equity crowdfunding), focused on Spain first and Europe second (France for CosmoVentures), for the Ecosistema Delfina Leon based in Madrid West.",
     "applicant_profile": {
-      "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, branchout, delfina, cosmo). Full profiles and eligibility notes are in CLAUDE.md.",
+      "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, branchout, delfina, cosmo, dako). Full profiles and eligibility notes are in CLAUDE.md.",
       "lines_of_work": [
         {
           "line": "solidarity / outreach science projects",
@@ -103,6 +103,18 @@
             "French business-angel networks (France Angels, Femmes Business Angels) and edtech/AI seed funds",
             "Erasmus+ and Horizon Europe consortia needing a French partner"
           ]
+        },
+        {
+          "line": "El Gran DaKo: performing-arts company (poetry and live music)",
+          "key": "dako",
+          "example": "stage show premiering in a Madrid venue",
+          "what_it_is": "Performing-arts company (legal form to be confirmed) producing a poetry-and-music stage show; premiere in Madrid, then touring. Never write the artist's personal name; use El Gran DaKo.",
+          "search_angles": [
+            "Ayuntamiento de Madrid grants to performing-arts producers (BDNS; 10-working-day window around Feb–Mar)",
+            "Comunidad de Madrid theatre and music company grants (biennial structures, production, touring)",
+            "INAEM music and touring grants, theatre and poetry prizes and emerging-theatre competitions",
+            "Madrid West culture programmes (Las Rozas, Majadahonda, Pozuelo) and venues for performances"
+          ]
         }
       ],
       "geography": "Phase 1: Madrid West (Las Rozas, Majadahonda, Pozuelo de Alarcon; scope 'Madrid West'), then wider Comunidad de Madrid, then Spain/EU. CosmoVentures is in Paris: its own calls use scope 'France'; Madrid West does not apply to it."
@@ -133,7 +145,8 @@
       "Never delete entries from money.db or ROWS: archive them (archived=True, archive_reason, review_on). The archive exists to recover calls and guide future applications.",
       "Never name or try to identify individual beneficiaries (BDNS masks them); report legal entities only.",
       "Never delete entries; archive them. Never name individuals in the repo.",
-      "Never write the CosmoVentures founder's name or personal domains in the repo; use cosmoventures.fr."
+      "Never write the CosmoVentures founder's name or personal domains in the repo; use cosmoventures.fr.",
+      "Never write the El Gran DaKo artist's personal name in the repo; use El Gran DaKo. BranchOut project files from the shared Drive live only in the git-ignored proyectos/ folder."
     ]
   }
 }

@@ -155,7 +155,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if path == "/api/state":
                 return self._json(200, actions.state())
             return self._json(404, {"error": "no existe"})
-        if path.startswith(("/solicitudes", "/.git", "/.claude")):
+        if path.startswith(("/solicitudes", "/proyectos", "/.git", "/.claude")):
             return self._json(404, {"error": "no existe"})
         return super().do_GET()
 
