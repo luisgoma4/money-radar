@@ -1,6 +1,6 @@
 {
   "name": "money-radar",
-  "description": "Daily Spain/EU funding and investor radar and grant planner for the Ecosistema Delfina Leon (7 faces): search, verify, plan, research winners, rebuild dashboard, push.",
+  "description": "Daily Spain/EU funding and investor radar and grant planner for the ecosystem (7 faces; name pending): search, verify, plan, research winners, rebuild dashboard, push.",
   "schedule": "0 7 * * *",
   "timezone": "Europe/Madrid",
   "repository": "luisgoma4/money-radar",
@@ -14,7 +14,7 @@
     "PushNotification"
   ],
   "prompt": {
-    "goal": "Find public and private funding opportunities (grants, loans, prizes, foundation calls) and investors (venture and impact funds, business-angel networks, public co-investment, equity crowdfunding), focused on Spain first and Europe second (France for CosmoVentures), for the Ecosistema Delfina Leon based in Madrid West.",
+    "goal": "Find public and private funding opportunities (grants, loans, prizes, foundation calls) and investors (venture and impact funds, business-angel networks, public co-investment, equity crowdfunding), focused on Spain first and Europe second (France for CosmoVentures), for the ecosystem based in Madrid West.",
     "applicant_profile": {
       "note": "A call only needs to fit ONE line of work; record it in the row's `lines` field (keys: cloudy, semf, causality, branchout, delfina, cosmo, dako). Full profiles and eligibility notes are in CLAUDE.md.",
       "lines_of_work": [
@@ -79,7 +79,7 @@
           "what_it_is": "SL; hub for tech startups planning a coworking and coliving space in Madrid West"
         },
         {
-          "line": "Fundacion Delfina Leon (planned umbrella foundation)",
+          "line": "Umbrella foundation (planned, not yet named)",
           "key": "delfina",
           "example": null,
           "what_it_is": "Foundation to be constituted, holding all projects and a shared space for SEMF, Causality Graphs, Cloudy and BranchOut",

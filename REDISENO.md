@@ -103,7 +103,7 @@ Hoy `planner.what_now` y `oracle()` ordenan hitos por valor desbloqueado y propo
 13. ¿Sigue siendo público el repo? ¿Qué partes deben seguir viéndose en GitHub Pages: el radar, el mapa de actores, la red humana (nunca con nombres)...?
 14. El núcleo hoy es `strategy.json` (editado a mano) más SQLite. ¿Seguimos con JSON + SQLite y solo librería estándar, o se acepta otra base (p. ej. SQLite como fuente única, o un servicio con auth)?
 15. ¿El radar se convierte en "una máquina más" con el mismo contrato, o se queda como está y las demás máquinas se le acoplan?
-16. Nombre del sistema y de sus partes (¿"Ecosistema Delfina León"? ¿"money-radar" pasa a ser solo el nombre del radar?).
+16. Nombre del sistema y de sus partes (desde el 23 oct 2026 la fundación ya no se llama Delfina León y el ecosistema queda sin nombre: ¿cuál? ¿"money-radar" pasa a ser solo el nombre del radar?).
 17. ¿La rutina diaria en la nube ejecutará otras máquinas además del radar? Si es así, ¿cuáles y con qué frecuencia?
 18. ¿Qué entra en el núcleo además de lo actual: eventos (la idea pendiente de la pestaña de eventos), clientes, servicios, contactos de prensa...?
 

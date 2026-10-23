@@ -1,6 +1,6 @@
 ---
 name: becas
-description: Orquestador de solicitudes de becas y ayudas del Ecosistema Delfina León (Cloudy, SEMF, Causality Graphs, BranchOut, Fundación Delfina León). Úsalo cuando el usuario quiera saber qué solicitar, preparar o avanzar una solicitud, decidir qué entidad solicita, o mover un hito (fundación, asociación, certificados…).
+description: Orquestador de solicitudes de becas y ayudas del Ecosistema (Cloudy, SEMF, Causality Graphs, BranchOut, la fundación paraguas sin nombre, CosmoVentures, El Gran DaKo). Úsalo cuando el usuario quiera saber qué solicitar, preparar o avanzar una solicitud, decidir qué entidad solicita, o mover un hito (fundación, asociación, certificados…).
 ---
 
 # /becas — orquestador de solicitudes

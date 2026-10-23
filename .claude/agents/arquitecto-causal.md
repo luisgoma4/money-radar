@@ -1,6 +1,6 @@
 ---
 name: arquitecto-causal
-description: Analista de la estructura causal del Ecosistema Delfina León. Úsalo para discutir o revisar nodos, relaciones, mediadores, confusores y pesos del grafo del ecosistema (figuras legales, caras, productos, socios, factores, hitos y convocatorias/ships), y para proponer cambios justificados en strategy.json -> graph. También lo consulta el oráculo en la fase «Lectura del grafo» de /ceremonia.
+description: Analista de la estructura causal del Ecosistema. Úsalo para discutir o revisar nodos, relaciones, mediadores, confusores y pesos del grafo del ecosistema (figuras legales, caras, productos, socios, factores, hitos y convocatorias/ships), y para proponer cambios justificados en strategy.json -> graph. También lo consulta el oráculo en la fase «Lectura del grafo» de /ceremonia.
 tools: Bash, Read, Edit, Grep, Glob
 ---
 

@@ -1,8 +1,8 @@
 {
   "_doc": "Planificador de estrategia. Un solo proyecto con varias caras al mundo: cada convocatoria se ataca con una entidad solicitante (figura legal) y una combinación de caras que forman la oferta de valor. Estimaciones de valor = juicio de planificación basado en ganadores reales (campo winners) o rangos oficiales; no son importes confirmados. planner.py calcula grado, preparación, calendario y qué hitos desbloquean más valor. Los prerrequisitos de cada convocatoria son solo los propios de la estrategia; los de la figura legal (p. ej. que la fundación exista) se añaden automáticamente según la entidad solicitante elegida: la primera de la lista que ya existe.",
   "project": {
-    "name": "Ecosistema Delfina León",
-    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (Fundación Delfina León) que comparte espacio y gobierno; CosmoVentures, estudio científico en París, abre la puerta a Francia y a la seguridad de la IA; El Gran DaKo, empresa de artes escénicas, lleva la parte de arte en vivo."
+    "name": "Ecosistema (nombre por decidir)",
+    "pitch": "Un único proyecto de ciencia, salud, cultura y tecnología con sede en Madrid Oeste: produce contenido científico para familias (Cloudy), conecta una red internacional interdisciplinar (SEMF), mide impacto con métodos causales (Causality Graphs) y aloja startups en un hub de coworking y coliving (BranchOut), bajo una fundación paraguas (fundación por constituir, sin nombre aún) que comparte espacio y gobierno; CosmoVentures, estudio científico en París, abre la puerta a Francia y a la seguridad de la IA; El Gran DaKo, empresa de artes escénicas, lleva la parte de arte en vivo."
   },
   "faces": {
     "cloudy": {
@@ -48,8 +48,8 @@
       ]
     },
     "delfina": {
-      "name": "Fundación Delfina León",
-      "offers": "Vehículo sin ánimo de lucro que agrupa todas las caras, espacio compartido y gobierno; interlocutor con ayuntamientos y fundaciones.",
+      "name": "Fundación paraguas (sin nombre)",
+      "offers": "Fundación por constituir y aún sin nombre: vehículo sin ánimo de lucro que agrupa todas las caras, espacio compartido y gobierno; interlocutor con ayuntamientos y fundaciones.",
       "tags": [
         "sin ánimo de lucro",
         "paraguas",
@@ -81,7 +81,7 @@
   },
   "entities": {
     "fundacion_dl": {
-      "name": "Fundación Delfina León",
+      "name": "Fundación paraguas (sin nombre, por constituir)",
       "form": "Fundación",
       "status": "planned",
       "seat": "Las Rozas (recomendado)",
@@ -105,7 +105,7 @@
       ]
     },
     "asoc_local": {
-      "name": "Asociación local (p. ej. Amigos de la Fundación Delfina León)",
+      "name": "Asociación local en Las Rozas (propuesta)",
       "form": "Asociación",
       "status": "proposed",
       "seat": "Las Rozas",
@@ -286,12 +286,42 @@
         "aulas y alojamiento para la Escuela Interdisciplinar"
       ],
       "requires": []
+    },
+    "partner_weber": {
+      "name": "Fundación Weber",
+      "form": "Fundación (economía de la salud y farma; Madrid, Lisboa, México)",
+      "status": "external",
+      "seat": "Madrid",
+      "faces": [
+        "causality"
+      ],
+      "can": [
+        "proyecto conjunto de formación en causalidad para clínicos (Aula Virtual Weber)",
+        "acceso a la industria farmacéutica y a market access",
+        "publicaciones y difusión en economía de la salud"
+      ],
+      "requires": []
+    },
+    "ddd_asoc": {
+      "name": "D+D+D Asociación de arte para la diversidad, diversión y desarrollo",
+      "form": "Asociación",
+      "status": "exists",
+      "seat": "Villanueva de la Cañada (Madrid)",
+      "faces": [
+        "delfina"
+      ],
+      "can": [
+        "subvenciones culturales y sociales a asociaciones (arte y diversidad)",
+        "fundaciones privadas con convocatorias sociales",
+        "socio sin ánimo de lucro mientras no exista la fundación"
+      ],
+      "requires": []
     }
   },
   "milestones": {
     "M_FUND": {
-      "name": "Constituir la Fundación Delfina León",
-      "detail": "Certificado negativo de denominación, estatutos, dotación ≥30.000 € (25 % al firmar si es dineraria, resto en 5 años), escritura, informe del Protectorado e inscripción en el Registro de Fundaciones de la Comunidad de Madrid.",
+      "name": "Constituir la fundación paraguas (nombre por decidir)",
+      "detail": "Elegir nombre y pedir el certificado negativo de denominación; estatutos, dotación ≥30.000 € (25 % al firmar si es dineraria, resto en 5 años), escritura, informe del Protectorado e inscripción en el Registro de Fundaciones de la Comunidad de Madrid.",
       "weeks": 20,
       "status": "pending"
     },
@@ -1443,11 +1473,11 @@
     "nodes": [
       {
         "id": "e_fund",
-        "label": "Fundación Delfina León",
+        "label": "Fundación (sin nombre)",
         "type": "entity",
         "status": "planned",
         "face": "delfina",
-        "detail": "Paraguas sin ánimo de lucro; por constituir (M_FUND)."
+        "detail": "Paraguas sin ánimo de lucro; por constituir y sin nombre (M_FUND)."
       },
       {
         "id": "e_asoc",
@@ -1920,6 +1950,30 @@
         "status": "proposed",
         "face": "semf",
         "detail": "Propuesta: ~20 personas en trabajo colaborativo intensivo (posible sede: isla de Tabarca)."
+      },
+      {
+        "id": "x_weber",
+        "label": "Fundación Weber",
+        "type": "partner",
+        "status": "external",
+        "face": "causality",
+        "detail": "Fundación de economía de la salud muy ligada a la industria farmacéutica (weber.org.es); socio de Causality Graphs en formación para clínicos."
+      },
+      {
+        "id": "p_cg_formacion",
+        "label": "Formación en causalidad para clínicos",
+        "type": "product",
+        "status": "planned",
+        "face": "causality",
+        "detail": "Programa de formación en inferencia causal para profesionales clínicos, con la Fundación Weber."
+      },
+      {
+        "id": "e_ddd",
+        "label": "Asociación D+D+D",
+        "type": "entity",
+        "status": "exists",
+        "face": "delfina",
+        "detail": "Asociación de arte para la diversidad, diversión y desarrollo, con sede en Villanueva de la Cañada (Madrid)."
       }
     ],
     "edges": [
@@ -2830,6 +2884,55 @@
         "from": "p_semf_video",
         "to": "z_reputacion",
         "label": "visibilidad",
+        "status": "planned",
+        "weight": 0.3
+      },
+      {
+        "from": "f_cg",
+        "to": "p_cg_formacion",
+        "label": "diseña e imparte",
+        "status": "planned",
+        "weight": 0.8
+      },
+      {
+        "from": "x_weber",
+        "to": "p_cg_formacion",
+        "label": "coorganiza y da acceso a clínicos y farma",
+        "status": "planned",
+        "weight": 0.7
+      },
+      {
+        "from": "s_ciencia",
+        "to": "x_weber",
+        "label": "economía de la salud",
+        "status": "exists",
+        "weight": 0.4
+      },
+      {
+        "from": "s_bancos",
+        "to": "x_weber",
+        "label": "industria farmacéutica",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "s_arte",
+        "to": "e_ddd",
+        "label": "arte para la diversidad",
+        "status": "exists",
+        "weight": 0.6
+      },
+      {
+        "from": "s_sociedad",
+        "to": "e_ddd",
+        "label": "diversidad e inclusión",
+        "status": "exists",
+        "weight": 0.5
+      },
+      {
+        "from": "e_ddd",
+        "to": "e_fund",
+        "label": "asociación existente que puede preparar la fundación",
         "status": "planned",
         "weight": 0.3
       }

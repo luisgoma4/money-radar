@@ -1,6 +1,6 @@
 ---
 name: ceremonia
-description: Claude actúa como oráculo y dirige la ceremonia periódica del Ecosistema Delfina León (Cloudy, SEMF, Causality Graphs, BranchOut, Fundación): lectura del estado y del grafo causal, ronda de preguntas a cada cara, deliberación sobre relaciones y pesos, dictamen, compromisos y registro. Úsalo cuando el usuario pida la ceremonia, el oráculo, una revisión del ecosistema o una reunión de seguimiento.
+description: Claude actúa como oráculo y dirige la ceremonia periódica del Ecosistema (Cloudy, SEMF, Causality Graphs, BranchOut, Fundación): lectura del estado y del grafo causal, ronda de preguntas a cada cara, deliberación sobre relaciones y pesos, dictamen, compromisos y registro. Úsalo cuando el usuario pida la ceremonia, el oráculo, una revisión del ecosistema o una reunión de seguimiento.
 ---
 
 # /ceremonia — el oráculo dirige

@@ -324,7 +324,7 @@ def cmd_grafo3d(args):
     # The viewer needs networkx/scipy, so run it without -I (normal site-packages).
     exe = "/usr/bin/env"
     subprocess.run([exe, "python3", str(VIEWER), str(out / "graph.json"), str(out / "graph3d.html"),
-                    "--title", "Ecosistema Delfina Leon"], check=True)
+                    "--title", "Ecosistema"], check=True)
     pin_colours(out / "graph3d.html", plan)
     rebuild()  # the dashboard links the 3D view once graph3d.html exists
     print("Visor 3D: graphify-out/graph3d.html (enlazado desde la pestaña Grafo del dashboard)")
